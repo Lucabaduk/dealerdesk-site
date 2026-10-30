@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Book a test drive or service</title>
+<link rel="stylesheet" href="modules/booking.css">
+</head><body style="margin:0">
+<div class="ddp" id="ddp">
+  <div class="ddp-hero"><h1 id="ddp-name">Book with us</h1><p>Test drives and service, in under a minute.</p></div>
+  <main class="ddp-main">
+    <form class="ddb-card" id="ddp-form" novalidate>
+      <div class="ddp-choice" role="tablist">
+        <button type="button" data-kind="test-drive" class="on">Test drive</button>
+        <button type="button" data-kind="service">Service</button>
+      </div>
+      <div id="ddp-td" style="margin-top:12px"><label>Vehicle (stock # or VIN)<input name="vehicle" id="ddp-vehicle" list="ddp-veh" autocomplete="off"></label><datalist id="ddp-veh"></datalist></div>
+      <div id="ddp-sv" hidden style="margin-top:12px;display:grid;gap:10px">
+        <label>Service<select name="type"><option value="oil-change">Oil change</option><option value="tires">Tires</option><option value="brakes">Brakes</option><option value="inspection">Inspection</option><option value="other">Other</option></select></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><label>Year<input name="year" inputmode="numeric"></label><label>Make<input name="make"></label><label>Model<input name="model"></label></div>
+        <label>VIN (optional)<input name="vin" maxlength="17"></label><label>Mileage<input name="mileage" inputmode="numeric"></label>
+        <label>What's going on?<textarea name="notes" rows="2"></textarea></label>
+      </div>
+      <label style="margin-top:12px">Date<input type="date" name="date" id="ddp-date"></label>
+      <div class="ddp-slots" id="ddp-slots" aria-live="polite"></div>
+      <div style="display:grid;gap:10px">
+        <label>Your name<input name="customer" autocomplete="name" required></label>
+        <label>Phone<input name="phone" type="tel" autocomplete="tel" required></label>
+        <label>Email (optional)<input name="email" type="email" autocomplete="email"></label>
+      </div>
+      <div class="ddb-msg ddb-bad" id="ddp-err" hidden role="alert"></div>
+      <button class="ddb-btn ddb-primary" style="width:100%">Request appointment</button>
+    </form>
+    <div class="ddb-card ddp-done" id="ddp-done" hidden><h2>You're booked</h2><p>Confirmation code</p><b id="ddp-code"></b><p id="ddp-when"></p></div>
+  </main>
+</div>
+<script src="modules/booking.js"></script>
+<script src="modules/booking-public.js"></script>
+</body></html>
