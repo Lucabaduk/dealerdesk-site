@@ -77,6 +77,20 @@ if (!fs.existsSync(schemaPath)) skipped.push('schema export (no /workspace/deale
   const ex = Bs.toSchema(); const ds = S.normalizeDealership({ dealer_name: sample.dealer_name, cars: sample.cars, test_drives: ex.test_drives, service_bookings: ex.service_bookings, leads: [] });
   assert.strictEqual(ds.test_drives[0].car_id, car.id); assert.strictEqual(ds.service_bookings[0].service_type, 'oil_change'); B = load(globalThis.localStorage); });
 
+t('invalid settings change nothing in memory or storage (validate first, then apply)', () => {
+  const st = fake({ dealerdesk_data: INV }), Bx = load(st); const before = JSON.stringify(Bx.settings());
+  throwsCode(() => Bx.updateSettings({ hours: { mon: { open: '08:00', close: '20:00' }, tue: { open: '18:00', close: '09:00' } }, bays: 8 }), 'bad_hours');
+  assert.strictEqual(JSON.stringify(Bx.settings()), before); throwsCode(() => Bx.updateSettings({ hours: { mon: { open: '07:00', close: '21:00' } }, slotMin: 5 }), 'bad_slotMin');
+  assert.strictEqual(JSON.stringify(Bx.settings()), before); assert.strictEqual(st.getItem('dealerdesk_booking'), null);
+  const failing = fake({ dealerdesk_data: INV }), By = load(failing); failing.setItem = () => { throw new Error('QuotaExceededError'); };
+  throwsCode(() => By.updateSettings({ bays: 9 }), 'save_failed'); assert.strictEqual(By.settings().bays, 4); });
+t('no salespeople set: at most one test drive per slot (booking + open slots)', () => {
+  const Bz = load(fake({ dealerdesk_data: INV })); Bz.addTestDrive(td({ vehicle: 'A100', salesperson: '', time: '14:00' }));
+  const e = throwsCode(() => Bz.addTestDrive(td({ vehicle: 'XYZ9', salesperson: '', time: '14:15' })), 'conflict'); assert.strictEqual(e.conflicts[0].type, 'capacity');
+  assert.ok(!Bz.openSlots('test-drive', '2026-11-04', {}).includes('14:00')); Bz.addTestDrive(td({ vehicle: 'XYZ9', salesperson: '', time: '14:30' }));
+  Bz.setStaff('salespeople', ['Maria', 'Ken']); Bz.addTestDrive(td({ vehicle: 'C3', salesperson: 'Ken', time: '14:30' }));
+  assert.strictEqual(throwsCode(() => Bz.addTestDrive(td({ vehicle: 'A100', salesperson: '', time: '14:45' })), 'conflict').conflicts[0].type, 'capacity'); });
+
 // ---------- UI (jsdom) ----------
 function opt(n) { for (const d of [process.env.DD_DEV_MODULES, '/tmp/qrdev/node_modules', '/tmp/devmods/node_modules'].filter(Boolean)) { try { return require(require.resolve(n, { paths: [d] })); } catch (e) {} } return null; }
 const jsdom = opt('jsdom');
