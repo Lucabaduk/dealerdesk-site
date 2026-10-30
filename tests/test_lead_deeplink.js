@@ -15,8 +15,11 @@ async function dom() { if (!JSDOM) { console.log('  (jsdom not found, DOM tests 
   let w = await boot('https://x.io/dd/staff-inventory.html?lead=Lgood1'), d = w.document;
   t('valid ?lead opens Leads tab + drawer', () => { ok(!d.getElementById('pane-leads').hidden); ok(d.getElementById('ldrawer').hasAttribute('open')); eq(d.getElementById('ld-name').textContent, 'Ana'); ok(d.getElementById('l-notice').hidden); eq(w.location.search, '?lead=Lgood1'); });
   t('close removes param', () => { d.getElementById('ld-close').click(); ok(!d.getElementById('ldrawer').hasAttribute('open')); eq(w.location.search, ''); });
-  t('opening a card writes the param (refresh keeps it)', () => { d.querySelector('#lrows .lcard').click(); eq(w.location.search, '?lead=Lgood1'); eq(w.history.length, 1); });
-  t('back (popstate without param) closes drawer', () => { w.history.replaceState(null, '', '/dd/staff-inventory.html'); w.dispatchEvent(new w.PopStateEvent('popstate')); ok(!d.getElementById('ldrawer').hasAttribute('open')); });
+  t('opening a card pushes ?lead (refresh keeps it, Back closes)', () => { const n = w.history.length; d.querySelector('#lrows .lcard').click(); eq(w.location.search, '?lead=Lgood1'); eq(w.history.length, n + 1); });
+  await new Promise(r => { w.addEventListener('popstate', () => setTimeout(r, 20), { once: true }); w.history.back(); });
+  t('Back closes drawer and removes param', () => { ok(!d.getElementById('ldrawer').hasAttribute('open')); eq(w.location.search, ''); });
+  d.querySelector('#lrows .lcard').click(); d.getElementById('ld-close').click(); await new Promise(r => setTimeout(r, 60));
+  t('close after card open removes param', () => { ok(!d.getElementById('ldrawer').hasAttribute('open')); eq(w.location.search, ''); });
   w = await boot('https://x.io/dd/staff-inventory.html#lead=Lgood1'); d = w.document;
   t('#lead= also works, then moves to ?lead', () => { ok(d.getElementById('ldrawer').hasAttribute('open')); eq(w.location.search, '?lead=Lgood1'); eq(w.location.hash, ''); });
   for (const bad of ['__proto__', 'constructor', 'toString', '%3Cscript%3Ealert(1)%3C%2Fscript%3E', '%3Cimg%20src%3Dx%20onerror%3Dalert(1)%3E', 'nope123', '%E0%A4%A']) {
