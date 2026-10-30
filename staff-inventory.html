@@ -23,6 +23,7 @@ dialog{border:0;border-radius:14px;background:var(--card);color:var(--ink);width
 .pill.hold{background:#fff1d6;color:#7a4b00}.pill.sold{background:#fde2e2;color:#8a1c1c}
 .notice{margin:0 16px 8px;padding:10px 12px;border-radius:10px;background:#fff1d6;color:#7a4b00;font-weight:600}
 .me{align-items:center}.me-l{font-weight:600}.me input{flex:0 1 220px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}input.pick{width:24px;height:24px;min-height:0;margin:10px}
 .chk{display:flex;align-items:center;gap:8px;min-height:44px}.chk input{width:22px;height:22px;min-height:0}
 .lcards{display:grid;gap:8px;padding:0 12px 16px}.lcard{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;min-height:64px;color:inherit;font-size:15px}
 .lcard .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.lcard b{font-size:16px;margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -49,10 +50,10 @@ dialog.drawer{margin:0 0 0 auto;height:100%;max-height:100%;width:min(480px,100v
   <div class="bar"><input type="search" id="q" placeholder="Search make, model, VIN, stock #" aria-label="Search">
     <select id="f-make" aria-label="Make"><option value="">All makes</option></select><select id="f-body" aria-label="Body type"><option value="">All body types</option></select><select id="f-status" aria-label="Status"><option value="">Any status</option><option>available</option><option>hold</option><option>sold</option></select>
     <input type="number" id="f-max" placeholder="Max $" aria-label="Max price" inputmode="numeric"><select id="sort" aria-label="Sort"><option value="">Newest added</option><option value="price">Price ↑</option><option value="price:desc">Price ↓</option><option value="year:desc">Year ↓</option><option value="mileage">Mileage ↑</option><option value="stock">Stock #</option></select>
-    <button class="primary" id="add">+ Add car</button><button id="print-page">Print QR (this page)</button>
+    <button class="primary" id="add">+ Add car</button><button id="print-page">Print QR (this page)</button><button id="stickers" type="button">Print stickers (filtered)</button>
     <button id="export">Export JSON</button><label class="muted" style="display:flex;align-items:center;gap:6px"><input type="file" id="import" accept="application/json" style="min-height:44px;border:0;padding:0;max-width:200px"></label></div>
   <p class="muted" id="count" style="padding:0 16px"></p>
-  <div class="wrap"><table><thead><tr><th></th><th>Car</th><th class="hide-sm">Stock #</th><th class="hide-sm">VIN</th><th class="num">Price</th><th class="num hide-sm">Miles</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="wrap"><table><thead><tr><th><span class="sr">Select</span></th><th></th><th>Car</th><th class="hide-sm">Stock #</th><th class="hide-sm">VIN</th><th class="num">Price</th><th class="num hide-sm">Miles</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
   <div class="pager"><button id="prev">‹ Prev</button><span id="pageinfo"></span><button id="next">Next ›</button></div>
 </section>
 <section id="pane-leads" hidden>
@@ -87,5 +88,5 @@ dialog.drawer{margin:0 0 0 auto;height:100%;max-height:100%;width:min(480px,100v
   <label class="full">Photo URLs (one per line)<textarea name="photos" rows="2"></textarea></label><label class="full">Features (comma separated)<textarea name="features" rows="2"></textarea></label>
   </div><p class="err" id="formerr" role="alert"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" id="cancel">Cancel</button><button class="primary" type="submit" id="save">Save</button></div></form></dialog>
 <div id="print"></div>
-<script src="modules/store.js"></script><script src="modules/qr.js"></script><script src="modules/inventory.js"></script><script src="modules/leads.js"></script><script src="modules/qr-label.js"></script><script src="modules/staff-inventory.js"></script>
+<script src="modules/store.js"></script><script src="modules/qr.js"></script><script src="modules/inventory.js"></script><script src="modules/leads.js"></script><script src="modules/qr-label.js"></script><script src="modules/window-sticker.js"></script><script src="modules/staff-inventory.js"></script>
 </body></html>

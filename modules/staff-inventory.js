@@ -24,12 +24,13 @@
     last.items.forEach(function (c) { var tr = el('tr'), td0 = el('td'), img = el('img'); img.alt = ''; img.loading = 'lazy'; DDStore.setImg(img, c.photos[0]); td0.appendChild(img); tr.appendChild(td0);
       var t = el('td'); t.appendChild(el('div', '', [c.year, c.make, c.model].join(' '))); t.appendChild(el('div', 'muted', [c.trim, c.color].filter(Boolean).join(' · '))); tr.appendChild(t);
       tr.appendChild(el('td', 'hide-sm', c.stock_no)); tr.appendChild(el('td', 'hide-sm muted', c.vin)); tr.appendChild(el('td', 'num', money(c.price))); tr.appendChild(el('td', 'num hide-sm', c.mileage.toLocaleString('en-US')));
+      var ckd = el('td'), ck = el('input'); ck.type = 'checkbox'; ck.className = 'pick'; ck.setAttribute('aria-label', 'Select ' + c.vin); ck.checked = !!picked[c.vin]; ck.addEventListener('change', function () { if (ck.checked) picked[c.vin] = 1; else delete picked[c.vin]; pickUi(); }); ckd.appendChild(ck); tr.insertBefore(ckd, tr.firstChild);
       var st = el('td'), sel = el('select'); sel.setAttribute('aria-label', 'Status for ' + c.vin); inv.STATUSES.forEach(function (s) { var o = el('option', '', s); o.value = s; sel.appendChild(o); }); sel.value = c.status;
       sel.addEventListener('change', function () { inv.setStatus(c.vin, sel.value); }); st.appendChild(sel); tr.appendChild(st);
-      var act = el('td'); act.appendChild(btn('Edit', function () { openForm(c); })); act.appendChild(document.createTextNode(' ')); act.appendChild(btn('QR', function () { printLabels([c]); }));
+      var act = el('td'); act.appendChild(btn('Edit', function () { openForm(c); })); act.appendChild(document.createTextNode(' ')); act.appendChild(btn('QR', function () { printLabels([c]); })); act.appendChild(document.createTextNode(' ')); act.appendChild(btn('Print sticker', function () { openSticker(DDSticker.urlFor(c.vin) + '&print=1'); }));
       act.appendChild(document.createTextNode(' ')); act.appendChild(btn('Remove', function () { if (confirm('Remove ' + c.year + ' ' + c.make + ' ' + c.model + ' (' + c.vin + ')?')) { inv.remove(c.vin); fillMakes(); draw(); } })); tr.appendChild(act);
       tb.appendChild(tr); });
-    if (!last.items.length) { var tr = el('tr'), td = el('td', 'muted', inv.size() ? 'No cars match.' : 'No cars yet. Add one or import JSON.'); td.colSpan = 8; tr.appendChild(td); tb.appendChild(tr); }
+    if (!last.items.length) { var tr = el('tr'), td = el('td', 'muted', inv.size() ? 'No cars match.' : 'No cars yet. Add one or import JSON.'); td.colSpan = 9; tr.appendChild(td); tb.appendChild(tr); }
     $('count').textContent = last.total.toLocaleString('en-US') + (last.total === 1 ? ' car' : ' cars'); $('pageinfo').textContent = 'Page ' + last.page + ' of ' + last.pages; $('prev').disabled = last.page <= 1; $('next').disabled = last.page >= last.pages;
   }
   function openForm(car) { editing = car ? car.vin : null; var f = $('carform'); f.reset(); $('formerr').textContent = ''; $('dlg-title').textContent = car ? 'Edit car' : 'Add car'; f.elements.vin.readOnly = !!car;
@@ -39,6 +40,13 @@
     var r = editing ? inv.update(editing, formToCar(v)) : inv.add(formToCar(v)); if (!r.ok) { $('formerr').textContent = errorText(r.errors); return; } $('formerr').textContent = ''; showDlg(false); fillMakes(); draw(); });
   $('cancel').addEventListener('click', function () { showDlg(false); });
   function showDlg(on) { var d = $('dlg'); if (on) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); } else { if (d.close) d.close(); else d.removeAttribute('open'); } }
+  // window stickers: selected rows, or the whole filtered list if none selected (one per page)
+  var picked = Object.create(null);
+  function pickedVins() { return Object.keys(picked); }
+  function pickUi() { var n = pickedVins().length; $('stickers').textContent = n ? 'Print stickers (' + n + ' selected)' : 'Print stickers (filtered)'; }
+  function openSticker(u) { if (!u) return; var w = root.open(u, '_blank', 'noopener'); if (!w) location.href = u; }
+  $('stickers').addEventListener('click', function () { var vins = pickedVins(); if (!vins.length) vins = inv.query(Object.assign(buildQuery(state()), { page: 1, pageSize: DDSticker.MAX_BATCH })).items.map(function (c) { return c.vin; });
+    if (!vins.length) return; var bu = DDSticker.batchUrl(vins); if (bu) openSticker(bu + '&print=1'); });
   function printLabels(cars) { DDQRLabel.sheet($('print'), cars, location.href); setTimeout(function () { root.print(); }, 50); }
   $('print-page').addEventListener('click', function () { if (last && last.items.length) printLabels(last.items); });
   ['q', 'f-make', 'f-body', 'f-status', 'f-max', 'sort'].forEach(function (id) { $(id).addEventListener(id === 'q' || id === 'f-max' ? 'input' : 'change', function () { page = 1; draw(); }); });
@@ -110,6 +118,6 @@
   $('csv').addEventListener('click', function () { download('dealerdesk-leads.csv', leads.exportCSV(leads.search(lq())), 'text/csv'); });
   function tab(which) { var isInv = which === 'inv'; $('pane-inv').hidden = !isInv; $('pane-leads').hidden = isInv; $('tab-inv').setAttribute('aria-selected', String(isInv)); $('tab-leads').setAttribute('aria-selected', String(!isInv)); if (!isInv) drawLeads(); }
   $('tab-inv').addEventListener('click', function () { tab('inv'); }); $('tab-leads').addEventListener('click', function () { tab('leads'); });
-  function start() { fillMakes(); draw(); badge(); meUi(); fromUrl(); }
+  function start() { fillMakes(); pickUi(); draw(); badge(); meUi(); fromUrl(); }
   if (inv.size()) start(); else fetch('data/cars.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { inv.load(d); }).catch(function () {}).then(start);
 })(typeof self !== 'undefined' ? self : this);

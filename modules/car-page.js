@@ -19,6 +19,8 @@
     box.appendChild(el('div', 'price', money(car.price)));
     box.appendChild(el('p', 'meta', Number(car.mileage).toLocaleString('en-US') + ' miles' + (car.color ? ' · ' + car.color : '') + ' · VIN ' + car.vin));
     if (car.features && car.features.length) box.appendChild(el('p', '', car.features.join(' · ')));
+    // staff device (has a 'You are' name) gets a Print sticker link
+    if (window.DDStore && DDStore.getStaffName && DDStore.getStaffName()) { var ps = el('a', 'staff-sticker', 'Print sticker'); ps.href = 'window-sticker.html?vin=' + encodeURIComponent(car.vin) + '&print=1'; ps.target = '_blank'; ps.rel = 'noopener'; box.appendChild(ps); }
     if (window.DDFavorites) { var fav = DDFavorites.create(), bar = el('div', 'favbar'), h = DDFavorites.heart(fav, car.vin), a = el('a', '', 'Compare'), n = el('span', 'n');
       a.href = 'compare.html'; a.appendChild(n); DDFavorites.badge(fav, n); bar.appendChild(h); bar.appendChild(a); box.appendChild(bar); }
     form.hidden = false;
@@ -34,7 +36,7 @@
   var leads = DDLeads.create();
   form.addEventListener('submit', function (ev) {
     ev.preventDefault(); var f = form.elements;
-    var data = { vin: vin, interest_car_id: carId, name: f.name.value, phone: f.phone.value, email: f.email.value, interest: (form.querySelector('input[name=interest]:checked') || {}).value, message: f.message.value, website: f.website.value };
+    var data = { vin: vin, interest_car_id: carId, ref: (new URLSearchParams(location.search).get('src') || ''), name: f.name.value, phone: f.phone.value, email: f.email.value, interest: (form.querySelector('input[name=interest]:checked') || {}).value, message: f.message.value, website: f.website.value };
     var r = leads.submit(data);
     if (!r.ok) { var m = { name: 'Please enter your name.', contact: 'Please add a phone number or email.', phone: 'That phone number looks wrong.', email: 'That email looks wrong.', too_soon: 'Thanks, we already got your request.', spam: 'Could not send.' };
       msg.className = 'err'; msg.textContent = m[r.errors[0]] || 'Please check the form.'; return; }

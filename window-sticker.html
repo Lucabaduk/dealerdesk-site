@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<title>DealerDesk · Window sticker</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='#14213d'/%3E%3Ctext x='32' y='42' font-family='Helvetica,Arial,sans-serif' font-size='28' font-weight='700' fill='#fff' text-anchor='middle'%3EDD%3C/text%3E%3C/svg%3E">
+<style>
+:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#e9edf2;color:#111;font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.bar{position:sticky;top:0;display:flex;gap:10px;align-items:center;padding:10px 16px;background:#14213d;color:#fff;z-index:2}.bar b{margin-right:auto}
+.bar button{min-height:44px;padding:0 18px;border:0;border-radius:10px;background:#0a7d5a;color:#fff;font-size:16px;font-weight:600}
+#msg{margin:12px 16px;padding:10px 12px;border-radius:10px;background:#fff1d6;color:#7a4b00;font-weight:600}
+#stickers{padding:16px;display:grid;gap:16px;justify-content:center}
+.ws{width:8.5in;min-height:11in;height:11in;background:#fff;padding:.45in .5in;display:flex;flex-direction:column;gap:.16in;overflow:hidden;box-shadow:0 2px 10px #0003;border-top:.18in solid #14213d}
+.ws-dealer{font-size:13pt;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#14213d}.ws-title{font-size:34pt;line-height:1.05;margin:.04in 0 0;font-weight:800}.ws-trim{font-size:18pt;color:#333}
+.ws-top{display:grid;grid-template-columns:1.25fr 1fr;gap:.2in}.ws-photo img{width:100%;height:2.9in;object-fit:cover;border-radius:6px;background:#d9dee6;display:block}
+.ws-pricebox{border:2px solid #14213d;border-radius:8px;padding:.14in;display:flex;flex-direction:column;gap:.08in}.ws-plabel{font-size:11pt;text-transform:uppercase;color:#444}.ws-price{font-size:36pt;font-weight:800;line-height:1}
+.ws-ids{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0;font-size:10.5pt}.ws-ids dt{font-weight:700}.ws-ids dd{margin:0;word-break:break-all}.mono{font-family:ui-monospace,Menlo,monospace}
+.ws-econ{margin-top:auto;background:#eef6f1;border-radius:6px;padding:.08in .1in}.ws-econ.none{background:#f2f2f2}.ws-elabel{font-size:9.5pt;text-transform:uppercase;color:#444}.ws-ebig{font-size:22pt;font-weight:800}.ws-esmall{font-size:10pt}
+.ws-mid{display:grid;grid-template-columns:1fr 1fr;gap:.2in;flex:1;min-height:0}.ws h2{font-size:12pt;text-transform:uppercase;border-bottom:2px solid #14213d;margin:0 0 .06in;padding-bottom:2px}
+.ws-specs dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0;font-size:11pt}.ws-specs dt{font-weight:700}.ws-specs dd{margin:0}
+.ws-feat ul{margin:0;padding-left:1.1em;columns:2;column-gap:.2in;font-size:10.5pt}.ws-feat li{break-inside:avoid}.muted{color:#666}
+.ws-desc{margin:0;font-size:10.5pt;color:#222;max-height:1.1in;overflow:hidden}
+.ws-foot{display:flex;gap:.2in;align-items:center;border-top:2px solid #14213d;padding-top:.12in}.ws-qr img{width:1.9in;height:1.9in;display:block}.ws-scan{font-size:16pt;font-weight:700}.ws-dealer2{font-size:12pt;color:#333;margin-top:4px}
+@page{size:letter portrait;margin:0}
+@media print{body{background:#fff}.bar,#msg{display:none!important}#stickers{display:block;padding:0}.ws{box-shadow:none;margin:0;break-after:page;page-break-after:always}.ws:last-child{break-after:auto;page-break-after:auto}}
+</style></head><body>
+<div class="bar"><b>Window sticker</b><span id="count"></span><button id="print" type="button">Print</button></div>
+<p id="msg" role="status" hidden></p>
+<main id="stickers"></main>
+<script src="modules/store.js"></script><script src="modules/qr.js"></script><script src="modules/inventory.js"></script><script src="modules/window-sticker.js"></script><script src="modules/window-sticker-page.js"></script>
+</body></html>

@@ -44,7 +44,7 @@
     var interest = String(input.interest || '').toLowerCase().replace(/[\s-]/g, '_'); if (INTERESTS.indexOf(interest) < 0) errors.push('interest');
     var vin = String(input.vin || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) errors.push('vin');
     if (errors.length) return { ok: false, errors: errors };
-    return { ok: true, lead: { vin: vin, name: name, phone: phone, email: email, interest: interest, interest_car_id: /^[A-Za-z0-9_-]{1,40}$/.test(String(input.interest_car_id || '')) ? String(input.interest_car_id) : null, source: 'website', via: 'qr', notes: S.cleanText(input.message, 1000), preferredTime: S.cleanText(input.preferredTime, 60) } };
+    return { ok: true, lead: { vin: vin, name: name, phone: phone, email: email, interest: interest, interest_car_id: /^[A-Za-z0-9_-]{1,40}$/.test(String(input.interest_car_id || '')) ? String(input.interest_car_id) : null, source: 'website', via: 'qr', ref: /^[a-z_]{1,20}$/.test(String(input.ref || '')) ? String(input.ref) : '', notes: S.cleanText(input.message, 1000), preferredTime: S.cleanText(input.preferredTime, 60) } };
   }
   function create(opts) {
     opts = opts || {}; var store = opts.storage || S.defaultStorage(), clock = opts.now || Date.now, leads = [], minGapMs = opts.minGapMs == null ? 30000 : opts.minGapMs;
