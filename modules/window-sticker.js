@@ -4,7 +4,7 @@
   'use strict';
   var node = typeof module !== 'undefined' && module.exports;
   var I = node ? require('./inventory.js') : root.DDInventory, Q = node ? require('./qr.js') : root.DDQR, S = node ? require('./store.js') : root.DDStore;
-  var MAX_BATCH = 500, MAX_STORED = 20000, BATCH_KEY = 'dealerdesk.sticker.batch';
+  var MAX_BATCH = 500, MAX_STORED = 20000, URL_MAX = 100, BATCH_KEY = 'dealerdesk.sticker.batch';
   function has(o, k) { return o != null && Object.prototype.hasOwnProperty.call(o, k); }
   function get(o, k) { return has(o, k) ? o[k] : null; }
   function num(v) { return v == null || v === '' || !isFinite(+v) ? null : +v; }
@@ -66,16 +66,16 @@
   /** where staff buttons go: single VIN or a batch stashed in sessionStorage (filtered lists can be thousands long) */
   function urlFor(vin) { var v = I.cleanVin(vin); return I.isValidVin(v) ? 'window-sticker.html?vin=' + v : ''; }
   function batchUrl(vins, session) { var list = []; var seen = Object.create(null); (vins || []).forEach(function (v) { v = I.cleanVin(v); if (I.isValidVin(v) && !seen[v] && list.length < MAX_STORED) { seen[v] = 1; list.push(v); } });
-    try { (session || root.sessionStorage).setItem(BATCH_KEY, JSON.stringify(list)); } catch (e) { return list.length <= 30 ? 'window-sticker.html?vins=' + list.join(',') : ''; } return 'window-sticker.html?batch=1'; }
+    try { (session || root.sessionStorage).setItem(BATCH_KEY, JSON.stringify(list)); } catch (e) { /* storage blocked/full: fall back to VINs in the URL (≈1.8 KB for 100), and say how many were asked for */ return 'window-sticker.html?vins=' + list.slice(0, URL_MAX).join(',') + (list.length > URL_MAX ? '&total=' + list.length + '&nostore=1' : ''); } return 'window-sticker.html?batch=1'; }
   function vinsFromUrl(search, session) { var p = new URLSearchParams(String(search || '')), out = [];
     if (p.get('vin')) out = [p.get('vin')]; else if (p.get('vins')) out = String(p.get('vins')).split(','); else if (p.get('batch')) { try { var a = JSON.parse((session || root.sessionStorage).getItem(BATCH_KEY) || '[]'); if (Array.isArray(a)) out = a; } catch (e) {} }
     return parseList(out).vins; }
   /** like vinsFromUrl but also reports how many valid VINs were asked for, so the page can say when the cap cut the list */
   function parseVins(search, session) { var p = new URLSearchParams(String(search || '')), out = [];
     if (p.get('vin')) out = [p.get('vin')]; else if (p.get('vins')) out = String(p.get('vins')).split(','); else if (p.get('batch')) { try { var a = JSON.parse((session || root.sessionStorage).getItem(BATCH_KEY) || '[]'); if (Array.isArray(a)) out = a; } catch (e) {} }
-    return parseList(out); }
+    var r = parseList(out), t = Math.floor(+p.get('total')); if (p.get('vins') && isFinite(t) && t > r.total && t <= MAX_STORED) { r.total = t; r.noStore = p.get('nostore') === '1'; } return r; }
   function parseList(out) { var seen = Object.create(null), all = out.map(function (v) { return I.cleanVin(v); }).filter(function (v) { if (!I.isValidVin(v) || seen[v]) return false; seen[v] = 1; return true; });
     return { vins: all.slice(0, MAX_BATCH), total: all.length }; }
-  var api = { stickerData: stickerData, economy: economy, dealerName: dealerName, render: render, urlFor: urlFor, batchUrl: batchUrl, vinsFromUrl: vinsFromUrl, parseVins: parseVins, photoCredit: photoCredit, MAX_BATCH: MAX_BATCH, BATCH_KEY: BATCH_KEY };
+  var api = { stickerData: stickerData, economy: economy, dealerName: dealerName, render: render, urlFor: urlFor, batchUrl: batchUrl, vinsFromUrl: vinsFromUrl, parseVins: parseVins, photoCredit: photoCredit, MAX_BATCH: MAX_BATCH, URL_MAX: URL_MAX, BATCH_KEY: BATCH_KEY };
   if (node) module.exports = api; else root.DDSticker = api;
 })(typeof self !== 'undefined' ? self : this);

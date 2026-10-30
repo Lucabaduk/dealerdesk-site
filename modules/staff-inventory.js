@@ -46,7 +46,9 @@
   function pickUi() { var n = pickedVins().length; $('stickers').textContent = n ? 'Print stickers (' + n + ' selected)' : 'Print stickers (filtered)'; }
   function openSticker(u) { if (!u) return; var w = root.open(u, '_blank', 'noopener'); if (!w) location.href = u; }
   $('stickers').addEventListener('click', function () { var vins = pickedVins(); if (!vins.length) vins = inv.query(Object.assign(buildQuery(state()), { page: 1, pageSize: 1e9 })).items.map(function (c) { return c.vin; });
-    if (!vins.length) return; var bu = DDSticker.batchUrl(vins); if (bu) openSticker(bu + '&print=1'); });
+    var sn = $('st-notice'); if (!vins.length) { if (sn) { sn.textContent = 'No cars to print.'; sn.hidden = false; } return; } var bu = DDSticker.batchUrl(vins);
+    if (sn) { var m = /[?&]total=(\d+)/.exec(bu || ''); sn.textContent = !bu ? 'Could not open stickers.' : m ? 'Browser storage is unavailable: opening the first ' + DDSticker.URL_MAX + ' of ' + m[1] + ' stickers. Select fewer cars or narrow the filter for the rest.' : ''; sn.hidden = !sn.textContent; }
+    if (bu) openSticker(bu + '&print=1'); });
   function printLabels(cars) { DDQRLabel.sheet($('print'), cars, location.href); setTimeout(function () { root.print(); }, 50); }
   $('print-page').addEventListener('click', function () { if (last && last.items.length) printLabels(last.items); });
   ['q', 'f-make', 'f-body', 'f-status', 'f-max', 'sort'].forEach(function (id) { $(id).addEventListener(id === 'q' || id === 'f-max' ? 'input' : 'change', function () { page = 1; draw(); }); });

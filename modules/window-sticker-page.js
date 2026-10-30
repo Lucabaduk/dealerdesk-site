@@ -9,6 +9,7 @@
     var r = DDSticker.render(out, cars, { baseUrl: location.href, dealer: DDSticker.dealerName() });
     document.getElementById('count').textContent = r.count === 1 ? '1 sticker' : r.count + ' stickers';
     var capped = parsed.total > vins.length ? 'Showing the first ' + vins.length + ' of ' + parsed.total + ' (max ' + DDSticker.MAX_BATCH + ' per print). ' : '';
+    if (parsed.noStore) capped = 'Browser storage is unavailable, so only the first ' + vins.length + ' of ' + parsed.total + ' stickers could be passed. Select fewer cars or narrow the filter to print the rest. ';
     say(capped + (missing ? (missing === 1 ? '1 car not found' : missing + ' cars not found') : (r.count ? '' : 'No stickers to print.')));
     fit();
     document.body.setAttribute('data-ready', '1');
