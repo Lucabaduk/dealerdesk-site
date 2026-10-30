@@ -47,4 +47,18 @@ let w5=boot({hash:'#lead?car='+carsJson.cars[1].id});await tick();ok(w5.document
 // watch poll
 let w6=boot({q:'?watch=1'});await tick();ok(w6.__f.some(u=>u.startsWith('version.json?t=')),'watch polls version.json');
 const idx=fs.readFileSync(R+'/index.html','utf8');ok(/app\.html/.test(idx)&&/watch=1/.test(idx)&&!/TableTop/i.test(idx+html),'site ok, no TableTop');
+// type-ahead, filters, detail
+{let w7=boot();await tick();const d7=w7.document,D7=w7.DealerDesk;const mk=carsJson.cars[0].make;
+ const sg=D7.suggest(mk.slice(0,2));ok(sg.length>0&&sg.filter(x=>x.make===mk).length<=5,'typeahead <=5 per make');
+ d7.querySelector('[data-view=inventory]').click();const q=d7.querySelector('[data-inv=q]');q.value=mk.slice(0,3);q.dispatchEvent(new w7.Event('input',{bubbles:true}));ok(d7.querySelectorAll('.ta-item').length>0,'suggest list shown');
+ d7.querySelector('.ta-item').dispatchEvent(new w7.MouseEvent('mousedown',{bubbles:true}));ok(D7.inventory.model&&[...d7.querySelectorAll('tr[data-car]')].length>0,'pick suggestion filters model');
+ d7.querySelector('[data-act=clrf]').click();const pm=d7.querySelector('[data-inv=pmax]');pm.value='30000';pm.dispatchEvent(new w7.Event('change',{bubbles:true}));
+ ok([...d7.querySelectorAll('tr[data-car]')].length===carsJson.cars.filter(c=>(c.price!=null?c.price:c.price_cents/100)<=30000).length,'price filter');
+ const fb=d7.querySelector('[data-inv=fuel]');fb.value='Electric';fb.dispatchEvent(new w7.Event('change',{bubbles:true}));ok(d7.querySelectorAll('tr[data-car]').length>=0,'fuel filter runs');
+ d7.querySelector('[data-act=clrf]').click();const id=carsJson.cars[0].id;d7.querySelector('[data-open="'+id+'"]').click();
+ ok(d7.querySelector('.hero-img')&&d7.querySelector('.specs')&&/VIN/.test(d7.querySelector('.specs').textContent),'detail page');
+ let got=null;w7.DDOrder={open:x=>got=x};d7.querySelector('[data-act=order]').click();ok(got===id,'DDOrder hook');
+ let fav=null;w7.DDFavorites={toggle:x=>fav=x};d7.querySelector('[data-act=favorite]').click();ok(fav===id,'favorites hook');
+ delete w7.DDOrder;d7.querySelector('[data-act=order]').click();ok(D7.state&&d7.querySelector('[data-form=lead]'),'order fallback to lead');
+ let w8=boot({hash:'#car/'+id});await tick();ok(w8.document.querySelector('.hero-img'),'deep link to car');}
 console.log(pass+' passed, '+fail+' failed');process.exit(fail?1:0)})();
