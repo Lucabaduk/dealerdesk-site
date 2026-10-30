@@ -88,13 +88,20 @@
     if (!(price > 0)) throw err('bad_price', 'Price is required.');
     if (!(apr >= 0 && apr <= 40)) throw err('bad_apr', 'APR must be 0-40%.');
     if (!(term >= 36 && term <= 84)) throw err('bad_term', 'Term must be 36 to 84 months.');
-    var taxable = Math.max(0, s.taxTradeCredit ? price - trade : price), tax = taxable * taxRate / 100;
-    var financed = Math.max(0, price + tax - down - trade + owed), r = apr / 1200;
+    var taxable = Math.max(0, s.taxTradeCredit ? price - trade : price), tax = Math.round(taxable * taxRate) / 100;
+    // Cap credits at what is owed: trade-in first, then down payment. Nothing is ever negative.
+    var due = price + tax + owed, tradeUsed = Math.min(trade, due), downUsed = Math.min(down, Math.max(0, due - tradeUsed));
+    var r2 = function (x) { return Math.max(0, Math.round(x * 100) / 100); };
+    var financed = r2(due - tradeUsed - downUsed), r = apr / 1200;
+    var notes = [];
+    if (downUsed < down) notes.push('Your down payment is more than the amount owed, so we used ' + money2(downUsed) + '. No loan needed at that amount.');
+    if (tradeUsed < trade) notes.push('Your trade-in is worth more than the amount owed, so we used ' + money2(tradeUsed) + '. The dealer will talk with you about the difference.');
     var monthly = financed === 0 ? 0 : r === 0 ? financed / term : financed * r / (1 - Math.pow(1 + r, -term));
-    monthly = Math.round(monthly * 100) / 100;
-    var totalPayments = Math.round(monthly * term * 100) / 100;
-    return { price: price, tax: Math.round(tax * 100) / 100, taxRate: taxRate, down: down, trade: trade, tradeOwed: owed, financed: Math.round(financed * 100) / 100, apr: apr, term: term, monthly: monthly,
-      totalPayments: totalPayments, interest: Math.round((totalPayments - financed) * 100) / 100, totalCost: Math.round((totalPayments + down + trade - owed) * 100) / 100 };
+    monthly = r2(monthly);
+    var totalPayments = r2(monthly * term);
+    return { price: price, tax: r2(tax), taxRate: taxRate, down: r2(downUsed), downEntered: r2(down), downCapped: downUsed < down, trade: r2(tradeUsed), tradeEntered: r2(trade), tradeCapped: tradeUsed < trade,
+      tradeOwed: owed, financed: financed, apr: apr, term: term, monthly: monthly, note: notes.join(' '),
+      totalPayments: totalPayments, interest: r2(totalPayments - financed), totalCost: r2(totalPayments + downUsed + tradeUsed - owed) };
   }
 
   // ---------- requests ----------

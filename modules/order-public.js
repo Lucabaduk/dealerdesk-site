@@ -24,7 +24,7 @@
     var out = $('ddo-calcout');
     try { var r = O.payment({ price: cv('price').value, down: cv('down').value, trade: cv('trade').value, apr: cv('apr').value, term: cv('term').value });
       out.innerHTML = ''; var m = el('div', 'ddo-monthly'); m.appendChild(el('b', null, M2(r.monthly))); m.appendChild(el('span', null, '/month for ' + r.term + ' months')); out.appendChild(m);
-      var dl = el('dl', 'ddo-break'); [['Price', M2(r.price)], ['Tax', M2(r.tax)], ['Down', '-' + M2(r.down)], ['Trade-in', '-' + M2(r.trade)], ['Amount financed', M2(r.financed)], ['Interest', M2(r.interest)], ['Total of payments', M2(r.totalPayments)], ['Total cost (incl. down + trade)', M2(r.totalCost)]].forEach(function (x) { dl.appendChild(el('dt', null, x[0])); dl.appendChild(el('dd', null, x[1])); }); out.appendChild(dl);
+      var dl = el('dl', 'ddo-break'); [['Price', M2(r.price)], ['Tax', M2(r.tax)], ['Down payment', (r.down > 0 ? '\u2212 ' : '') + M2(r.down)], ['Trade-in credit', (r.trade > 0 ? '\u2212 ' : '') + M2(r.trade)], ['Amount financed', M2(r.financed)], ['Interest', M2(r.interest)], ['Total of payments', M2(r.totalPayments)], ['Total cost (incl. down + trade)', M2(r.totalCost)]].forEach(function (x) { dl.appendChild(el('dt', null, x[0])); dl.appendChild(el('dd', null, x[1])); }); out.appendChild(dl); if (r.note) out.appendChild(el('p', 'ddo-note ddo-capnote', r.note));
     } catch (e) { out.textContent = e.message; }
   }
   var t = $('ddo-trade'); function tv(n) { return t.querySelector('[name="' + n + '"]'); }

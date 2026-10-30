@@ -25,6 +25,17 @@ t('payment: 0% APR, term 36-84 only, price required, never negative', () => {
   assert.strictEqual(O.payment({ price: 36000, apr: 0, term: 36, taxRate: 0 }).monthly, 1000); throwsCode(() => O.payment({ price: 1, term: 24 }), 'bad_term'); throwsCode(() => O.payment({ price: 1, term: 96 }), 'bad_term');
   throwsCode(() => O.payment({ price: '' }), 'bad_price'); const r = O.payment({ price: 1000, down: 5000, term: 36 }); assert.strictEqual(r.monthly, 0); assert.strictEqual(r.financed, 0);
   assert.strictEqual(O.payment({ price: '$25,000', term: 72 }).price, 25000); assert.strictEqual(O.payment({ price: 25000 }).term, 72); });
+t('down payment over the amount owed is capped, with a note, nothing negative', () => {
+  const r = O.payment({ price: 20000, down: 25000, apr: 6, term: 60, taxRate: 6 });
+  assert.strictEqual(r.down, 21200); assert.strictEqual(r.downEntered, 25000); assert.ok(r.downCapped); assert.match(r.note, /more than the amount owed/);
+  assert.strictEqual(r.financed, 0); assert.strictEqual(r.monthly, 0); assert.strictEqual(r.totalCost, 21200);
+  const both = O.payment({ price: 20000, down: 8000, trade: 15000, apr: 6, term: 60, taxRate: 6 }); // tax on 5,000 = 300; owed 20,300 -> trade 15,000 + down 5,300
+  assert.strictEqual(both.trade, 15000); assert.strictEqual(both.down, 5300); assert.ok(both.downCapped && !both.tradeCapped); assert.strictEqual(both.financed, 0);
+  const bigTrade = O.payment({ price: 10000, down: 1000, trade: 14000, term: 36 }); assert.strictEqual(bigTrade.trade, 10000); assert.strictEqual(bigTrade.down, 0); assert.ok(bigTrade.tradeCapped); assert.match(bigTrade.note, /trade-in is worth more/);
+  const exact = O.payment({ price: 10000, down: 10600, term: 36, taxRate: 6 }); assert.ok(!exact.downCapped); assert.strictEqual(exact.note, ''); assert.strictEqual(exact.financed, 0);
+  const normal = O.payment({ price: 30000, down: 3000, apr: 6, term: 60, taxRate: 6 }); assert.ok(!normal.downCapped && !normal.tradeCapped && normal.note === '');
+  for (const p of [{ price: 5000, down: 99999 }, { price: 5000, trade: 99999 }, { price: 5000, down: 99999, trade: 99999, tradeOwed: 100 }, { price: 1, down: -50, trade: -5 }])
+    for (const [k, v] of Object.entries(O.payment(Object.assign({ term: 48 }, p)))) if (typeof v === 'number') assert.ok(v >= 0, k + ' = ' + v); });
 t('trade-in estimate follows the labelled formula', () => {
   const r = O.tradeIn({ year: 2019, make: 'Ford', model: 'Escape', mileage: 60000, condition: 'good' });
   const base = 32000 * Math.pow(0.85, 7), mAdj = Math.min(1.15, Math.max(0.5, 1 - 0.08 * (60000 - 84000) / 10000));
@@ -82,6 +93,12 @@ if (!jsdom) skipped.push('UI tests (jsdom not found)'); else {
     assert.match(d.getElementById('ddo-book').getAttribute('href'), new RegExp('booking\\.html\\?vehicle=' + avail.stock_no));
     const saved = JSON.parse(st.getItem('dealerdesk_orders')).orders[0]; assert.strictEqual(saved.kind, 'buy'); assert.ok(saved.trade); assert.strictEqual(saved.calc.term, 36);
     assert.strictEqual(d.querySelectorAll('input[autocomplete^="cc-"]').length, 0); });
+  t('order.html: down over price shows capped amounts, a note, and no negative numbers', () => {
+    const dom = page('order.html', 'http://localhost/order.html?vehicle=' + avail.stock_no, fake({ dealerdesk_data: JSON.stringify(CARS) })), d = dom.window.document;
+    const c = d.getElementById('ddo-calc'); c.querySelector('[name=down]').value = String(avail.price * 3); c.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    const out = d.getElementById('ddo-calcout').textContent; assert.ok(d.querySelector('.ddo-capnote'), 'note shown'); assert.match(out, /\$0\.00\/month/);
+    assert.ok(!/-\s*\$|\$\s*-|\u2212\s*\$-/.test(out), 'negative amount in: ' + out);
+    c.querySelector('[name=down]').value = '1000'; c.dispatchEvent(new dom.window.Event('input', { bubbles: true })); assert.ok(!d.querySelector('.ddo-capnote'), 'note gone'); });
   t('order.html: unknown and sold cars show a message, no form', () => {
     let d = page('order.html', 'http://localhost/order.html?vehicle=NOPE', fake({ dealerdesk_data: JSON.stringify(CARS) })).window.document; assert.ok(d.getElementById('ddo-flow').hidden); assert.match(d.getElementById('ddo-missing').textContent, /could not find/);
     if (sold) { d = page('order.html', 'http://localhost/order.html?vehicle=' + sold.stock_no, fake({ dealerdesk_data: JSON.stringify(CARS) })).window.document; assert.ok(d.getElementById('ddo-flow').hidden); assert.match(d.getElementById('ddo-missing').textContent, /sold/); }
