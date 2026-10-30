@@ -3,7 +3,9 @@
   'use strict';
   var vin = DDInventory.cleanVin(new URLSearchParams(location.search).get('vin'));
   var box = document.getElementById('car'), form = document.getElementById('lead'), msg = document.getElementById('msg');
-  var ENDPOINT = (document.querySelector('meta[name="dd-leads-endpoint"]') || {}).content || ''; // optional server, set by Coder
+  // Leads server: the meta tag is honoured ONLY if it is https and its host is in this allowlist (edit here, not in HTML).
+  var LEAD_ENDPOINT_HOSTS = [];
+  var ENDPOINT = DDStore.allowedEndpoint((document.querySelector('meta[name="dd-leads-endpoint"]') || {}).content, LEAD_ENDPOINT_HOSTS);
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function money(n) { return '$' + Number(n).toLocaleString('en-US'); }
   function show(car) {
@@ -36,7 +38,7 @@
     var r = leads.submit(data);
     if (!r.ok) { var m = { name: 'Please enter your name.', contact: 'Please add a phone number or email.', phone: 'That phone number looks wrong.', email: 'That email looks wrong.', too_soon: 'Thanks, we already got your request.', spam: 'Could not send.' };
       msg.className = 'err'; msg.textContent = m[r.errors[0]] || 'Please check the form.'; return; }
-    if (ENDPOINT && /^https:\/\//.test(ENDPOINT)) fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(r.lead) }).catch(function () {});
+    if (ENDPOINT) fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(r.lead) }).catch(function () {});
     form.reset(); msg.className = 'ok'; msg.textContent = 'Thanks! A team member will contact you soon.';
   });
 })();
