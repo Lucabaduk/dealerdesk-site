@@ -1,0 +1,36 @@
+const { t, eq, ok, done, schema, genCars } = require('./_h.js');
+const S = require('../modules/store.js'), I = require('../modules/inventory.js'), Q = require('../modules/qr.js');
+const fixed = () => Date.UTC(2026, 9, 30);
+const mk = (storage) => I.create({ storage: storage || S.memoryStorage(), now: fixed });
+const base = { vin: '1hgcm82633a004352', year: 2021, make: 'Velora', model: 'Aster', trim: 'LX', price: '$24,990', mileage: '31,000', color: 'Silver', status: 'available', photos: ['assets/cars/aster.webp', 'javascript:alert(1)', 'https://img.example.com/a.webp', '../x.webp'], features: ['Bluetooth', 'bluetooth', '<b>Sunroof</b>'] };
+t('add normalizes', () => { const inv = mk(); const r = inv.add(base); ok(r.ok, JSON.stringify(r)); eq(r.car.vin, '1HGCM82633A004352'); eq(r.car.price, 24990); eq(r.car.mileage, 31000); eq(r.car.photos, ['assets/cars/aster.webp', 'https://img.example.com/a.webp']); eq(r.car.features, ['Bluetooth', 'b Sunroof /b'.replace(/ \/b$/, ' /b')]); eq(r.car.condition, 'used'); eq(r.car.id, 'car-1hgcm82633a004352'); });
+t('rejects bad vin (I/O/Q, length)', () => { eq(mk().add(Object.assign({}, base, { vin: '1HGCM82633A00435O' })).errors, ['vin']); eq(mk().add(Object.assign({}, base, { vin: 'ABC' })).ok, false); });
+t('rejects bad fields', () => { const r = mk().add({ vin: base.vin, year: 1800, make: '', model: 'x', price: -1, status: 'gone' }); eq(r.errors, ['year', 'make', 'price', 'status']); });
+t('strips html/control chars', () => { const c = mk().add(Object.assign({}, base, { make: '<script>x</script>Velora\u0000' })).car; ok(c.make.indexOf('<') < 0 && c.make.indexOf('\u0000') < 0); });
+t('duplicate vin', () => { const inv = mk(); inv.add(base); eq(inv.add(base).errors, ['duplicate']); });
+t('edit / status / remove', () => { const inv = mk(); inv.add(base); ok(inv.update(base.vin, { price: 22000, vin: 'XXXXX' }).ok); eq(inv.get(base.vin).price, 22000); eq(inv.setStatus(base.vin, 'hold').car.status, 'hold'); eq(inv.setStatus(base.vin, 'bogus').ok, false); ok(inv.remove(base.vin)); eq(inv.get(base.vin), null); eq(inv.remove(base.vin), false); });
+t('get by id', () => { const inv = mk(); inv.add(Object.assign({}, base, { id: 'car-77' })); eq(inv.get('car-77').vin, '1HGCM82633A004352'); });
+t('persists', () => { const st = S.memoryStorage(); mk(st).add(base); eq(mk(st).size(), 1); });
+t('corrupt storage ignored', () => { const st = S.memoryStorage(); st.setItem(I.KEY, '{nope'); eq(mk(st).size(), 0); });
+t('export/import roundtrip + merge', () => { const a = mk(); a.load(genCars(30)); const js = a.exportJSON(); const b = mk(); const r = b.importJSON(js); eq([r.added, r.updated], [30, 0]); eq(b.importJSON(js).updated, 30); eq(b.importJSON('nope').errors, ['bad_json']); eq(b.importJSON('{"x":1}').errors, ['bad_format']); eq(b.importJSON(JSON.stringify([base]), 'replace').count, 1); });
+const inv = mk(); inv.load(genCars(5000));
+t('load 5000', () => eq(inv.size(), 5000));
+t('filters: make+status', () => { const r = inv.query({ make: 'velora', status: 'available', pageSize: 1e9 }); ok(r.total > 0); ok(r.items.every(c => c.make === 'Velora' && c.status === 'available')); });
+t('filters: model, color, year, price, mileage', () => { const r = inv.query({ model: 'Ridge', color: 'Silver', minYear: 2018, maxYear: 2022, minPrice: 15000, maxPrice: 40000, maxMileage: 90000, pageSize: 1e9 });
+  ok(r.items.every(c => c.model === 'Ridge' && c.color === 'Silver' && c.year >= 2018 && c.year <= 2022 && c.price >= 15000 && c.price <= 40000 && c.mileage <= 90000)); ok(r.total > 0); });
+t('multi-value filter', () => { const r = inv.query({ make: ['Velora', 'Kestrel'], pageSize: 1e9 }); ok(r.items.every(c => c.make === 'Velora' || c.make === 'Kestrel')); });
+t('text search', () => { const r = inv.query({ text: 'kestrel volt' }); ok(r.total > 0 && r.items.every(c => c.make === 'Kestrel' && c.model === 'Volt')); eq(inv.query({ text: 'DD10042' }).items[0].stock_no, 'DD10042'); });
+t('sort price asc/desc', () => { const a = inv.query({ sort: 'price', pageSize: 1e9 }).items.map(c => c.price); ok(a.every((v, i) => !i || a[i - 1] <= v)); const d = inv.query({ sort: 'price', dir: 'desc', status: 'sold', pageSize: 1e9 }).items; ok(d.every((c, i) => c.status === 'sold' && (!i || d[i - 1].price >= c.price))); });
+t('paging 24', () => { const p1 = inv.query({ sort: 'year' }), p2 = inv.query({ sort: 'year', page: 2 }); eq(p1.items.length, 24); eq(p1.pages, Math.ceil(5000 / 24)); ok(p1.items[23].vin !== p2.items[0].vin); eq(inv.query({ page: 99999 }).page, p1.pages); });
+t('facets', () => { const f = inv.facets('make'); eq(f.length, 5); eq(f.reduce((s, x) => s + x.count, 0), 5000); ok(inv.facets('model', { make: 'Halden' }).every(x => ['Haul', 'Crew', 'Tow'].includes(x.value))); });
+t('index stays right after edit', () => { const v = inv.query({ make: 'Marisco' }).items[0].vin; inv.update(v, { make: 'Velora' }); ok(!inv.query({ make: 'Marisco', pageSize: 1e9 }).items.some(c => c.vin === v)); ok(inv.query({ make: 'Velora', pageSize: 1e9 }).items.some(c => c.vin === v)); });
+t('PERF: filter+sort+page on 5000 < 50ms', () => { const qs = [{ make: 'Velora', status: 'available', sort: 'price' }, { text: 'silver sport', maxMileage: 60000, sort: 'mileage', dir: 'desc', page: 2 }, { minPrice: 20000, maxPrice: 35000, minYear: 2019, sort: 'year' }, { color: 'Red' }, {}];
+  inv.query({ sort: 'price' }); // warm caches like a real page would after load
+  for (const q of qs) { const t0 = process.hrtime.bigint(); for (let k = 0; k < 5; k++) inv.query(q); const ms = Number(process.hrtime.bigint() - t0) / 5e6; if (ms >= 50) throw new Error(JSON.stringify(q) + ' took ' + ms.toFixed(1) + 'ms'); }
+  const t0 = process.hrtime.bigint(); mk().load(genCars(5000)); console.log('  load+index 5000 cars: ' + (Number(process.hrtime.bigint() - t0) / 1e6).toFixed(1) + 'ms'); });
+const Sc = schema();
+t('matches Grok Master Helper schema (normalizeCar)', () => { if (!Sc) { console.log('  (schema.js not found, skipped)'); return; } inv.query({ pageSize: 300 }).items.forEach(c => { const n = Sc.normalizeCar(c); eq(n.price_cents, Math.round(c.price * 100)); eq(n.vin, c.vin); });
+  const d = JSON.parse(require('fs').readFileSync('/workspace/dealership/sample-data.json', 'utf8')); const r = mk().load(d); eq(r.skipped, 0); eq(r.count, d.cars.length); });
+t('carUrl + QR', () => { const u = inv.carUrl('https://luca.github.io/dealerdesk/app.html?x=1#y', '1hgcm82633a004352'); eq(u, 'https://luca.github.io/dealerdesk/car.html?vin=1HGCM82633A004352'); const M = Q.encode(u); eq(M.length, 37); ok(Q.toSVG(u).startsWith('<svg')); });
+t('QR too long throws', () => { let th = false; try { Q.encode('x'.repeat(400)); } catch (e) { th = true; } ok(th); });
+done('inventory');
