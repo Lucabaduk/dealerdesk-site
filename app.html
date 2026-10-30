@@ -97,4 +97,8 @@ var DD=window.DealerDesk={get db(){return db},schema:schema,save:save,render:ren
 if(/^#lead/.test(location.hash)){cur='leads'}
 render();if(db.firstRun){delete db.firstRun;save();toast('Sample data loaded. Reset anytime in Settings.')}
 })();
-</script></body></html>
+</script><script>(function(){var v=null,pend=false;function typing(){var a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)}
+function note(){var t=document.getElementById('toast');if(t){t.textContent='Updated';t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2500)}}
+function chk(){if(!window.fetch||location.protocol==='file:')return;fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){if(v===null){v=j.v;return}if(j.v!==v){if(typing()){if(!pend){pend=true;note()}}else location.reload()}}).catch(function(){})}
+chk();setInterval(chk,10000);document.addEventListener('focusout',function(){if(pend)setTimeout(function(){if(!typing())location.reload()},1500)})})();</script>
+</body></html>

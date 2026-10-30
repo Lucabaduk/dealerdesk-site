@@ -16,4 +16,8 @@ section{padding:70px 6vw}.grid{display:grid;grid-template-columns:repeat(auto-fi
 <div class="f"><h3>Sales dashboard</h3><p>See revenue, units sold, stock value and sales by staff at a glance.</p></div>
 <div class="f"><h3>Private by design</h3><p>Your data stays in your browser. Export it anytime.</p></div></div></section>
 <section id="pricing" class="alt"><h2>Pricing</h2><p><b>Free during early access.</b> All features included. No card required.</p><a class="cta" href="app.html">Open the app</a></section>
-<footer>© 2026 DealerDesk. Sample data is fictional.</footer></body></html>
+<footer>© 2026 DealerDesk. Sample data is fictional.</footer><div id="toast" style="position:fixed;right:18px;bottom:18px;background:#14213d;color:#fff;padding:10px 16px;border-radius:8px;display:none"></div><style>#toast.on{display:block!important}</style><script>(function(){var v=null,pend=false;function typing(){var a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)}
+function note(){var t=document.getElementById('toast');if(t){t.textContent='Updated';t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2500)}}
+function chk(){if(!window.fetch||location.protocol==='file:')return;fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){if(v===null){v=j.v;return}if(j.v!==v){if(typing()){if(!pend){pend=true;note()}}else location.reload()}}).catch(function(){})}
+chk();setInterval(chk,10000);document.addEventListener('focusout',function(){if(pend)setTimeout(function(){if(!typing())location.reload()},1500)})})();</script>
+</body></html>
