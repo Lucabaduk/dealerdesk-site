@@ -54,8 +54,8 @@
       if (st === 'available' || st === 'hold' || st === 'sold') out[st]++;
       inc(out.by_body_type, c.body_type); inc(out.by_fuel, c.fuel_type || c.fuel); inc(out.by_make, c.make);
       var p = cents(c.price_cents != null ? c.price_cents : Number(c.price) * 100);
-      if (st !== 'sold') { if (p) { priceSum += p; priceN++; } out.stock_value_cents += p; }
-      var t = createdTime(c); if (t != null && t <= n && st !== 'sold') { ageSum += (n - t) / DAY; ageN++; }
+      if (st === 'available' || st === 'hold') { if (p) { priceSum += p; priceN++; } out.stock_value_cents += p; }
+      var t = createdTime(c); if (t != null && t <= n && (st === 'available' || st === 'hold')) { ageSum += (n - t) / DAY; ageN++; }
     });
     out.avg_price_cents = priceN ? Math.round(priceSum / priceN) : 0; // unsold cars only
     out.avg_age_days = ageN ? Math.round(ageSum / ageN * 10) / 10 : null; // null when no car has a listed/created time
@@ -92,10 +92,10 @@
   // Deals (app: pending/closed/lost) and orders (any status string) as one pipeline.
   function dealAmount(x) { return cents(x.price_cents != null ? x.price_cents : x.total_cents != null ? x.total_cents : Number(x.price != null ? x.price : x.total) * 100); }
   function pipeline(deals, orders) {
-    var out = { stages: {}, open_count: 0, open_value_cents: 0 };
+    var out = { stages: Object.create(null), open_count: 0, open_value_cents: 0 };
     var add = function (x, kind) {
       var s = String(x.status || x.stage || 'pending').toLowerCase(), a = dealAmount(x);
-      var g = out.stages[s] || (out.stages[s] = { count: 0, value_cents: 0, deals: 0, orders: 0 });
+      var g = Object.prototype.hasOwnProperty.call(out.stages, s) ? out.stages[s] : (out.stages[s] = { count: 0, value_cents: 0, deals: 0, orders: 0 });
       g.count++; g.value_cents += a; g[kind]++;
       if (!/^(closed|won|sold|delivered|completed|lost|cancelled|canceled)$/.test(s)) { out.open_count++; out.open_value_cents += a; }
     };

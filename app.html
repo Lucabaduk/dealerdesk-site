@@ -298,8 +298,8 @@ else if (typeof window !== 'undefined') window.DealerDeskSchema = api;
       if (st === 'available' || st === 'hold' || st === 'sold') out[st]++;
       inc(out.by_body_type, c.body_type); inc(out.by_fuel, c.fuel_type || c.fuel); inc(out.by_make, c.make);
       var p = cents(c.price_cents != null ? c.price_cents : Number(c.price) * 100);
-      if (st !== 'sold') { if (p) { priceSum += p; priceN++; } out.stock_value_cents += p; }
-      var t = createdTime(c); if (t != null && t <= n && st !== 'sold') { ageSum += (n - t) / DAY; ageN++; }
+      if (st === 'available' || st === 'hold') { if (p) { priceSum += p; priceN++; } out.stock_value_cents += p; }
+      var t = createdTime(c); if (t != null && t <= n && (st === 'available' || st === 'hold')) { ageSum += (n - t) / DAY; ageN++; }
     });
     out.avg_price_cents = priceN ? Math.round(priceSum / priceN) : 0; // unsold cars only
     out.avg_age_days = ageN ? Math.round(ageSum / ageN * 10) / 10 : null; // null when no car has a listed/created time
@@ -336,10 +336,10 @@ else if (typeof window !== 'undefined') window.DealerDeskSchema = api;
   // Deals (app: pending/closed/lost) and orders (any status string) as one pipeline.
   function dealAmount(x) { return cents(x.price_cents != null ? x.price_cents : x.total_cents != null ? x.total_cents : Number(x.price != null ? x.price : x.total) * 100); }
   function pipeline(deals, orders) {
-    var out = { stages: {}, open_count: 0, open_value_cents: 0 };
+    var out = { stages: Object.create(null), open_count: 0, open_value_cents: 0 };
     var add = function (x, kind) {
       var s = String(x.status || x.stage || 'pending').toLowerCase(), a = dealAmount(x);
-      var g = out.stages[s] || (out.stages[s] = { count: 0, value_cents: 0, deals: 0, orders: 0 });
+      var g = Object.prototype.hasOwnProperty.call(out.stages, s) ? out.stages[s] : (out.stages[s] = { count: 0, value_cents: 0, deals: 0, orders: 0 });
       g.count++; g.value_cents += a; g[kind]++;
       if (!/^(closed|won|sold|delivered|completed|lost|cancelled|canceled)$/.test(s)) { out.open_count++; out.open_value_cents += a; }
     };
@@ -481,7 +481,7 @@ dashboard:{label:'Dashboard',render:function(){var D=window.DealerDeskDashboard,
  '<div class="dash2"><div class="card" id="needs-attention"><h3 style="margin-top:0">Needs attention'+(at.length?' <span class="badge">'+at.length+'</span>':'')+'</h3>'+(at.length?'<ul class="att">'+at.slice(0,10).map(function(a){return'<li class="'+(/uncontacted|unconfirmed/.test(a.type)?'hi':'')+'">'+esc(a.message||a.type)+'</li>'}).join('')+'</ul>'+(at.length>10?'<p class="muted">and '+(at.length-10)+' more</p>':''):'<p class="muted">All clear. Nothing needs follow-up.</p>')+'</div>'+
  '<div class="card"><h3 style="margin-top:0">Lead pipeline</h3>'+['new','contacted','qualified','won','lost'].map(function(k){var n=bs[k]||0;return'<div class="pipe"><span>'+esc(label(k))+'</span><i style="width:'+Math.round(100*n/lmax)+'%"></i><b>'+n+'</b></div>'}).join('')+
  (sk.length?'<h3>Deals and orders</h3>'+sk.map(function(k){return'<div class="pipe"><span>'+esc(label(k))+'</span><i style="width:'+Math.round(100*(stg[k].count||0)/pmax)+'%"></i><b>'+(stg[k].count||0)+'</b></div>'}).join(''):'')+'</div></div>'+
- '<h3>Upcoming</h3><table><tr><th>When</th><th>Type</th><th>Customer</th></tr>'+((tdv.upcoming||[]).map(function(b){return['Test drive',b]}).concat((sv.upcoming||[]).map(function(b){return['Service',b]})).slice(0,8).map(function(x){var b=x[1];return'<tr><td>'+esc(String(b.at||b.date||'').replace('T',' '))+'</td><td>'+x[0]+'</td><td>'+esc(b.customer&&b.customer.name||b.name||'')+'</td></tr>'}).join('')||empty(3,'No upcoming bookings.'))+'</table>'}},
+ '<h3>Upcoming</h3><table><tr><th>When</th><th>Type</th><th>Customer</th></tr>'+((tdv.upcoming||[]).map(function(b){return['Test drive',b]}).concat((sv.upcoming||[]).map(function(b){return['Service',b]})).slice(0,8).map(function(x){var b=x[1];return'<tr><td>'+esc(String(b.when||b.date||'').replace('T',' '))+'</td><td>'+x[0]+'</td><td>'+esc((b.customer&&typeof b.customer==='object'?b.customer.name:b.customer)||b.name||'')+'</td></tr>'}).join('')||empty(3,'No upcoming bookings.'))+'</table>'}},
 inventory:{label:'Inventory',count:function(){return cars().filter(function(c){return c.status==='available'}).length},render:function(){
  var l=invList(),pages=Math.max(1,Math.ceil(l.length/PAGE));if(inv.page>=pages)inv.page=pages-1;var rows=l.slice(inv.page*PAGE,inv.page*PAGE+PAGE);
  var makes=Object.keys(cars().reduce(function(a,c){a[c.make]=1;return a},{})).sort();
