@@ -9,13 +9,16 @@
   function show(car) {
     box.textContent = '';
     if (!car) { box.appendChild(el('h1', '', 'Vehicle not found')); box.appendChild(el('p', 'meta', 'Please ask a salesperson for help.')); return; }
-    if (!car.photos.length) car.photos = ['assets/site/no-photo.webp'];
-    { var g = el('div', 'gallery'); car.photos.forEach(function (p) { var i = el('img'); i.src = p; i.alt = car.year + ' ' + car.make + ' ' + car.model; i.loading = 'lazy'; g.appendChild(i); }); box.appendChild(g); }
+    var NOPHOTO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240"><rect width="400" height="240" fill="#d9dee6"/><text x="200" y="128" font-family="sans-serif" font-size="22" fill="#5b6577" text-anchor="middle">Photo coming soon</text></svg>');
+    if (!car.photos.length) car.photos = [NOPHOTO];
+    { var g = el('div', 'gallery'); car.photos.forEach(function (p) { var i = el('img'); i.src = p; i.alt = car.year + ' ' + car.make + ' ' + car.model; i.loading = 'lazy'; i.onerror = function () { this.onerror = null; this.src = NOPHOTO; }; g.appendChild(i); }); box.appendChild(g); }
     box.appendChild(el('span', 'badge ' + car.status, car.status === 'available' ? 'Available' : car.status === 'hold' ? 'On hold' : 'Sold'));
     box.appendChild(el('h1', '', [car.year, car.make, car.model, car.trim].filter(Boolean).join(' ')));
     box.appendChild(el('div', 'price', money(car.price)));
     box.appendChild(el('p', 'meta', Number(car.mileage).toLocaleString('en-US') + ' miles' + (car.color ? ' · ' + car.color : '') + ' · VIN ' + car.vin));
     if (car.features && car.features.length) box.appendChild(el('p', '', car.features.join(' · ')));
+    if (window.DDFavorites) { var fav = DDFavorites.create(), bar = el('div', 'favbar'), h = DDFavorites.heart(fav, car.vin), a = el('a', '', 'Compare'), n = el('span', 'n');
+      a.href = 'compare.html'; a.appendChild(n); DDFavorites.badge(fav, n); bar.appendChild(h); bar.appendChild(a); box.appendChild(bar); }
     form.hidden = false;
   }
   function fromLocal() { return DDInventory.create().get(vin); }

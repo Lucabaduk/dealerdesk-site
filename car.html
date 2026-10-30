@@ -3,8 +3,8 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https:; form-action 'none'; base-uri 'none'">
 <title>DealerDesk · Vehicle</title>
 <style>
-:root{--ink:#14213d;--accent:#0a7d5a;--bg:#f4f6f8;--card:#fff;--muted:#5b6577}
-@media (prefers-color-scheme:dark){:root{--ink:#e8edf5;--bg:#0e1420;--card:#18202f;--muted:#9aa6ba}}
+:root{color-scheme:light dark;--ink:#14213d;--accent:#0a7d5a;--btn:#0a7d5a;--bg:#f4f6f8;--card:#fff;--muted:#5b6577}
+@media (prefers-color-scheme:dark){:root{--ink:#e8edf5;--bg:#0e1420;--card:#18202f;--muted:#9aa6ba;--accent:#3fd1a0}}
 *{box-sizing:border-box}body{margin:0;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 main{max-width:560px;margin:0 auto;padding:16px}.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px #0002}
 .gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory}.gallery img{width:100%;max-height:280px;object-fit:cover;border-radius:10px;scroll-snap-align:start;flex:0 0 100%}
@@ -12,7 +12,9 @@ h1{font-size:1.35rem;margin:.4rem 0}.price{font-size:1.6rem;font-weight:700;colo
 .badge.hold{background:#fff1d6;color:#7a4b00}.badge.sold{background:#fde2e2;color:#8a1c1c}
 label{display:block;margin:10px 0 4px;font-weight:600}input,textarea,select{width:100%;padding:12px;font-size:16px;border:1px solid #9aa6ba66;border-radius:10px;background:transparent;color:inherit}
 .chips{display:flex;gap:8px;flex-wrap:wrap}.chips label{flex:1;margin:0;font-weight:500;border:1px solid #9aa6ba66;border-radius:10px;padding:10px;min-height:44px;text-align:center}
-.chips input{width:auto;margin-right:6px}button{width:100%;min-height:48px;margin-top:14px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:1.05rem;font-weight:600}
+.chips input{width:auto;margin-right:6px}button{width:100%;min-height:48px;margin-top:14px;border:0;border-radius:12px;background:var(--btn);color:#fff;font-size:1.05rem;font-weight:600}
+.favbar{display:flex;gap:10px;margin-top:10px}.favbar button,.favbar a{flex:1;margin:0;min-height:48px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;font-size:1rem;font-weight:600;text-decoration:none}
+.dd-heart{background:var(--card);color:#d6336c;border:1px solid #9aa6ba66}.dd-heart[aria-pressed=true]{background:#d6336c;color:#fff}.favbar a{border:1px solid #9aa6ba66;color:inherit}.favbar .n{background:var(--btn);color:#fff;border-radius:99px;padding:0 8px;font-size:.85rem}
 .hp{position:absolute;left:-9999px}.err{color:#c0392b;min-height:1.2em}.ok{color:var(--accent);font-weight:600}
 </style></head><body><main>
 <div id="car" class="card"><p class="meta">Loading vehicle…</p></div>
@@ -27,5 +29,5 @@ label{display:block;margin:10px 0 4px;font-weight:600}input,textarea,select{widt
   <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
   <button type="submit">Send</button><p id="msg" class="err" role="status"></p>
 </form></main>
-<script src="modules/store.js"></script><script src="modules/inventory.js"></script><script src="modules/leads.js"></script><script src="modules/car-page.js"></script>
+<script src="modules/store.js"></script><script src="modules/inventory.js"></script><script src="modules/leads.js"></script><script src="modules/favorites.js"></script><script src="modules/car-page.js"></script>
 </body></html>

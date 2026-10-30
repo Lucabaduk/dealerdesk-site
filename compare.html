@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>DealerDesk · Compare</title>
+<style>
+:root{color-scheme:light dark;--ink:#14213d;--bg:#f4f6f8;--card:#fff;--muted:#5b6577;--diff:#fff6d6;--best:#0a7d5a;--line:#dde2ea}
+@media (prefers-color-scheme:dark){:root{color-scheme:light dark;--ink:#e8edf5;--bg:#0e1420;--card:#18202f;--muted:#9aa6ba;--diff:#3a3214;--best:#4fd1a1;--line:#2a3446}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:12px 16px}h1{font-size:1.2rem;margin:0}
+.tools{display:flex;gap:8px}button{min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;font-size:15px}
+label.only{display:flex;align-items:center;gap:6px;min-height:44px}label.only input{width:20px;height:20px}
+.wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 8px 24px}
+table{border-collapse:separate;border-spacing:0;min-width:100%;background:var(--card);border-radius:12px}
+th,td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;min-width:130px;text-align:left}
+th.row{position:sticky;left:0;background:var(--card);min-width:96px;max-width:110px;font-weight:600;color:var(--muted);z-index:1}
+thead td img{width:100%;max-width:200px;aspect-ratio:4/3;object-fit:cover;border-radius:8px;display:block}
+thead td a{color:inherit;font-weight:600;text-decoration:none}tr.diff td{background:var(--diff)}td.best{color:var(--best);font-weight:700}
+td.miss{color:var(--muted)}.x{min-height:44px;min-width:88px;margin-top:6px;font-size:13px}.msg{padding:24px 16px;color:var(--muted)}
+.hide-same tr.same{display:none}
+</style></head><body>
+<header><h1>Compare cars</h1><div class="tools"><label class="only"><input type="checkbox" id="only"> Differences only</label><button id="share" type="button">Share</button></div></header>
+<div class="wrap" id="out"><p class="msg">Loading…</p></div>
+<script src="modules/store.js"></script><script src="modules/inventory.js"></script><script src="modules/favorites.js"></script><script src="modules/compare.js"></script><script src="modules/compare-page.js"></script>
+</body></html>

@@ -32,9 +32,13 @@
     var status = String(input.status || 'available').toLowerCase(); if (STATUSES.indexOf(status) < 0) errors.push('status');
     var condition = String(input.condition || (mileage < 500 ? 'new' : 'used')).toLowerCase(); if (CONDITIONS.indexOf(condition) < 0) errors.push('condition');
     if (errors.length) return { ok: false, errors: errors };
-    return { ok: true, car: { id: id, stock_no: stock, vin: vin, year: year, make: make, model: model, trim: S.cleanText(input.trim, 60), price: price, mileage: mileage,
+    var r0 = { id: id, stock_no: stock, vin: vin, year: year, make: make, model: model, trim: S.cleanText(input.trim, 60), price: price, mileage: mileage,
       color: S.cleanText(input.color, 30), condition: condition, status: status,
-      photos: (Array.isArray(input.photos) ? input.photos : []).map(safeUrl).filter(Boolean).slice(0, 30), features: list(input.features, 40, 60) } };
+      photos: (Array.isArray(input.photos) ? input.photos : []).map(safeUrl).filter(Boolean).slice(0, 30), features: list(input.features, 40, 60) };
+    // optional spec fields (kept only when present & valid) for detail/compare pages
+    var car = r0; ['body', 'engine', 'transmission', 'drivetrain'].forEach(function (k) { var t = S.cleanText(input[k] != null ? input[k] : (k === 'body' ? input.body_type : null), 60); if (t) car[k] = t; });
+    [['hp', 1, 2500], ['seats', 1, 15], ['mpg_city', 1, 200], ['mpg_hwy', 1, 200], ['range_mi', 1, 1500]].forEach(function (d) { if (input[d[0]] != null && input[d[0]] !== '') { var n = num(input[d[0]], d[1], d[2], true); if (n != null) car[d[0]] = n; } });
+    return { ok: true, car: car };
   }
   function create(opts) {
     opts = opts || {}; var store = opts.storage || S.defaultStorage(), clock = opts.now || Date.now, persist = opts.persist !== false;
@@ -46,7 +50,7 @@
         INDEXED.forEach(function (f) { var k = String(c[f]).toLowerCase(); (idx[f][k] || (idx[f][k] = [])).push(i); });
         hay[i] = [c.vin, c.stock_no, c.year, c.make, c.model, c.trim, c.color, c.features.join(' ')].join(' ').toLowerCase(); }
     }
-    function save() { if (persist) try { store.setItem(KEY, JSON.stringify(cars)); } catch (e) { /* quota: keep in memory */ } }
+    function save() { if (!persist) return true; try { store.setItem(KEY, JSON.stringify(cars)); return true; } catch (e) { /* quota: keep in memory, drop stale copy so a reload doesn't show old data */ try { store.removeItem(KEY); } catch (e2) {} return false; } }
     function ingest(listIn) { var out = [], seen = {}, skipped = 0; (listIn || []).slice(0, 20000).forEach(function (c) { var r = normalize(c, clock()); if (!r.ok || seen[r.car.vin] || seen['#' + r.car.id]) { skipped++; return; } seen[r.car.vin] = seen['#' + r.car.id] = 1; out.push(r.car); }); return { cars: out, skipped: skipped }; }
     try { var raw = JSON.parse(store.getItem(KEY) || 'null'); if (Array.isArray(raw)) cars = ingest(raw).cars; } catch (e) { cars = []; }
     rebuild();
@@ -61,7 +65,7 @@
     var api = {
       STATUSES: STATUSES.slice(), size: function () { return cars.length; },
       /** Replace inventory from Helper's data file ({cars:[...]} or [...]); keeps nothing old. */
-      load: function (data) { var l = Array.isArray(data) ? data : (data && data.cars); if (!Array.isArray(l)) return { ok: false, errors: ['bad_format'] }; var r = ingest(l); cars = r.cars; rebuild(); save(); return { ok: true, count: cars.length, skipped: r.skipped }; },
+      load: function (data) { var l = Array.isArray(data) ? data : (data && data.cars); if (!Array.isArray(l)) return { ok: false, errors: ['bad_format'] }; var r = ingest(l); cars = r.cars; rebuild(); var saved = save(); return { ok: true, count: cars.length, skipped: r.skipped, saved: saved }; },
       list: function () { return cars.map(copy); },
       get: function (vinOrId) { var i = at(vinOrId); return i < 0 ? null : copy(cars[i]); },
       add: function (input) { var r = normalize(input, clock()); if (!r.ok) return r; if (byVin[r.car.vin] != null || byId[r.car.id] != null) return { ok: false, errors: ['duplicate'] };
