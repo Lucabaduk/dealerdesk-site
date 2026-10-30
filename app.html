@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src data: blob: 'self' https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
-<title>DealerDesk</title>
+<link rel="icon" href="data:,"><title>DealerDesk</title>
 <style>
 :root{--ink:#14213d;--muted:#5c677d;--line:#e3e7ee;--bg:#f6f7fb;--card:#fff;--acc:#2f5bea;--ok:#1f8a5b;--warn:#b7791f;--bad:#c0392b}
 *{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:var(--bg);display:flex;min-height:100vh}
@@ -19,7 +19,8 @@ form.row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}input,select{paddin
 .toast{position:fixed;right:18px;bottom:18px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;opacity:0;transition:.3s}.toast.on{opacity:1}
 @media(max-width:700px){body{flex-direction:column}nav{width:100%;display:flex;overflow-x:auto;padding:8px}nav h1{display:none}nav button{width:auto;white-space:nowrap}main{padding:14px}table{display:block;overflow-x:auto;white-space:nowrap}.btn,input,select,nav button{min-height:44px}input,select{font-size:16px}}
 @media(prefers-color-scheme:dark){:root{--ink:#e6e9f2;--muted:#9aa5bd;--line:#2c3550;--bg:#0f1424;--card:#171e33}nav{background:#0a0f1d}th{background:#1f2740}.btn.ghost{background:var(--card)}input,select{background:#0f1424;color:var(--ink)}.toast{background:#2f5bea}.pill,.thumb,.nophoto{background:#1f2740}}
-.muted{color:var(--muted)}.row input[type=search]{min-width:240px;flex:1}details summary{cursor:pointer;font-weight:600}.btn[disabled]{opacity:.45;cursor:default}</style></head><body>
+.muted{color:var(--muted)}.row input[type=search]{min-width:240px;flex:1}details summary{cursor:pointer;font-weight:600}.btn[disabled]{opacity:.45;cursor:default}.ta{position:relative;flex:1;min-width:240px;display:flex}.ta input{flex:1}.ta-list{display:none;position:absolute;top:100%;left:0;right:0;z-index:5;background:var(--card);border:1px solid var(--line);border-radius:6px;max-height:320px;overflow:auto;box-shadow:0 6px 18px rgba(0,0,0,.12)}.ta-item{padding:9px 12px;cursor:pointer}.ta-item:hover{background:var(--bg)}.row input[type=number][data-inv]{width:110px}
+.detail{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:22px;margin-bottom:18px}.hero-img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:10px;background:var(--line)}.thumbs{display:flex;gap:8px;margin-top:8px;overflow-x:auto}.tbtn{border:2px solid transparent;padding:0;border-radius:6px;background:none;cursor:pointer}.tbtn.on{border-color:var(--acc)}.tbtn img{width:84px;height:54px;object-fit:cover;border-radius:4px;display:block}.price{font-size:28px;font-weight:700;margin:4px 0 8px}.specs th{width:160px}.feat{columns:2;padding-left:18px}main a{color:inherit}.pill.available{background:#e3f4ec;color:var(--ok)}.pill.hold{background:#fbf0dc;color:var(--warn)}.pill.sold{background:#f8e1de;color:var(--bad)}@media(max-width:800px){.detail{grid-template-columns:1fr}.feat{columns:1}}</style></head><body>
 <nav id="nav"><h1>DealerDesk</h1></nav><main id="main"></main><div class="toast" id="toast"></div>
 <script>// DealerDesk data schema — standalone, no dependencies.
 // Every normalize* function returns a clean object or throws SchemaError.
@@ -37,6 +38,9 @@ const ENUMS = {
   serviceStatus: ['booked', 'in_progress', 'done', 'cancelled'],
   leadSource: ['website', 'walk_in', 'phone', 'referral', 'social', 'other'],
   leadStatus: ['new', 'contacted', 'qualified', 'won', 'lost'],
+  bodyType: ['sedan', 'coupe', 'hatchback', 'wagon', 'convertible', 'suv', 'pickup', 'minivan', 'van'],
+  fuelType: ['gasoline', 'diesel', 'hybrid', 'plug-in hybrid', 'electric'],
+  drivetrain: ['FWD', 'RWD', 'AWD', '4WD'],
 };
 
 const text = (v, max) => (typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v)))
@@ -113,6 +117,27 @@ function normalizeCustomer(c, field) {
   return out;
 }
 
+// Optional spec fields: only included when present and valid; a bad value throws.
+function optNum(c, k, min, max) { return c[k] == null || c[k] === '' ? {} : { [k]: num(k, c[k], min, max, true) }; }
+function optText(c, k, max) { const t = text(c[k], max); return t ? { [k]: t } : {}; }
+function optSpecs(c) {
+  const o = {
+    ...optText(c, 'description', 600),
+    ...(c.body_type ? { body_type: oneOf('body_type', c.body_type, ENUMS.bodyType) } : {}),
+    ...optText(c, 'engine', 60), ...optText(c, 'transmission', 40),
+    ...(c.drivetrain ? { drivetrain: oneOf('drivetrain', String(c.drivetrain).toLowerCase(), ENUMS.drivetrain.map(x => x.toLowerCase())).toUpperCase() } : {}),
+    ...(c.fuel_type ? { fuel_type: oneOf('fuel_type', c.fuel_type, ENUMS.fuelType) } : {}),
+    ...optNum(c, 'horsepower', 40, 2000),
+    ...optNum(c, 'mpg_city', 5, 150), ...optNum(c, 'mpg_highway', 5, 150), ...optNum(c, 'mpg_combined', 5, 150),
+    ...optNum(c, 'mpge', 20, 200), ...optNum(c, 'range_miles', 30, 700),
+    ...optNum(c, 'doors', 2, 5), ...optNum(c, 'seats', 1, 15),
+    ...optText(c, 'interior_color', 30),
+  };
+  if (o.fuel_type === 'electric' && (o.mpg_city || o.mpg_highway)) throw new SchemaError('mpg_city', 'electric cars use range_miles, not MPG');
+  return o;
+}
+const optionalSpecs = optSpecs;
+
 const YEAR_MAX = new Date().getFullYear() + 2;
 
 function normalizeCar(c) {
@@ -134,6 +159,7 @@ function normalizeCar(c) {
     status: oneOf('status', c.status, ENUMS.carStatus, 'available'),
     photos: (Array.isArray(c.photos) ? c.photos : []).map(safeUrl).filter(Boolean).slice(0, 30),
     features: list(c.features, 40, 60),
+    ...optionalSpecs(c),
   };
 }
 
@@ -197,7 +223,7 @@ function normalizeDealership(d) {
   obj(d, 'dealership');
   const arr = (v, name) => { if (v == null) return []; if (!Array.isArray(v)) throw new SchemaError(name, 'must be a list'); return v; };
   const uniq = (arr, name) => { const s = new Set(); for (const x of arr) { if (s.has(x.id)) throw new SchemaError(name, 'duplicate id ' + x.id); s.add(x.id); } return arr; };
-  const cars = uniq(arr(d.cars, 'cars').slice(0, 2000).map(normalizeCar), 'cars');
+  const cars = uniq(arr(d.cars, 'cars').slice(0, 20000).map(normalizeCar), 'cars');
   const stock = new Set(); for (const c of cars) { if (stock.has(c.stock_no)) throw new SchemaError('cars', 'duplicate stock_no ' + c.stock_no); stock.add(c.stock_no); }
   return {
     dealer_name: text(d.dealer_name, 80) || 'Our dealership',
@@ -216,6 +242,7 @@ else if (typeof window !== 'undefined') window.DealerDeskSchema = api;
 (function(){
 'use strict';
 var S=window.DealerDeskSchema,KEY='dealerdesk.v2',OLD='dealerdesk.v1',PAGE=50;
+var WL=null;try{if(window.DDLeads)WL=window.DDLeads.create()}catch(e){}
 function uid(p){return p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return'&#'+c.charCodeAt(0)+';'})}
@@ -235,7 +262,7 @@ function migrate(o){var d=blank(),bad=0;o=o||{};var st=o.settings||{};
 function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&d.schema===2)return Object.assign(blank(),d)}}catch(e){}
  try{var o=localStorage.getItem(OLD);if(o){var m=migrate(JSON.parse(o));return m}}catch(e){}var b=blank();b.firstRun=true;return b}
 var st=load();function save(){var c=Object.assign({},st);delete c.firstRun;localStorage.setItem(KEY,JSON.stringify(c))}
-function seedFromBase(){if(!st.seeded&&baseOk){st.seeded=true;st.leads=base.leads.concat(st.leads);st.test_drives=base.test_drives.concat(st.test_drives);st.service_bookings=base.service_bookings.concat(st.service_bookings)}if(!st.settings.dealer_name)st.settings.dealer_name=base.dealer_name}
+function seedFromBase(){if(!st.seeded&&baseOk){st.seeded=true;st.leads=base.leads.concat(st.leads);st.test_drives=base.test_drives.concat(st.test_drives);st.service_bookings=base.service_bookings.concat(st.service_bookings)}if(!st.settings.dealer_name&&base.dealer_name&&base.dealer_name!=='Our dealership')st.settings.dealer_name=base.dealer_name}
 var carCache=null;function cars(){if(carCache)return carCache;var rm={};st.cars_removed.forEach(function(i){rm[i]=1});
  carCache=base.cars.filter(function(c){return!rm[c.id]}).map(function(c){var o=st.car_overrides[c.id];return o?Object.assign({},c,o):c}).concat(st.cars_added.filter(function(c){return!rm[c.id]}));
  carCache.byId={};carCache.forEach(function(c){carCache.byId[c.id]=c});return carCache}
@@ -252,9 +279,17 @@ function toast(m){var t=document.getElementById('toast');t.textContent=m;t.class
 var NOPHOTO='assets/site/no-photo.webp';
 function photo(c){var p=(c.photos&&c.photos[0])||NOPHOTO;return'<img class="thumb" loading="lazy" decoding="async" alt="" src="'+esc(p)+'" data-fallback="1">'}
 function schemaErr(e){return e&&e.field?label(e.field)+': '+(e.message||'invalid'):'Could not save: '+(e&&e.message||'invalid')}
+var BODY={sedan:'Sedan',suv:'SUV',pickup:'Pickup',hatch:'Hatchback',ev:'Sedan',minivan:'Minivan',coupe:'Coupe',convertible:'Convertible',wagon:'Wagon',luxury:'Sedan',compact:'Hatchback'};
+function bodyType(c){if(c.body_type){var bt=String(c.body_type).toLowerCase();return{suv:'SUV',pickup:'Pickup',truck:'Pickup',hatchback:'Hatchback',van:'Minivan',minivan:'Minivan'}[bt]||label(bt)}var m=/cars\/([a-z]+)-/.exec((c.photos||[])[0]||'');return m&&BODY[m[1]]||'Other'}
+function fuel(c){if(c.fuel)return label(c.fuel);var t=((c.photos||[])[0]||'')+' '+c.model+' '+c.trim+' '+(c.features||[]).join(' ');return/\bev-|electric|\bEV\b/i.test(t)?'Electric':/hybrid/i.test(t)?'Hybrid':'Gasoline'}
+function describe(c){if(c.description)return c.description;return(c.condition==='new'?'Brand-new ':'Pre-owned ')+c.year+' '+c.make+' '+c.model+(c.trim?' '+c.trim:'')+(c.color?' in '+c.color.toLowerCase():'')+'. '+(c.condition==='new'?'Delivery miles only. ':c.mileage.toLocaleString()+' miles. ')+((c.features||[]).length?'Highlights: '+c.features.slice(0,4).join(', ')+'.':'')}
+/* Type-ahead: up to 5 model suggestions per matching make */
+function suggest(q){q=String(q||'').trim().toLowerCase();if(!q)return[];var mm={};cars().forEach(function(c){var k=c.make;(mm[k]=mm[k]||{})[c.model]=(mm[k][c.model]||0)+1});var out=[];
+ Object.keys(mm).sort().forEach(function(mk){var models=Object.keys(mm[mk]).sort(function(a,b){return mm[mk][b]-mm[mk][a]||(a<b?-1:1)});var mkHit=mk.toLowerCase().indexOf(q)===0;
+  var hits=models.filter(function(m){return mkHit||(mk+' '+m).toLowerCase().indexOf(q)>=0||m.toLowerCase().indexOf(q)===0}).slice(0,5);hits.forEach(function(m){out.push({make:mk,model:m,count:mm[mk][m]})})});return out.slice(0,25)}
 /* Inventory: minimal, swappable for coder 3's module via DealerDesk.registerView('inventory',...) */
-var inv={q:'',status:'',condition:'',make:'',sort:'newest',page:0};
-function invList(){var q=inv.q.toLowerCase();var l=cars().filter(function(c){return(!inv.status||c.status===inv.status)&&(!inv.condition||c.condition===inv.condition)&&(!inv.make||c.make===inv.make)&&(!q||(c.year+' '+c.make+' '+c.model+' '+c.trim+' '+c.vin+' '+c.stock_no+' '+c.color).toLowerCase().indexOf(q)>=0)});
+var inv={q:'',status:'',condition:'',make:'',model:'',body:'',fuel:'',pmin:'',pmax:'',ymin:'',ymax:'',mmax:'',sort:'newest',page:0};
+function invList(){var q=inv.q.toLowerCase();var l=cars().filter(function(c){return(!inv.status||c.status===inv.status)&&(!inv.condition||c.condition===inv.condition)&&(!inv.make||c.make===inv.make)&&(!inv.model||c.model===inv.model)&&(!inv.body||bodyType(c)===inv.body)&&(!inv.fuel||fuel(c)===inv.fuel)&&(inv.pmin===''||c.price_cents>=inv.pmin*100)&&(inv.pmax===''||c.price_cents<=inv.pmax*100)&&(inv.ymin===''||c.year>=+inv.ymin)&&(inv.ymax===''||c.year<=+inv.ymax)&&(inv.mmax===''||c.mileage<=+inv.mmax)&&(!q||(c.year+' '+c.make+' '+c.model+' '+c.trim+' '+c.vin+' '+c.stock_no+' '+c.color).toLowerCase().indexOf(q)>=0)});
  var f={price_asc:function(a,b){return a.price_cents-b.price_cents},price_desc:function(a,b){return b.price_cents-a.price_cents},year_desc:function(a,b){return b.year-a.year},mileage_asc:function(a,b){return a.mileage-b.mileage},newest:null}[inv.sort];return f?l.slice().sort(f):l}
 var views={
 dashboard:{label:'Dashboard',render:function(){var cs=cars(),closed=st.deals.filter(function(d){return d.status==='closed'}),rev=closed.reduce(function(a,d){return a+d.price_cents},0);
@@ -265,10 +300,10 @@ dashboard:{label:'Dashboard',render:function(){var cs=cars(),closed=st.deals.fil
 inventory:{label:'Inventory',count:function(){return cars().filter(function(c){return c.status==='available'}).length},render:function(){
  var l=invList(),pages=Math.max(1,Math.ceil(l.length/PAGE));if(inv.page>=pages)inv.page=pages-1;var rows=l.slice(inv.page*PAGE,inv.page*PAGE+PAGE);
  var makes=Object.keys(cars().reduce(function(a,c){a[c.make]=1;return a},{})).sort();
- return'<h2>Inventory</h2><div class="row" id="invbar"><input type="search" data-inv="q" placeholder="Search make, model, VIN, stock #" value="'+esc(inv.q)+'"><select data-inv="status">'+opts(S.ENUMS.carStatus,label,inv.status,'Any status')+'</select><select data-inv="condition">'+opts(S.ENUMS.condition,label,inv.condition,'New & used')+'</select><select data-inv="make">'+opts(makes,String,inv.make,'All makes')+'</select><select data-inv="sort">'+opts(['newest','price_asc','price_desc','year_desc','mileage_asc'],function(s){return{newest:'Sort: default',price_asc:'Price: low to high',price_desc:'Price: high to low',year_desc:'Year: newest',mileage_asc:'Mileage: lowest'}[s]},inv.sort)+'</select></div>'+
+ return'<h2>Inventory</h2><div class="row" id="invbar"><div class="ta"><input type="search" data-inv="q" autocomplete="off" aria-autocomplete="list" placeholder="Search make, model, VIN, stock #" value="'+esc(inv.q)+'"><div class="ta-list" id="ta" role="listbox"></div></div><select data-inv="status">'+opts(S.ENUMS.carStatus,label,inv.status,'Any status')+'</select><select data-inv="condition">'+opts(S.ENUMS.condition,label,inv.condition,'New & used')+'</select><select data-inv="make">'+opts(makes,String,inv.make,'All makes')+'</select><select data-inv="body">'+opts(['Sedan','SUV','Pickup','Hatchback','Coupe','Convertible','Wagon','Minivan','Other'],String,inv.body,'Any body')+'</select><select data-inv="fuel">'+opts(['Gasoline','Hybrid','Electric'],String,inv.fuel,'Any fuel')+'</select><input data-inv="pmin" type="number" min="0" placeholder="Min $" value="'+esc(inv.pmin)+'"><input data-inv="pmax" type="number" min="0" placeholder="Max $" value="'+esc(inv.pmax)+'"><input data-inv="ymin" type="number" placeholder="Year from" value="'+esc(inv.ymin)+'"><input data-inv="ymax" type="number" placeholder="Year to" value="'+esc(inv.ymax)+'"><input data-inv="mmax" type="number" min="0" placeholder="Max miles" value="'+esc(inv.mmax)+'">'+(inv.model?'<button class="btn ghost" data-act="clrmodel">'+esc(inv.make+' '+inv.model)+' ×</button>':'')+'<button class="btn ghost" data-act="clrf">Clear filters</button><select data-inv="sort">'+opts(['newest','price_asc','price_desc','year_desc','mileage_asc'],function(s){return{newest:'Sort: default',price_asc:'Price: low to high',price_desc:'Price: high to low',year_desc:'Year: newest',mileage_asc:'Mileage: lowest'}[s]},inv.sort)+'</select></div>'+
  '<details class="card" style="margin-bottom:14px"><summary>Add a car</summary><form class="row" data-form="car" style="margin-top:10px"><input name="stock_no" placeholder="Stock #" required><input name="vin" placeholder="VIN (17)" required maxlength="17"><input name="year" type="number" placeholder="Year" required><input name="make" placeholder="Make" required><input name="model" placeholder="Model" required><input name="trim" placeholder="Trim"><input name="price" type="number" placeholder="Price" required><input name="mileage" type="number" placeholder="Mileage"><select name="condition"><option value="used">Used</option><option value="new">New</option></select><input name="photo" placeholder="Photo URL (https://)"><button class="btn">Add car</button></form></details>'+
  '<p class="muted" id="invcount">'+l.length.toLocaleString()+' cars'+(pages>1?' · page '+(inv.page+1)+' of '+pages:'')+'</p>'+
- '<table><tr><th></th><th>Vehicle</th><th>Stock #</th><th>VIN</th><th>Price</th><th>Mileage</th><th>Status</th><th></th></tr>'+(rows.length?rows.map(function(c){return'<tr data-car="'+esc(c.id)+'"><td>'+photo(c)+'</td><td>'+esc(carName(c.id))+'<br><small class="muted">'+esc(label(c.condition))+(c.color?' · '+esc(c.color):'')+'</small></td><td>'+esc(c.stock_no)+'</td><td>'+esc(c.vin)+'</td><td>'+money(c.price_cents)+'</td><td>'+c.mileage.toLocaleString()+' mi</td><td><select data-act="carstatus" data-id="'+esc(c.id)+'">'+opts(S.ENUMS.carStatus,label,c.status)+'</select></td><td><button class="btn ghost" data-act="delcar" data-id="'+esc(c.id)+'">Remove</button></td></tr>'}).join(''):empty(8,baseOk||cars().length?'No cars match these filters.':'Loading inventory…'))+'</table>'+
+ '<table><tr><th></th><th>Vehicle</th><th>Stock #</th><th>VIN</th><th>Price</th><th>Mileage</th><th>Status</th><th></th></tr>'+(rows.length?rows.map(function(c){return'<tr data-car="'+esc(c.id)+'"><td><a href="#car/'+encodeURIComponent(c.id)+'" data-open="'+esc(c.id)+'">'+photo(c)+'</a></td><td><a href="#car/'+encodeURIComponent(c.id)+'" data-open="'+esc(c.id)+'">'+esc(carName(c.id))+'</a><br><small class="muted">'+esc(label(c.condition))+(c.color?' · '+esc(c.color):'')+'</small></td><td>'+esc(c.stock_no)+'</td><td>'+esc(c.vin)+'</td><td>'+money(c.price_cents)+'</td><td>'+c.mileage.toLocaleString()+' mi</td><td><select data-act="carstatus" data-id="'+esc(c.id)+'">'+opts(S.ENUMS.carStatus,label,c.status)+'</select></td><td><button class="btn ghost" data-act="delcar" data-id="'+esc(c.id)+'">Remove</button></td></tr>'}).join(''):empty(8,baseOk||cars().length?'No cars match these filters.':'Loading inventory…'))+'</table>'+
  (pages>1?'<div class="row pager" style="margin-top:12px"><button class="btn ghost" data-act="pg" data-id="-1"'+(inv.page?'':' disabled')+'>Previous</button><button class="btn ghost" data-act="pg" data-id="1"'+(inv.page<pages-1?'':' disabled')+'>Next</button></div>':'')}},
 leads:{label:'Leads',count:function(){return st.leads.filter(function(l){return l.status==='new'}).length},render:function(){var av=cars().filter(function(c){return c.status!=='sold'}).slice(0,500);if(preCar&&car(preCar)&&av.indexOf(car(preCar))<0)av.unshift(car(preCar));
  return'<h2>Leads</h2><form class="row" data-form="lead"><input name="name" placeholder="Name" required><input name="phone" type="tel" placeholder="Phone"><input name="email" type="email" placeholder="Email"><select name="interest_car_id">'+opts(av,function(c){return carName(c.id)+' · '+c.stock_no},'', 'Vehicle of interest')+'</select><select name="source">'+opts(S.ENUMS.leadSource,label,'walk_in')+'</select><input name="notes" placeholder="Notes"><button class="btn">Add lead</button></form>'+
@@ -283,10 +318,18 @@ deals:{label:'Deals',count:function(){return st.deals.filter(function(d){return 
  return'<h2>Deals</h2><form class="row" data-form="deal"><select name="car_id" required>'+opts(avail,function(c){return carName(c.id)+' · '+c.stock_no+' · '+money(c.price_cents)},'','Vehicle')+'</select><input name="buyer" placeholder="Buyer" required><input name="price" type="number" min="0" step="1" placeholder="Sale price" required><select name="staff_id">'+opts(st.staff,function(s){return s.name},'','Salesperson')+'</select><button class="btn">Start deal</button></form>'+
  '<table><tr><th>Date</th><th>Vehicle</th><th>Buyer</th><th>Price</th><th>Tax</th><th>Total</th><th>Salesperson</th><th>Status</th><th></th></tr>'+(st.deals.length?st.deals.map(function(d){var tax=Math.round(d.price_cents*tr/100);return'<tr data-deal="'+esc(d.id)+'"><td>'+esc(d.date)+'</td><td>'+esc(carName(d.car_id))+'</td><td>'+esc(d.buyer)+'</td><td>'+money(d.price_cents)+'</td><td>'+money(tax)+'</td><td>'+money(d.price_cents+tax)+'</td><td>'+esc(staff(d.staff_id))+'</td><td><span class="pill '+esc(d.status)+'">'+esc(label(d.status))+'</span></td><td>'+(d.status==='pending'?'<button class="btn" data-act="closedeal" data-id="'+esc(d.id)+'">Close</button> <button class="btn ghost" data-act="lostdeal" data-id="'+esc(d.id)+'">Lost</button>':'')+'</td></tr>'}).join(''):empty(9,'No deals yet. Start one above.'))+'</table>'}},
 staff:{label:'Staff',render:function(){return'<h2>Staff</h2><form class="row" data-form="staff"><input name="name" placeholder="Name" required maxlength="80"><select name="role">'+opts(['Sales','Sales Manager','Service Advisor','Finance'],String,'Sales')+'</select><button class="btn">Add staff</button></form><table><tr><th>Name</th><th>Role</th><th>Deals closed</th><th></th></tr>'+(st.staff.length?st.staff.map(function(s){return'<tr><td>'+esc(s.name)+'</td><td>'+esc(s.role)+'</td><td>'+st.deals.filter(function(d){return d.staff_id===s.id&&d.status==='closed'}).length+'</td><td><button class="btn ghost" data-act="delstaff" data-id="'+esc(s.id)+'">Remove</button></td></tr>'}).join(''):empty(4,'No staff yet.'))+'</table>'}},
+car:{label:'Car',hidden:true,render:function(){var c=car(detailId);if(!c)return'<h2>Car</h2><p class="muted">'+(baseOk?'This car is no longer in inventory.':'Loading…')+'</p><button class="btn ghost" data-view="inventory">Back to inventory</button>';
+ var ph=c.photos.length?c.photos:[NOPHOTO],i=Math.min(galIdx,ph.length-1);
+ var specs=[['Stock #',c.stock_no],['VIN',c.vin],['Year',c.year],['Make',c.make],['Model',c.model],['Trim',c.trim||'—'],['Body',bodyType(c)],['Fuel',fuel(c)],['Condition',label(c.condition)],['Mileage',c.mileage.toLocaleString()+' mi'],['Color',c.color||'—'],['Status',label(c.status)]];
+ return'<p><button class="btn ghost" data-view="inventory">‹ Back to inventory</button></p><div class="detail"><div class="gallery"><img class="hero-img" alt="'+esc(carName(c.id))+'" src="'+esc(ph[i])+'" data-fallback="1">'+(ph.length>1?'<div class="thumbs">'+ph.map(function(p,j){return'<button class="tbtn'+(j===i?' on':'')+'" data-act="gal" data-id="'+j+'" aria-label="Photo '+(j+1)+'"><img loading="lazy" alt="" src="'+esc(p)+'" data-fallback="1"></button>'}).join('')+'</div>':'')+'</div>'+
+ '<div class="info"><h2>'+esc(carName(c.id))+'</h2><div class="price">'+money(c.price_cents)+'</div><p><span class="pill '+esc(c.status)+'">'+esc(label(c.status))+'</span></p><p>'+esc(describe(c))+'</p>'+
+ '<div class="row" id="car-actions"><button class="btn" data-act="order" data-id="'+esc(c.id)+'"'+(c.status==='sold'?' disabled':'')+'>Order this car</button><button class="btn ghost" data-act="tdbook" data-id="'+esc(c.id)+'">Book test drive</button><button class="btn ghost" data-act="favorite" data-id="'+esc(c.id)+'" data-mount="favorite">Save</button><button class="btn ghost" data-act="compare" data-id="'+esc(c.id)+'" data-mount="compare">Compare</button></div><div id="dd-mount-order" data-car="'+esc(c.id)+'"></div><div id="dd-mount-tradein" data-car="'+esc(c.id)+'"></div></div></div>'+
+ '<h3>Specs</h3><table class="specs">'+specs.map(function(r){return'<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>'}).join('')+'</table>'+((c.features||[]).length?'<h3>Features</h3><ul class="feat">'+c.features.map(function(f){return'<li>'+esc(f)+'</li>'}).join('')+'</ul>':'')}},
 settings:{label:'Settings',render:function(){var s=st.settings;return'<h2>Settings</h2><form class="card" data-form="settings" style="max-width:460px;display:grid;gap:10px"><label>Dealership name<br><input name="dealer_name" maxlength="80" value="'+esc(s.dealer_name)+'" style="width:100%"></label><label>Currency<br><select name="currency">'+opts(['USD','CAD','EUR','GBP','BRL'],String,s.currency)+'</select></label><label>Sales tax %<br><input name="tax_rate" type="number" step="0.01" min="0" max="30" value="'+esc(s.tax_rate)+'"></label><label><input type="checkbox" name="sound"'+(s.sound?' checked':'')+'> Soft alert chime for new leads and bookings</label><div><button class="btn">Save settings</button> <button type="button" class="btn ghost" data-act="export">Export data</button> <button type="button" class="btn ghost" data-act="reset">Reset to sample data</button></div></form>'}}
 };
-var cur='dashboard',preCar='';
-function render(){document.getElementById('nav').innerHTML='<h1>'+esc(st.settings.dealer_name||'DealerDesk')+'</h1>'+Object.keys(views).map(function(k){var v=views[k],n=v.count?v.count():0;return'<button data-view="'+k+'"'+(k===cur?' class="on"':'')+'><span>'+esc(v.label)+'</span>'+(n?'<span class="badge">'+n.toLocaleString()+'</span>':'')+'</button>'}).join('');
+var cur='dashboard',preCar='',detailId='',galIdx=0;
+function openCar(id){detailId=id;galIdx=0;cur='car';if(location.hash!=='#car/'+encodeURIComponent(id))history.replaceState(null,'','#car/'+encodeURIComponent(id));render();window.scrollTo&&window.scrollTo(0,0);DD.emit('car',id)}
+function render(){document.getElementById('nav').innerHTML='<h1>'+esc(st.settings.dealer_name||'DealerDesk')+'</h1>'+Object.keys(views).filter(function(k){return!views[k].hidden}).map(function(k){var v=views[k],n=v.count?v.count():0;return'<button data-view="'+k+'"'+(k===cur||(cur==='car'&&k==='inventory')?' class="on"':'')+'><span>'+esc(v.label)+'</span>'+(n?'<span class="badge">'+n.toLocaleString()+'</span>':'')+'</button>'}).join('');
  document.getElementById('main').innerHTML=views[cur].render();
  if(cur==='leads'&&preCar){var sel=document.querySelector('[data-form=lead] [name=interest_car_id]');if(!car(preCar))return DD.emit('render',cur);if(sel)sel.value=preCar;var so=document.querySelector('[data-form=lead] [name=source]');if(so)so.value='other';var no=document.querySelector('[data-form=lead] [name=notes]');if(no)no.value='QR code';preCar=''}
  DD.emit('render',cur)}
@@ -304,14 +347,25 @@ var add={
 function setCar(id,patch){var c=car(id);if(!c)return;var n=S.normalizeCar(Object.assign({},c,patch,{price:(patch.price_cents!=null?patch.price_cents:c.price_cents)/100}));
  var a=st.cars_added.findIndex(function(x){return x.id===id});if(a>=0)st.cars_added[a]=n;else st.car_overrides[id]=Object.assign(st.car_overrides[id]||{},{status:n.status,price_cents:n.price_cents});dirty()}
 document.addEventListener('submit',function(e){var f=e.target,k=f.getAttribute('data-form');if(!add[k])return;e.preventDefault();try{add[k](fd(f),f)}catch(err){toast(schemaErr(err));return}save();render();toast('Saved')});
-var qT;document.addEventListener('input',function(e){var k=e.target.getAttribute('data-inv');if(k!=='q')return;inv.q=e.target.value;inv.page=0;clearTimeout(qT);qT=setTimeout(function(){render();var s=document.querySelector('[data-inv=q]');if(s){s.focus();s.setSelectionRange(s.value.length,s.value.length)}},150)});
+function showTA(q){var box=document.getElementById('ta');if(!box)return;var l=suggest(q);box.innerHTML=l.map(function(x,i){return'<div class="ta-item" role="option" data-make="'+esc(x.make)+'" data-model="'+esc(x.model)+'"><b>'+esc(x.make)+'</b> '+esc(x.model)+' <span class="muted">'+x.count+'</span></div>'}).join('');box.style.display=l.length?'block':'none'}
+var qT;document.addEventListener('input',function(e){var k=e.target.getAttribute('data-inv');if(k!=='q')return;var val=e.target.value;showTA(val);clearTimeout(qT);qT=setTimeout(function(){inv.q=val;inv.page=0;var p=document.querySelector('[data-inv=q]'),pos=p?p.selectionStart:0;render();var s=document.querySelector('[data-inv=q]');if(s&&p){s.focus();s.setSelectionRange(pos,pos);showTA(val)}},250)});
+document.addEventListener('mousedown',function(e){var it=e.target.closest('.ta-item');if(!it)return;e.preventDefault();pickTA(it)});
+function pickTA(it){inv.make=it.getAttribute('data-make');inv.model=it.getAttribute('data-model');inv.q='';inv.page=0;render()}
 document.addEventListener('change',function(e){var t=e.target,a=t.getAttribute('data-act'),id=t.getAttribute('data-id'),ik=t.getAttribute('data-inv');
- if(ik&&ik!=='q'){inv[ik]=t.value;inv.page=0;render();return}
+ if(ik&&ik!=='q'){inv[ik]=t.value;if(ik==='make')inv.model='';inv.page=0;render();return}
  try{if(a==='carstatus')setCar(id,{status:t.value});else if(a==='leadstatus'){var l=st.leads.find(function(x){return x.id===id});l.status=S.normalizeLead(Object.assign({},l,{status:t.value})).status}
  else if(a==='bkstatus'){var arr=t.getAttribute('data-k')==='td'?st.test_drives:st.service_bookings,b=arr.find(function(x){return x.id===id});b.status=t.value}else return}catch(err){toast(schemaErr(err));render();return}save();render()});
 document.addEventListener('error',function(e){var t=e.target;if(t.tagName==='IMG'&&t.getAttribute('data-fallback')&&t.getAttribute('src')!==NOPHOTO)t.src=NOPHOTO},true);
-document.addEventListener('click',function(e){var b=e.target.closest('[data-view],[data-act]');if(!b||b.tagName==='SELECT')return;var v=b.getAttribute('data-view');if(v){cur=v;render();return}
+document.addEventListener('click',function(e){var op0=e.target.closest('[data-open]');if(op0){e.preventDefault();openCar(op0.getAttribute('data-open'));return}var b=e.target.closest('[data-view],[data-act]');if(!b||b.tagName==='SELECT')return;var v=b.getAttribute('data-view');if(v){cur=v;render();return}
  var a=b.getAttribute('data-act'),id=b.getAttribute('data-id'),d;
+ var op=e.target.closest('[data-open]');if(op){e.preventDefault();openCar(op.getAttribute('data-open'));return}
+ var ti=e.target.closest('.ta-item');if(ti){pickTA(ti);return}
+ if(a==='gal'){galIdx=+id;render();return}
+ if(a==='clrmodel'){inv.model='';inv.page=0;render();return}
+ if(a==='clrf'){Object.keys(inv).forEach(function(k){if(k!=='sort')inv[k]=k==='page'?0:''});render();return}
+ if(a==='order'){if(window.DDOrder&&typeof window.DDOrder.open==='function')window.DDOrder.open(id);else{preCar=id;cur='leads';render();toast('Ordering opens soon. Add the buyer as a lead for now.')}return}
+ if(a==='tdbook'){if(window.DDBooking&&typeof window.DDBooking.open==='function')window.DDBooking.open(id);else{cur='bookings';render();var sl=document.querySelector('[data-form=testdrive] [name=car_id]');if(sl)sl.value=id}return}
+ if(a==='favorite'||a==='compare'){var api=a==='favorite'?window.DDFavorites:window.DDCompare;if(api&&typeof api.toggle==='function')api.toggle(id);DD.emit(a,id);return}
  if(a==='pg'){inv.page+=+id;render();window.scrollTo&&window.scrollTo(0,0);return}
  if(a==='closedeal'||a==='lostdeal'){d=st.deals.find(function(x){return x.id===id});d.status=a==='closedeal'?'closed':'lost';setCar(d.car_id,{status:a==='closedeal'?'sold':'available'})}
  else if(a==='delcar'){st.cars_removed.push(id);dirty()}
@@ -322,11 +376,12 @@ document.addEventListener('click',function(e){var b=e.target.closest('[data-view
 var subs={};
 var DD=window.DealerDesk={schema:S,get state(){return st},cars:cars,car:car,save:save,render:render,views:views,inventory:inv,chime:chime,uid:uid,toast:toast,
  on:function(ev,fn){(subs[ev]=subs[ev]||[]).push(fn)},emit:function(ev,x){(subs[ev]||[]).forEach(function(fn){try{fn(x)}catch(e){}})},
- registerView:function(k,v){views[k]=v;render()},setCar:function(id,p){setCar(id,p);save();render()},
+ registerView:function(k,v){views[k]=v;render()},openCar:openCar,suggest:suggest,bodyType:bodyType,fuel:fuel,setCar:function(id,p){setCar(id,p);save();render()},
  addLead:function(o){var l=S.normalizeLead(Object.assign({id:uid('ld'),status:'new'},o,{interest_car_id:o.interest_car_id||null}),cars());st.leads.unshift(l);save();chime();DD.emit('lead',l);render();return l},
  addTestDrive:function(o){var t=S.normalizeTestDrive(Object.assign({id:uid('td'),status:'requested'},o),cars());st.test_drives.push(t);save();chime();DD.emit('booking',t);render();return t},
  addServiceBooking:function(o){var s=S.normalizeServiceBooking(Object.assign({id:uid('sv'),status:'booked'},o));st.service_bookings.push(s);save();chime();DD.emit('booking',s);render();return s},
- loadBase:function(raw){try{base=S.normalizeDealership(raw);baseOk=true}catch(err){toast('Inventory file problem: '+schemaErr(err))}seedFromBase();dirty();save();render()}};
+ loadBase:function(raw){try{if(Array.isArray(raw))raw={cars:raw};raw=Object.assign({},raw,{cars:(raw.cars||[]).map(function(c){return c&&c.price==null&&c.price_cents!=null?Object.assign({},c,{price:c.price_cents/100}):c})});var nb=S.normalizeDealership(raw);base=nb;baseOk=true}catch(err){toast('Inventory file problem: '+schemaErr(err))}seedFromBase();dirty();save();render()}};
+var hm=/^#car\/(.+)$/.exec(location.hash);if(hm){detailId=decodeURIComponent(hm[1]);cur='car'}
 if(/^#lead/.test(location.hash)){cur='leads';var m=/[?&]car=([^&]+)/.exec(location.hash);if(m)preCar=decodeURIComponent(m[1])}
 render();
 var src=(document.querySelector('meta[name=dd-cars]')||{}).content||'cars.json';

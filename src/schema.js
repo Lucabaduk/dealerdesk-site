@@ -14,6 +14,9 @@ const ENUMS = {
   serviceStatus: ['booked', 'in_progress', 'done', 'cancelled'],
   leadSource: ['website', 'walk_in', 'phone', 'referral', 'social', 'other'],
   leadStatus: ['new', 'contacted', 'qualified', 'won', 'lost'],
+  bodyType: ['sedan', 'coupe', 'hatchback', 'wagon', 'convertible', 'suv', 'pickup', 'minivan', 'van'],
+  fuelType: ['gasoline', 'diesel', 'hybrid', 'plug-in hybrid', 'electric'],
+  drivetrain: ['FWD', 'RWD', 'AWD', '4WD'],
 };
 
 const text = (v, max) => (typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v)))
@@ -90,6 +93,27 @@ function normalizeCustomer(c, field) {
   return out;
 }
 
+// Optional spec fields: only included when present and valid; a bad value throws.
+function optNum(c, k, min, max) { return c[k] == null || c[k] === '' ? {} : { [k]: num(k, c[k], min, max, true) }; }
+function optText(c, k, max) { const t = text(c[k], max); return t ? { [k]: t } : {}; }
+function optSpecs(c) {
+  const o = {
+    ...optText(c, 'description', 600),
+    ...(c.body_type ? { body_type: oneOf('body_type', c.body_type, ENUMS.bodyType) } : {}),
+    ...optText(c, 'engine', 60), ...optText(c, 'transmission', 40),
+    ...(c.drivetrain ? { drivetrain: oneOf('drivetrain', String(c.drivetrain).toLowerCase(), ENUMS.drivetrain.map(x => x.toLowerCase())).toUpperCase() } : {}),
+    ...(c.fuel_type ? { fuel_type: oneOf('fuel_type', c.fuel_type, ENUMS.fuelType) } : {}),
+    ...optNum(c, 'horsepower', 40, 2000),
+    ...optNum(c, 'mpg_city', 5, 150), ...optNum(c, 'mpg_highway', 5, 150), ...optNum(c, 'mpg_combined', 5, 150),
+    ...optNum(c, 'mpge', 20, 200), ...optNum(c, 'range_miles', 30, 700),
+    ...optNum(c, 'doors', 2, 5), ...optNum(c, 'seats', 1, 15),
+    ...optText(c, 'interior_color', 30),
+  };
+  if (o.fuel_type === 'electric' && (o.mpg_city || o.mpg_highway)) throw new SchemaError('mpg_city', 'electric cars use range_miles, not MPG');
+  return o;
+}
+const optionalSpecs = optSpecs;
+
 const YEAR_MAX = new Date().getFullYear() + 2;
 
 function normalizeCar(c) {
@@ -111,6 +135,7 @@ function normalizeCar(c) {
     status: oneOf('status', c.status, ENUMS.carStatus, 'available'),
     photos: (Array.isArray(c.photos) ? c.photos : []).map(safeUrl).filter(Boolean).slice(0, 30),
     features: list(c.features, 40, 60),
+    ...optionalSpecs(c),
   };
 }
 
@@ -174,7 +199,7 @@ function normalizeDealership(d) {
   obj(d, 'dealership');
   const arr = (v, name) => { if (v == null) return []; if (!Array.isArray(v)) throw new SchemaError(name, 'must be a list'); return v; };
   const uniq = (arr, name) => { const s = new Set(); for (const x of arr) { if (s.has(x.id)) throw new SchemaError(name, 'duplicate id ' + x.id); s.add(x.id); } return arr; };
-  const cars = uniq(arr(d.cars, 'cars').slice(0, 2000).map(normalizeCar), 'cars');
+  const cars = uniq(arr(d.cars, 'cars').slice(0, 20000).map(normalizeCar), 'cars');
   const stock = new Set(); for (const c of cars) { if (stock.has(c.stock_no)) throw new SchemaError('cars', 'duplicate stock_no ' + c.stock_no); stock.add(c.stock_no); }
   return {
     dealer_name: text(d.dealer_name, 80) || 'Our dealership',

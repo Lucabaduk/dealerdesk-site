@@ -7,7 +7,7 @@ function boot(o={}){const d=new JSDOM(html,{runScripts:'dangerously',url:'https:
 (async()=>{
 let w=boot();await tick();let doc=w.document,DD=w.DealerDesk;const nav=v=>doc.querySelector('[data-view="'+v+'"]').click();
 function submit(k,vals){const f=doc.querySelector('[data-form="'+k+'"]');for(const n in vals){f.elements[n].value=vals[n]}f.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}))}
-ok(DD.cars().length===carsJson.cars.length,'cars loaded from cars.json');ok(DD.state.leads.length===carsJson.leads.length,'leads seeded');
+ok(DD.cars().length===carsJson.cars.length,'cars loaded from cars.json');ok(DD.state.leads.length===(carsJson.leads||[]).length,'leads seeded');
 ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(html),'no emoji');ok(!w.__f.some(u=>u.startsWith('version')),'no poll without watch');
 nav('inventory');const imgs=[...doc.querySelectorAll('img.thumb')];ok(imgs.length===Math.min(50,carsJson.cars.length)&&imgs.every(i=>i.getAttribute('loading')==='lazy'),'lazy thumbs, paged');
 ok(imgs.every(i=>/^assets\//.test(i.getAttribute('src'))),'photos or no-photo.webp');
@@ -28,8 +28,8 @@ nav('deals');submit('deal',{car_id:c.id,buyer:'Pat',price:14500,staff_id:'st-2'}
 doc.querySelector('[data-act=closedeal][data-id="'+d.id+'"]').click();ok(DD.car(c.id).status==='sold'&&doc.querySelector('.pill.closed'),'close -> sold');
 nav('dashboard');ok(doc.querySelector('[data-kpi="Cars sold"] b').textContent==='1','dashboard sold');
 // leads + bookings through schema
-nav('leads');submit('lead',{name:'Q',phone:'12'});ok(DD.state.leads.length===carsJson.leads.length,'bad phone rejected');
-submit('lead',{name:'Q',phone:'(313) 555-0100'});ok(DD.state.leads.length===carsJson.leads.length+1,'lead added');
+nav('leads');submit('lead',{name:'Q',phone:'12'});ok(DD.state.leads.length===(carsJson.leads||[]).length,'bad phone rejected');
+submit('lead',{name:'Q',phone:'(313) 555-0100'});ok(DD.state.leads.length===(carsJson.leads||[]).length+1,'lead added');
 let ev=0;DD.on('booking',()=>ev++);DD.addServiceBooking({customer:{name:'Z',phone:'3135550100'},vehicle:{year:2018,make:'A',model:'B'},service_type:'tires',at:'2026-11-03T09:00'});ok(ev===1,'booking hook');
 let threw=false;try{DD.addTestDrive({customer:{name:'Z'},car_id:c.id,at:'2026-11-03T09:00'})}catch(e){threw=!!e.field}ok(threw,'testdrive validates');
 nav('staff');submit('staff',{name:'New Rep',role:'Finance'});ok(DD.state.staff.length===4,'staff');
@@ -47,4 +47,18 @@ let w5=boot({hash:'#lead?car='+carsJson.cars[1].id});await tick();ok(w5.document
 // watch poll
 let w6=boot({q:'?watch=1'});await tick();ok(w6.__f.some(u=>u.startsWith('version.json?t=')),'watch polls version.json');
 const idx=fs.readFileSync(R+'/index.html','utf8');ok(/app\.html/.test(idx)&&/watch=1/.test(idx)&&!/TableTop/i.test(idx+html),'site ok, no TableTop');
+// type-ahead, filters, detail
+{let w7=boot();await tick();const d7=w7.document,D7=w7.DealerDesk;const mk=carsJson.cars[0].make;
+ const sg=D7.suggest(mk.slice(0,2));ok(sg.length>0&&sg.filter(x=>x.make===mk).length<=5,'typeahead <=5 per make');
+ d7.querySelector('[data-view=inventory]').click();const q=d7.querySelector('[data-inv=q]');q.value=mk.slice(0,3);q.dispatchEvent(new w7.Event('input',{bubbles:true}));ok(d7.querySelectorAll('.ta-item').length>0,'suggest list shown');
+ d7.querySelector('.ta-item').dispatchEvent(new w7.MouseEvent('mousedown',{bubbles:true}));ok(D7.inventory.model&&[...d7.querySelectorAll('tr[data-car]')].length>0,'pick suggestion filters model');
+ d7.querySelector('[data-act=clrf]').click();const pm=d7.querySelector('[data-inv=pmax]');pm.value='30000';pm.dispatchEvent(new w7.Event('change',{bubbles:true}));
+ ok([...d7.querySelectorAll('tr[data-car]')].length===carsJson.cars.filter(c=>(c.price!=null?c.price:c.price_cents/100)<=30000).length,'price filter');
+ const fb=d7.querySelector('[data-inv=fuel]');fb.value='Electric';fb.dispatchEvent(new w7.Event('change',{bubbles:true}));ok(d7.querySelectorAll('tr[data-car]').length>=0,'fuel filter runs');
+ d7.querySelector('[data-act=clrf]').click();const id=carsJson.cars[0].id;d7.querySelector('[data-open="'+id+'"]').click();
+ ok(d7.querySelector('.hero-img')&&d7.querySelector('.specs')&&/VIN/.test(d7.querySelector('.specs').textContent),'detail page');
+ let got=null;w7.DDOrder={open:x=>got=x};d7.querySelector('[data-act=order]').click();ok(got===id,'DDOrder hook');
+ let fav=null;w7.DDFavorites={toggle:x=>fav=x};d7.querySelector('[data-act=favorite]').click();ok(fav===id,'favorites hook');
+ delete w7.DDOrder;d7.querySelector('[data-act=order]').click();ok(D7.state&&d7.querySelector('[data-form=lead]'),'order fallback to lead');
+ let w8=boot({hash:'#car/'+id});await tick();ok(w8.document.querySelector('.hero-img'),'deep link to car');}
 console.log(pass+' passed, '+fail+' failed');process.exit(fail?1:0)})();
