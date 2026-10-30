@@ -128,7 +128,7 @@ function normalizeCar(c) {
     make: req('make', c.make, 40),
     model: req('model', c.model, 60),
     trim: text(c.trim, 60),
-    price_cents: Math.round(num('price', c.price, 0, 10000000) * 100),
+    price_cents: (c.price == null && c.price_cents != null) ? num('price_cents', c.price_cents, 0, 1000000000, true) : Math.round(num('price', c.price, 0, 10000000) * 100),
     mileage,
     color: text(c.color, 30),
     condition,
