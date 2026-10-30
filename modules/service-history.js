@@ -12,8 +12,14 @@
   function nEmail(e) { e = str(e, 120).trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : ''; }
   function nName(n) { return str(n, 80).trim().toLowerCase().replace(/\s+/g, ' '); }
   function parse(get, k) { try { var r = get(k); if (!r) return null; var p = JSON.parse(r); return obj(p); } catch (e) { return null; } }
-  function toTime(d) { if (typeof d === 'number' && isFinite(d)) return d; var s = str(d, 40); if (!s) return NaN; var t = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T12:00' : s); return t; }
-  function cents(v) { v = +v; return isFinite(v) && v >= 0 ? Math.round(v) : null; }
+  var MAXT = 8.64e15;
+  function toTime(d) { var t;
+    if (typeof d === 'number') t = d;
+    else { var s = str(d, 40); if (!s) return NaN; var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+      if (m) { var dt = new Date(+m[1], +m[2] - 1, +m[3]); if (dt.getFullYear() !== +m[1] || dt.getMonth() !== +m[2] - 1 || dt.getDate() !== +m[3]) return NaN; }
+      t = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T12:00' : s); }
+    return isFinite(t) && Math.abs(t) <= MAXT ? t : NaN; }
+  function cents(v) { v = +v; return isFinite(v) && v >= 0 && v <= 1e13 ? Math.round(v) : null; }
   function lab(s) { return str(s, 40).replace(/[_-]/g, ' ').replace(/^./, function (x) { return x.toUpperCase(); }); }
 
   function collect(o) {
@@ -44,15 +50,17 @@
     }
     var od = parse(get, 'dealerdesk_orders');
     if (od) arr(od.orders).forEach(function (x) { var car = carOf(x.carId, x.stock, x.carLabel), p = +x.price;
-      add(x, { kind: 'Order', date: x.createdAt, stock: car.stock, model: car.model, work: (x.kind === 'reserve' ? 'Reservation' : 'Order request') + (x.code ? ' ' + str(x.code, 20) : ''), cost: isFinite(p) && p >= 0 ? Math.round(p * 100) : null, status: lab(x.status) }); });
+      add(x, { kind: 'Order', date: x.createdAt, stock: car.stock, model: car.model, work: (x.kind === 'reserve' ? 'Reservation' : 'Order request') + (x.code ? ' ' + str(x.code, 20) : ''), cost: cents(isFinite(p) && p >= 0 ? p * 100 : NaN), status: lab(x.status) }); });
     // union-find over phone/email/name keys
     var parent = Object.create(null);
     function find(k) { while (parent[k] !== k) { parent[k] = parent[parent[k]]; k = parent[k]; } return k; }
     function uni(a, b) { a = find(a); b = find(b); if (a !== b) parent[b] = a; }
     ev.forEach(function (e, i) { var ks = [], d = digits(e.who.phone), m = e.who.email, n = nName(e.who.name);
       if (d) ks.push('p:' + d); if (m) ks.push('e:' + m); if (!d && !m && n) ks.push('n:' + n);
-      if (n && (d || m)) ks.push('n:' + n);
       ks.forEach(function (k) { if (!(k in parent)) parent[k] = k; }); e.keys = ks; for (var j = 1; j < ks.length; j++) uni(ks[0], ks[j]); });
+    var nameRoots = Object.create(null);
+    ev.forEach(function (e) { var n = nName(e.who.name); if (n && (digits(e.who.phone) || e.who.email)) { var r = find(e.keys[0]), x = nameRoots[n] || (nameRoots[n] = []); if (x.indexOf(r) < 0) x.push(r); } });
+    Object.keys(nameRoots).forEach(function (n) { var x = nameRoots[n]; if (x.length === 1 && ('n:' + n) in parent) uni(x[0], 'n:' + n); });
     var groups = Object.create(null), out = [];
     ev.forEach(function (e) { var r = find(e.keys[0]), g = groups[r];
       if (!g) { g = groups[r] = { id: '', name: '', phones: [], emails: [], events: [] }; out.push(g); }
@@ -60,8 +68,9 @@
       if (e.who.phone && g.phones.indexOf(e.who.phone) < 0 && !g.phones.some(function (p) { return digits(p) && digits(p) === digits(e.who.phone); })) g.phones.push(e.who.phone);
       if (e.who.email && g.emails.indexOf(e.who.email) < 0) g.emails.push(e.who.email);
       delete e.keys; g.events.push(e); });
+    var ids = Object.create(null);
     out.forEach(function (g) { g.events.sort(function (a, b) { return (isNaN(b.t) ? -Infinity : b.t) - (isNaN(a.t) ? -Infinity : a.t); });
-      g.id = 'c' + (digits(g.phones[0]) || g.emails[0] || nName(g.name)).replace(/[^a-z0-9@.]/g, '-');
+      var base = 'c' + (digits(g.phones[0]) || g.emails[0] || nName(g.name)).replace(/[^a-z0-9@.]/g, '-'), id = base, k = 2; while (ids[id]) id = base + '~' + k++; ids[id] = 1; g.id = id;
       g.last = g.events.length && !isNaN(g.events[0].t) ? g.events[0].t : NaN;
       g.spent = g.events.reduce(function (s, e) { return s + (e.kind === 'Service' && e.cost ? e.cost : 0); }, 0);
       g.services = g.events.filter(function (e) { return e.kind === 'Service'; }).length; if (!g.name) g.name = g.phones[0] || g.emails[0] || 'Unknown'; });
@@ -74,13 +83,14 @@
   function money(c) { if (c == null) return '—'; try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(c / 100); } catch (e) { return '$' + Math.round(c / 100); } }
   function fdate(t) { if (isNaN(t)) return '—'; var d = new Date(t); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
 
-  var ui = { q: '', sel: '' }, CSS = '.sh-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:14px}.sh-list{display:grid;gap:6px;align-content:start;max-height:70vh;overflow:auto}.sh-c{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit;color:inherit;cursor:pointer;min-height:44px;overflow-wrap:anywhere}.sh-c.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}.sh-c small,.sh-tl small{display:block;color:var(--muted)}.sh-tl{list-style:none;margin:0;padding:0;display:grid;gap:8px}.sh-tl li{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:9px;overflow-wrap:anywhere}.sh-tl li.k-service{border-left-color:var(--ok)}.sh-tl li.k-order,.sh-tl li.k-deal{border-left-color:var(--warn)}.sh-head{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:baseline}@media(max-width:700px){.sh-wrap{grid-template-columns:1fr}.sh-list{max-height:40vh}}';
+  var ui = { q: '', sel: '', limit: 200 }, CSS = '.sh-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:14px}.sh-list{display:grid;gap:6px;align-content:start;max-height:70vh;overflow:auto}.sh-c{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit;color:inherit;cursor:pointer;min-height:44px;overflow-wrap:anywhere}.sh-c.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}.sh-c small,.sh-tl small{display:block;color:var(--muted)}.sh-tl{list-style:none;margin:0;padding:0;display:grid;gap:8px}.sh-tl li{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;padding:9px;overflow-wrap:anywhere}.sh-tl li.k-service{border-left-color:var(--ok)}.sh-tl li.k-order,.sh-tl li.k-deal{border-left-color:var(--warn)}.sh-links a{display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere}.sh-head{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:baseline}@media(max-width:700px){.sh-wrap{grid-template-columns:1fr}.sh-list{max-height:40vh}}';
   function html(list) {
     var shown = search(list, ui.q), g = list.filter(function (x) { return x.id === ui.sel; })[0] || shown[0];
-    var left = shown.length ? shown.map(function (c) { return '<button type="button" class="sh-c' + (g && c.id === g.id ? ' on' : '') + '" data-sh="' + esc(c.id) + '"><b>' + esc(c.name) + '</b><small>' + esc(c.phones[0] || c.emails[0] || '') + '</small><small>' + c.events.length + ' record' + (c.events.length === 1 ? '' : 's') + ' &middot; last ' + esc(fdate(c.last)) + '</small></button>'; }).join('') : '<p class="muted">No customers match.</p>';
+    var more = shown.length > ui.limit, page = shown.slice(0, ui.limit); if (g && page.indexOf(g) < 0 && shown.indexOf(g) >= 0) page.push(g);
+    var left = shown.length ? page.map(function (c) { return '<button type="button" class="sh-c' + (g && c.id === g.id ? ' on' : '') + '" data-sh="' + esc(c.id) + '"><b>' + esc(c.name) + '</b><small>' + esc(c.phones[0] || c.emails[0] || '') + '</small><small>' + c.events.length + ' record' + (c.events.length === 1 ? '' : 's') + ' &middot; last ' + esc(fdate(c.last)) + '</small></button>'; }).join('') + (more ? '<button type="button" class="btn ghost sh-c" data-sh-more>Show more (' + (shown.length - ui.limit) + ' left)</button>' : '') : '<p class="muted">No customers match.</p>';
     var right = !g ? '<p class="muted">No customer history yet. Service jobs, test drives, bookings and orders show up here.</p>' :
       '<div class="card"><div class="sh-head"><h3 style="margin:0">' + esc(g.name) + '</h3><span class="muted">' + g.services + ' service job' + (g.services === 1 ? '' : 's') + ' &middot; ' + esc(money(g.spent)) + ' service spend</span></div>' +
-      '<p class="muted" style="margin:6px 0 10px">' + g.phones.map(function (p) { return '<a href="tel:' + esc(String(p).replace(/[^\d+]/g, '')) + '">' + esc(p) + '</a>'; }).concat(g.emails.map(function (e) { return '<a href="mailto:' + esc(e) + '">' + esc(e) + '</a>'; })).join(' &middot; ') + '</p>' +
+      '<p class="muted sh-links" style="margin:6px 0 10px">' + g.phones.map(function (p) { return '<a href="tel:' + esc(String(p).replace(/[^\d+]/g, '')) + '">' + esc(p) + '</a>'; }).concat(g.emails.map(function (e) { return '<a href="mailto:' + esc(e) + '">' + esc(e) + '</a>'; })).join(' &middot; ') + '</p>' +
       '<ol class="sh-tl">' + g.events.map(function (e) { return '<li class="k-' + esc(e.kind.toLowerCase().replace(/[^a-z]/g, '')) + '"><div class="sh-head"><b>' + esc(e.kind) + ': ' + esc(e.work) + '</b><span class="pill">' + esc(e.status || '—') + '</span></div><small>' + esc(fdate(e.t)) + ' &middot; ' + esc(e.model || 'No car') + (e.stock ? ' &middot; #' + esc(e.stock) : '') + ' &middot; ' + esc(money(e.cost)) + '</small></li>'; }).join('') + '</ol></div>';
     return '<style>' + CSS + '</style><form class="row" data-sh-form onsubmit="return false"><input type="search" data-sh-q placeholder="Search name, phone, email, stock #" value="' + esc(ui.q) + '" aria-label="Search customers"></form>' +
       '<p class="muted" data-sh-count>' + shown.length + ' of ' + list.length + ' customer' + (list.length === 1 ? '' : 's') + '</p><div class="sh-wrap"><div class="sh-list">' + left + '</div><div>' + right + '</div></div>';
@@ -89,10 +99,10 @@
     if (!el) return; var list = collect(src);
     function draw() { var f = document.activeElement && document.activeElement.hasAttribute && document.activeElement.hasAttribute('data-sh-q'), pos = f ? document.activeElement.selectionStart : 0;
       el.innerHTML = html(list); if (f) { var i = el.querySelector('[data-sh-q]'); i.focus(); try { i.setSelectionRange(pos, pos); } catch (e) {} } }
-    el.oninput = function (e) { if (e.target.hasAttribute('data-sh-q')) { ui.q = String(e.target.value).slice(0, 80); ui.sel = ''; draw(); } };
-    el.onclick = function (e) { var b = e.target.closest && e.target.closest('[data-sh]'); if (b) { ui.sel = b.getAttribute('data-sh'); draw(); } };
+    el.oninput = function (e) { if (e.target.hasAttribute('data-sh-q')) { ui.q = String(e.target.value).slice(0, 80); ui.sel = ''; ui.limit = 200; draw(); } };
+    el.onclick = function (e) { if (e.target.closest && e.target.closest('[data-sh-more]')) { ui.limit += 200; draw(); return; } var b = e.target.closest && e.target.closest('[data-sh]'); if (b) { ui.sel = b.getAttribute('data-sh'); draw(); } };
     draw();
   }
-  root.DDServiceHistory = { collect: collect, search: search, mount: mount, ui: ui, open: function (q) { ui.q = String(q || '').slice(0, 80); ui.sel = ''; } };
+  root.DDServiceHistory = { collect: collect, search: search, mount: mount, ui: ui, open: function (q) { var s = ''; try { s = typeof q === 'string' || typeof q === 'number' ? String(q) : ''; } catch (e) {} ui.q = s.slice(0, 80); ui.sel = ''; ui.limit = 200; } };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.DDServiceHistory;
 })(typeof window !== 'undefined' ? window : globalThis);
