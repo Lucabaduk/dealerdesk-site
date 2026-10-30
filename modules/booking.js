@@ -1,10 +1,13 @@
 /*! DealerDesk Booking module - test drives + service appointments.
  *  Plain script, no dependencies. Exposes window.DDBooking (module.exports under node).
- *  Storage: localStorage key "dealerdesk_booking" (own key). Reads vehicles read-only from
- *  "dealerdesk_v1" (DealerDesk data layer) if present, so the vehicle picker works with inventory. */
+ *  Storage: localStorage key "dealerdesk_booking" (own key).
+ *  Vehicles: DealerDesk schema cars (/workspace/dealership SCHEMA.md: id, stock_no, vin, year, make, model,
+ *  trim, status available|hold|sold). Give them with DDBooking.setInventory(carsOrDataset), or they are read
+ *  read-only from localStorage "dealerdesk_data" ({cars:[...]}) if the core app stores them there.
+ *  DDBooking.toSchema() exports bookings as schema test_drives / service_bookings. */
 (function (root) {
   'use strict';
-  var KEY = 'dealerdesk_booking', INV_KEY = 'dealerdesk_v1';
+  var KEY = 'dealerdesk_booking', INV_KEY = 'dealerdesk_data';
   var TD_STATUS = ['booked', 'confirmed', 'completed', 'no-show', 'cancelled'];
   var SV_STATUS = ['scheduled', 'checked-in', 'in-progress', 'ready', 'picked-up'];
   var SV_TYPES = { 'oil-change': 'Oil change', tires: 'Tires', brakes: 'Brakes', inspection: 'Inspection', other: 'Other' };
@@ -51,16 +54,36 @@
   function nid(p) { state.seq += 1; return p + state.seq; }
 
   // ---------- inventory (read-only) ----------
+  var invCache = { raw: null, list: [], byRef: {} }, injected = null;
+  function setInventory(x) { injected = x ? (Array.isArray(x) ? x : (x.cars || [])) : null; invCache.raw = {}; return vehicles().length; }
   function vehicles() {
-    var s = store(), out = [];
-    try { var db = s && JSON.parse(s.getItem(INV_KEY) || 'null'); if (db && Array.isArray(db.vehicles)) out = db.vehicles; } catch (e) {}
-    return out.map(function (v) { return { id: v.id, stock: clean(v.stock || v.stock_number || ('#' + v.id), 20), vin: String(v.vin || '').toUpperCase(), year: v.year, make: v.make, model: v.model, trim: v.trim || '', status: v.status || 'available' }; });
+    var raw = injected;
+    if (!raw) { var s = store(); try { raw = s && s.getItem(INV_KEY); } catch (e) { raw = null; } }
+    if (raw === invCache.raw) return invCache.list;
+    var out = injected || []; if (!injected) try { var db = JSON.parse(raw || 'null'); if (db && Array.isArray(db.cars)) out = db.cars; } catch (e) {}
+    var byRef = {};
+    var list = out.filter(function (v) { return v && v.stock_no; }).map(function (v) {
+      var o = { id: v.id, stock: clean(v.stock_no, 20), vin: String(v.vin || '').toUpperCase(), year: v.year, make: v.make, model: v.model, trim: v.trim || '', status: v.status || 'available' };
+      o._q = (o.stock + ' ' + o.vin + ' ' + o.year + ' ' + (o.make || '') + ' ' + (o.model || '') + ' ' + o.trim).toLowerCase();
+      byRef[o.vin] = o; byRef[String(o.stock).toUpperCase()] = o; return o;
+    });
+    invCache = { raw: raw, list: list, byRef: byRef }; return list;
+  }
+  // Fast capped search: every word must match (stock, VIN, year, make, model, trim). Exact stock/VIN first, sold last.
+  function searchVehicles(q, limit) {
+    limit = limit || 8; var list = vehicles(), words = String(q || '').toLowerCase().trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    var exact = invCache.byRef[String(q).trim().toUpperCase()], hits = [], sold = [];
+    for (var i = 0; i < list.length && hits.length < limit; i++) {
+      var v = list[i], ok = true; if (v === exact) continue;
+      for (var w = 0; w < words.length; w++) if (v._q.indexOf(words[w]) < 0) { ok = false; break; }
+      if (ok) (v.status === 'sold' ? sold : hits).push(v);
+    }
+    return (exact ? [exact] : []).concat(hits, sold).slice(0, limit);
   }
   function findVehicle(ref) {
     ref = String(ref || '').trim().toUpperCase(); if (!ref) return null;
-    var list = vehicles();
-    for (var i = 0; i < list.length; i++) if (list[i].vin === ref || String(list[i].stock).toUpperCase() === ref) return list[i];
-    return null;
+    vehicles(); return invCache.byRef[ref] || null;
   }
   function vLabel(v) { return v ? [v.year, v.make, v.model, v.trim].filter(Boolean).join(' ') : ''; }
 
@@ -109,8 +132,8 @@
     ['customer', 'phone', 'email', 'salesperson', 'notes', 'date', 'time'].forEach(function (k) { if (p[k] !== undefined) o[k] = clean(p[k], k === 'notes' ? 500 : 80); });
     if (p.vehicle !== undefined || p.vin !== undefined || p.stock !== undefined) {
       var ref = p.vehicle || p.vin || p.stock, v = findVehicle(ref);
-      if (v) { o.vin = v.vin; o.stock = v.stock; o.vehicleLabel = vLabel(v); }
-      else { var r = normVin(ref); if (validVin(r)) { o.vin = r; o.stock = ''; } else { o.vin = ''; o.stock = clean(ref, 20).toUpperCase(); } o.vehicleLabel = clean(p.vehicleLabel || '', 80); }
+      if (v) { if (v.status === 'sold') throw err('sold', 'That car has been sold.'); o.carId = v.id; o.vin = v.vin; o.stock = v.stock; o.vehicleLabel = vLabel(v); }
+      else { o.carId = null; var r = normVin(ref); if (validVin(r)) { o.vin = r; o.stock = ''; } else { o.vin = ''; o.stock = clean(ref, 20).toUpperCase(); } o.vehicleLabel = clean(p.vehicleLabel || '', 80); }
     }
     o.durationMin = p.durationMin ? Math.round(+p.durationMin) : (o.durationMin || state.settings.testDriveMin);
     if (o.email) o.email = o.email.toLowerCase();
@@ -173,7 +196,7 @@
     if (!validEmail(o.email)) throw err('bad_email', 'That email address does not look right.');
     if (veh.vin && !validVin(veh.vin)) throw err('bad_vin', 'VIN must be 17 characters (no I, O or Q).');
     if (veh.year && (veh.year < 1950 || veh.year > new Date(clock()).getFullYear() + 2)) throw err('bad_year', 'Check the vehicle year.');
-    if (!veh.make && !veh.vin) throw err('need_vehicle', 'Enter the vehicle make/model or VIN.');
+    if (!veh.year || !veh.make || !veh.model) throw err('need_vehicle', 'Enter the vehicle year, make and model.');
     if (!parseDate(o.date)) throw err('bad_date', 'Pick a date.');
     return o;
   }
@@ -243,6 +266,17 @@
   // ---------- staff lists ----------
   function setStaff(kind, names) { var k = kind === 'advisors' ? 'advisors' : 'salespeople'; state[k] = (names || []).map(function (n) { return clean(n, 40); }).filter(Boolean); save(); return state[k].slice(); }
 
+  // ---------- export to DealerDesk schema ----------
+  var TD_MAP = { booked: 'requested', confirmed: 'confirmed', completed: 'completed', 'no-show': 'no_show', cancelled: 'cancelled' };
+  var SV_MAP = { scheduled: 'booked', 'checked-in': 'in_progress', 'in-progress': 'in_progress', ready: 'done', 'picked-up': 'done' };
+  function toSchema() {
+    function cust(x) { return { name: x.customer, phone: x.phone, email: x.email || '' }; }
+    return {
+      test_drives: state.testDrives.filter(function (t) { return t.carId; }).map(function (t) { return { id: t.id, customer: cust(t), car_id: t.carId, at: t.date + 'T' + t.time, status: TD_MAP[t.status], notes: (t.salesperson ? 'Salesperson: ' + t.salesperson + '. ' : '') + (t.notes || '') }; }),
+      service_bookings: state.services.map(function (s) { return { id: s.id, customer: cust(s), vehicle: { year: s.vehicle.year, make: s.vehicle.make, model: s.vehicle.model, vin: s.vehicle.vin || '' }, service_type: s.type.replace('-', '_'), at: s.date + 'T' + s.time, status: SV_MAP[s.status], notes: ['Bay ' + s.bay, s.advisor ? 'Advisor: ' + s.advisor : '', s.vehicle.mileage ? s.vehicle.mileage + ' mi' : '', s.notes || ''].filter(Boolean).join('. ') }; })
+    };
+  }
+
   // =================== UI (staff) ===================
   var ui = { el: null, tab: 'drives', view: 'day', date: null, msg: '' };
   function today() { return ymd(new Date(clock())); }
@@ -251,8 +285,7 @@
   function renderDrives() {
     var d = ui.date, inv = vehicles(), html = '';
     html += '<form class="ddb-card ddb-form" data-form="td"><h3>New test drive</h3><div class="ddb-grid">' +
-      '<label>Vehicle (stock # or VIN)<input name="vehicle" list="ddb-veh" required autocomplete="off"></label>' +
-      (inv.length ? '<datalist id="ddb-veh">' + inv.filter(function (v) { return v.status !== 'sold'; }).map(function (v) { return '<option value="' + esc(v.stock) + '">' + esc(vLabel(v) + ' - ' + v.vin) + '</option>'; }).join('') + '</datalist>' : '') +
+      '<label class="ddb-pick">Vehicle (search stock, VIN, make, model, year)<input name="vehicle" data-vsearch required autocomplete="off" placeholder="' + (inv.length ? inv.length + ' vehicles' : 'Stock # or VIN') + '"><div class="ddb-results" data-vresults role="listbox"></div></label>' +
       '<label>Customer<input name="customer" required></label><label>Phone<input name="phone" type="tel" required></label><label>Email<input name="email" type="email"></label>' +
       '<label>Salesperson' + (state.salespeople.length ? '<select name="salesperson"><option value="">Any</option>' + opt(state.salespeople) + '</select>' : '<input name="salesperson">') + '</label>' +
       '<label>Date<input name="date" type="date" value="' + esc(d) + '" required></label><label>Time<input name="time" type="time" step="900" required></label></div>' +
@@ -309,7 +342,7 @@
       (ui.msg ? '<div class="ddb-msg" role="status">' + esc(ui.msg) + '</div>' : '') + (saveError ? '<div class="ddb-msg ddb-bad">' + esc(saveError) + '</div>' : '') +
       (ui.tab === 'drives' ? renderDrives() : ui.tab === 'service' ? renderService() : renderSettings()) + '</div>';
   }
-  function refresh() { if (ui.el) ui.el.innerHTML = renderHTML(); }
+  function refresh() { if (!ui.el) return; ui.el.innerHTML = renderHTML(); var i = ui.el.querySelector('[data-vsearch]'); if (i) bindPicker(i, ui.el.querySelector('[data-vresults]')); }
   function formData(f) { var o = {}; Array.prototype.forEach.call(f.elements, function (e) { if (!e.name) return; o[e.name] = e.type === 'checkbox' ? e.checked : e.value; }); return o; }
   function onSubmit(ev) {
     var f = ev.target, kind = f.getAttribute('data-form'); if (!kind) return; ev.preventDefault(); var d = formData(f);
@@ -339,6 +372,13 @@
     if (e.hasAttribute('data-date') && parseDate(e.value)) { ui.date = e.value; refresh(); }
     else if (e.dataset && e.dataset.tdStatus) { try { setTDStatus(e.dataset.tdStatus, e.value); ui.msg = 'Status updated.'; } catch (x) { ui.msg = x.message; } refresh(); }
   }
+  function pickerHTML(list) { return list.map(function (v) { return '<button type="button" role="option" data-vpick="' + esc(v.stock) + '"><b>' + esc(v.stock) + '</b> ' + esc(vLabel(v)) + '<small>' + esc(v.vin) + (v.status !== 'available' ? ' &middot; ' + esc(v.status) : '') + '</small></button>'; }).join(''); }
+  // Wire a search input + results box (used by staff form and public page)
+  function bindPicker(input, box, onPick) {
+    var timer = null;
+    input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { box.innerHTML = pickerHTML(searchVehicles(input.value, 8)); }, 80); });
+    box.addEventListener('click', function (e) { var b = e.target.closest('[data-vpick]'); if (!b) return; input.value = b.getAttribute('data-vpick'); box.innerHTML = ''; if (onPick) onPick(findVehicle(input.value)); });
+  }
   function mount(el) {
     ui.el = el; ui.date = ui.date || today();
     el.addEventListener('submit', onSubmit); el.addEventListener('click', onClick); el.addEventListener('change', onChange);
@@ -349,7 +389,7 @@
   var api = {
     KEY: KEY, TD_STATUS: TD_STATUS, SV_STATUS: SV_STATUS, SV_TYPES: SV_TYPES,
     reload: load, settings: settings, updateSettings: updateSettings, setStaff: setStaff,
-    vehicles: vehicles, findVehicle: findVehicle,
+    setInventory: setInventory, toSchema: toSchema, vehicles: vehicles, findVehicle: findVehicle, searchVehicles: searchVehicles, bindPicker: bindPicker,
     addTestDrive: addTestDrive, updateTestDrive: updateTestDrive, setTestDriveStatus: setTDStatus, testDrivesOn: testDrivesOn, weekOf: weekOf, upcoming: upcoming,
     addService: addService, updateService: updateService, advanceService: advanceService, bayBoard: bayBoard,
     openSlots: openSlots, submitRequest: submitRequest, newRequests: newRequests, markSeen: markSeen,

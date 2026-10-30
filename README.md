@@ -13,7 +13,8 @@ Test drives + service appointments + a public booking page. Plain JS, no depende
 1. Copy `modules/booking.*` and `booking.html` into the app.
 2. `<link rel="stylesheet" href="modules/booking.css"><script src="modules/booking.js"></script>`
 3. Add a "Bookings" tab with `<div id="booking"></div>` and call `DDBooking.mount(el)` when it opens.
-4. Vehicle picker reads `dealerdesk_v1.vehicles` (fields `id, stock|stock_number, vin, year, make, model, trim, status`) read-only. If the core app uses another key/shape, change `INV_KEY` / `vehicles()` in booking.js.
+4. Vehicles use Grok Master Helper's schema (/workspace/dealership, `cars[]` with `id, stock_no, vin, year, make, model, trim, status`). Call `DDBooking.setInventory(dataset or cars)` from the core app, or store the dataset at localStorage `dealerdesk_data` and it is read read-only. Picker = search box (stock, VIN, make, model, year, multi-word), max 8 results, exact stock/VIN first; sold cars can't be booked. Tested with 5,000 cars.
+   `DDBooking.toSchema()` returns `{test_drives, service_bookings}` that pass `normalizeDealership` (status mapping: booked->requested, no-show->no_show, scheduled->booked, checked-in/in-progress->in_progress, ready/picked-up->done).
 5. Link the website / car QR codes to `booking.html?vehicle=<stock>`.
 6. `DDBooking.onChange(fn)` fires after any save; `DDBooking.newRequests()` gives unseen online requests for a badge.
 

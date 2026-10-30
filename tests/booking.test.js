@@ -5,8 +5,8 @@ function t(n, f) { try { f(); pass++; console.log('ok  - ' + n); } catch (e) { c
 function fake(init) { const m = Object.assign({}, init); return { _m: m, getItem: k => k in m ? m[k] : null, setItem(k, v) { m[k] = String(v); }, removeItem: k => { delete m[k]; } }; }
 const MOD = path.join(__dirname, '..', 'modules', 'booking.js');
 const NOW = new Date(2026, 10, 4, 8, 0).getTime(); // Wed Nov 4 2026 08:00 local
-const INV = JSON.stringify({ vehicles: [{ id: 1, stock: 'A100', vin: '1HGCM82633A100000', year: 2022, make: 'Honda', model: 'Accord', status: 'available' }, { id: 2, stock: 'B200', vin: '2T1BURHE0JC123456', year: 2021, make: 'Toyota', model: 'Corolla', status: 'sold' }] });
-function load(st) { globalThis.localStorage = st || fake({ dealerdesk_v1: INV }); delete require.cache[MOD]; const B = require(MOD); B._setClock(() => NOW); return B; }
+const INV = JSON.stringify({ cars: [{ id: 'car-a', stock_no: 'A100', vin: '1HGCM82633A100000', year: 2022, make: 'Honda', model: 'Accord', status: 'available' }, { id: 'car-b', stock_no: 'B200', vin: '2T1BURHE0JC123456', year: 2021, make: 'Toyota', model: 'Corolla', status: 'sold' }] });
+function load(st) { globalThis.localStorage = st || fake({ dealerdesk_data: INV }); delete require.cache[MOD]; const B = require(MOD); B._setClock(() => NOW); return B; }
 function throwsCode(f, code) { try { f(); } catch (e) { assert.strictEqual(e.code, code, 'got ' + e.code + ': ' + e.message); return e; } throw new Error('expected ' + code); }
 const td = (o) => Object.assign({ vehicle: 'A100', customer: 'Ann Lee', phone: '313-555-0101', email: 'ann@example.com', salesperson: 'Maria', date: '2026-11-04', time: '10:00' }, o);
 const sv = (o) => Object.assign({ customer: 'Bob Ray', phone: '(313) 555-0199', type: 'oil-change', vehicle: { year: 2018, make: 'Ford', model: 'F-150', mileage: 61000 }, date: '2026-11-04', time: '09:00' }, o);
@@ -53,27 +53,50 @@ t('public: rate limit per phone and off switch', () => {
 t('corrupt storage resets safely; HTML is escaped', () => { const B3 = load(fake({ dealerdesk_booking: '{bad' })); assert.ok(B3.lastSaveError()); B3.addTestDrive(td({ customer: '<img src=x onerror=alert(1)>' })); assert.ok(!B3.renderHTML().includes('<img src=x')); B = load(globalThis.localStorage); });
 t('no tokens / personal emails / TableTop server in shipped files', () => { for (const f of ['modules/booking.js', 'modules/booking-public.js', 'booking.html', 'modules/booking.css']) { const s = fs.readFileSync(path.join(__dirname, '..', f), 'utf8'); assert.ok(!/gmail\.com|tabletop|workers\.dev|Bearer|ghp_/i.test(s), f); } });
 
+t('sold car cannot be test-driven', () => throwsCode(() => load().addTestDrive(td({ vehicle: 'B200', time: '16:00', salesperson: 'Zed' })), 'sold'));
+t('5,000-car inventory: search by stock, VIN, make, model, year is capped and fast', () => {
+  const makes = [['Velora', 'Aster'], ['Kestrel', 'Ridge'], ['Norvik', 'Pulse'], ['Ardent', 'Vale']], cars = [];
+  for (let i = 0; i < 5000; i++) { const m = makes[i % 4]; cars.push({ id: 'c' + i, stock_no: 'DD' + (10000 + i), vin: ('1DDK' + String(i).padStart(6, '0') + 'TD12345').slice(0, 17), year: 2015 + (i % 11), make: m[0], model: m[1], status: i % 50 ? 'available' : 'sold' }); }
+  assert.strictEqual(B.setInventory({ cars }), 5000);
+  let t0 = process.hrtime.bigint(); let r;
+  for (let k = 0; k < 100; k++) r = B.searchVehicles('kestrel ridge 2020', 8);
+  const ms = Number(process.hrtime.bigint() - t0) / 1e6 / 100;
+  assert.strictEqual(r.length, 8); assert.ok(r.every(v => v.make === 'Kestrel' && v.year === 2020)); assert.ok(ms < 20, 'avg ' + ms.toFixed(2) + 'ms');
+  assert.strictEqual(B.searchVehicles('DD14321')[0].stock, 'DD14321'); assert.strictEqual(B.searchVehicles(cars[777].vin)[0].id, 'c777');
+  assert.strictEqual(B.searchVehicles('dd1', 8).length, 8); assert.deepStrictEqual(B.searchVehicles('', 8), []); assert.deepStrictEqual(B.searchVehicles('zzzz'), []);
+  t0 = process.hrtime.bigint(); assert.strictEqual(B.findVehicle('DD14999').id, 'c4999'); assert.ok(Number(process.hrtime.bigint() - t0) / 1e6 < 5);
+  const html = B.renderHTML(); assert.ok(!html.includes('<datalist') && html.includes('5000 vehicles'), 'no full list rendered');
+  B.setInventory(null); });
+const schemaPath = '/workspace/dealership/schema.js';
+if (!fs.existsSync(schemaPath)) skipped.push('schema export (no /workspace/dealership)'); else t('toSchema() passes DealerDesk schema validation', () => {
+  const S = require(schemaPath), sample = JSON.parse(fs.readFileSync('/workspace/dealership/sample-data.json', 'utf8'));
+  const Bs = load(fake({ dealerdesk_data: JSON.stringify(sample) })); const car = sample.cars.find(c => c.status !== 'sold');
+  assert.strictEqual(Bs.vehicles().length, sample.cars.length); Bs.addTestDrive(td({ vehicle: car.stock_no })); Bs.addService(sv({ vehicle: { year: 2019, make: 'Ford', model: 'Escape', mileage: 50000 } }));
+  const ex = Bs.toSchema(); const ds = S.normalizeDealership({ dealer_name: sample.dealer_name, cars: sample.cars, test_drives: ex.test_drives, service_bookings: ex.service_bookings, leads: [] });
+  assert.strictEqual(ds.test_drives[0].car_id, car.id); assert.strictEqual(ds.service_bookings[0].service_type, 'oil_change'); B = load(globalThis.localStorage); });
+
 // ---------- UI (jsdom) ----------
 function opt(n) { for (const d of [process.env.DD_DEV_MODULES, '/tmp/qrdev/node_modules', '/tmp/devmods/node_modules'].filter(Boolean)) { try { return require(require.resolve(n, { paths: [d] })); } catch (e) {} } return null; }
 const jsdom = opt('jsdom');
+function await0() {} // picker debounce is replaced by sync timers in UI tests
 if (!jsdom) skipped.push('UI tests (jsdom not found)'); else {
   const root = path.join(__dirname, '..');
   const mk = (file, url, store) => { const html = fs.readFileSync(path.join(root, file), 'utf8').replace(/<script src="([^"]+)"><\/script>/g, (m, s) => '<script>' + fs.readFileSync(path.join(root, s), 'utf8') + '</script>');
     const dom = new jsdom.JSDOM(html, { url, runScripts: 'outside-only', pretendToBeVisual: true }); Object.defineProperty(dom.window, 'localStorage', { value: store, configurable: true });
-    dom.window.Date.now = () => NOW; const RD = dom.window.Date; dom.window.eval('(' + ((n) => { const O = Date; window.Date = class extends O { constructor(...a) { a.length ? super(...a) : super(n); } static now() { return n; } }; }) + ')(' + NOW + ')');
+    dom.window.setTimeout = (f) => { f(); return 0; }; dom.window.clearTimeout = () => {}; dom.window.Date.now = () => NOW; const RD = dom.window.Date; dom.window.eval('(' + ((n) => { const O = Date; window.Date = class extends O { constructor(...a) { a.length ? super(...a) : super(n); } static now() { return n; } }; }) + ')(' + NOW + ')');
     dom.window.document.querySelectorAll('script').forEach(s => dom.window.eval(s.textContent)); return dom; };
   t('staff UI: mount, book via form, switch tabs, week view, bay advance', () => {
-    const st = fake({ dealerdesk_v1: INV }); const dom = mk('demo.html', 'http://localhost/demo.html', st), d = dom.window.document;
+    const st = fake({ dealerdesk_data: INV }); const dom = mk('demo.html', 'http://localhost/demo.html', st), d = dom.window.document;
     assert.ok(d.querySelector('[data-form="td"]')); const f = d.querySelector('[data-form="td"]');
-    f.elements.vehicle.value = 'A100'; f.elements.customer.value = 'Cy'; f.elements.phone.value = '3135550000'; f.elements.time.value = '11:00'; f.elements.date.value = '2026-11-04';
+    const inp = f.elements.vehicle; inp.value = 'acc'; inp.dispatchEvent(new dom.window.Event('input')); await0(); d.querySelector('[data-vpick="A100"]').click(); assert.strictEqual(inp.value, 'A100'); f.elements.customer.value = 'Cy'; f.elements.phone.value = '3135550000'; f.elements.time.value = '11:00'; f.elements.date.value = '2026-11-04';
     f.dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true })); assert.match(d.querySelector('.ddb-msg').textContent, /booked/);
     d.querySelector('[data-view="week"]').click(); assert.strictEqual(d.querySelectorAll('.ddb-day').length, 7);
-    d.querySelector('[data-tab="service"]').click(); const g = d.querySelector('[data-form="sv"]'); g.elements.customer.value = 'Di'; g.elements.phone.value = '3135550001'; g.elements.make.value = 'Kia'; g.elements.time.value = '10:00'; g.elements.date.value = '2026-11-04';
+    d.querySelector('[data-tab="service"]').click(); const g = d.querySelector('[data-form="sv"]'); g.elements.customer.value = 'Di'; g.elements.phone.value = '3135550001'; g.elements.make.value = 'Kia'; g.elements.model.value = 'Soul'; g.elements.year.value = '2020'; g.elements.time.value = '10:00'; g.elements.date.value = '2026-11-04';
     g.dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true })); assert.match(d.querySelector('.ddb-msg').textContent, /bay 1/);
     d.querySelector('[data-sv-next]').click(); assert.ok(d.querySelector('.ddb-s-checked-in'));
     d.querySelector('[data-tab="settings"]').click(); assert.strictEqual(d.querySelectorAll('.ddb-hrow').length, 7); });
   t('public page: QR vehicle param, pick slot, submit, confirmation', () => {
-    const st = fake({ dealerdesk_v1: INV }); const dom = mk('booking.html', 'http://localhost/booking.html?vehicle=A100&name=Motor%20City', st), d = dom.window.document;
+    const st = fake({ dealerdesk_data: INV }); const dom = mk('booking.html', 'http://localhost/booking.html?vehicle=A100&name=Motor%20City', st), d = dom.window.document;
     assert.match(d.title, /Motor City/); assert.strictEqual(d.getElementById('ddp-vehicle').value, 'A100');
     d.getElementById('ddp-date').value = '2026-11-05'; d.getElementById('ddp-date').dispatchEvent(new dom.window.Event('change'));
     d.querySelector('[data-t="11:00"]').click(); const f = d.getElementById('ddp-form'); f.elements.customer.value = 'Eve'; f.elements.phone.value = '313 555 0123';

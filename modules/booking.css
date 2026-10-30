@@ -55,3 +55,8 @@
 .ddp-slots button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:10px 0;font:inherit;font-weight:600;min-height:44px;cursor:pointer}
 .ddp-slots .on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .ddp-done{text-align:center;padding:24px}.ddp-done b{font-size:24px;letter-spacing:.08em;color:var(--acc)}
+.ddb-pick{position:relative}
+.ddb-results{position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--panel);border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,.18);overflow:hidden;text-transform:none;letter-spacing:0}
+.ddb-results button{display:flex;flex-wrap:wrap;gap:4px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);padding:10px 12px;font:inherit;font-weight:400;min-height:44px;cursor:pointer}
+.ddb-results button:hover,.ddb-results button:focus{background:rgba(20,184,166,.12)}
+.ddb-results small{width:100%;color:var(--mute);font-size:12px}

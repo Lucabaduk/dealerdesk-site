@@ -6,8 +6,7 @@
   var q = new URLSearchParams(location.search), kind = q.get('type') === 'service' ? 'service' : 'test-drive', time = '';
   if (q.get('name')) { $('ddp-name').textContent = 'Book with ' + q.get('name').slice(0, 60); document.title = $('ddp-name').textContent; }
   if (q.get('vehicle')) $('ddp-vehicle').value = q.get('vehicle').slice(0, 20);
-  var inv = B.vehicles().filter(function (v) { return v.status !== 'sold'; });
-  $('ddp-veh').innerHTML = inv.map(function (v) { var o = document.createElement('option'); o.value = v.stock; o.textContent = [v.year, v.make, v.model].join(' '); return o.outerHTML; }).join('');
+  B.bindPicker($('ddp-vehicle'), $('ddp-results'), function () { slots(); });
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   var d = new Date(); $('ddp-date').value = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   function setKind(k) {
