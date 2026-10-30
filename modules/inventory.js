@@ -50,7 +50,7 @@
         INDEXED.forEach(function (f) { var k = String(c[f]).toLowerCase(); (idx[f][k] || (idx[f][k] = [])).push(i); });
         hay[i] = [c.vin, c.stock_no, c.year, c.make, c.model, c.trim, c.color, c.features.join(' ')].join(' ').toLowerCase(); }
     }
-    function save() { if (persist) try { store.setItem(KEY, JSON.stringify(cars)); } catch (e) { /* quota: keep in memory */ } }
+    function save() { if (!persist) return true; try { store.setItem(KEY, JSON.stringify(cars)); return true; } catch (e) { /* quota: keep in memory, drop stale copy so a reload doesn't show old data */ try { store.removeItem(KEY); } catch (e2) {} return false; } }
     function ingest(listIn) { var out = [], seen = {}, skipped = 0; (listIn || []).slice(0, 20000).forEach(function (c) { var r = normalize(c, clock()); if (!r.ok || seen[r.car.vin] || seen['#' + r.car.id]) { skipped++; return; } seen[r.car.vin] = seen['#' + r.car.id] = 1; out.push(r.car); }); return { cars: out, skipped: skipped }; }
     try { var raw = JSON.parse(store.getItem(KEY) || 'null'); if (Array.isArray(raw)) cars = ingest(raw).cars; } catch (e) { cars = []; }
     rebuild();
@@ -65,7 +65,7 @@
     var api = {
       STATUSES: STATUSES.slice(), size: function () { return cars.length; },
       /** Replace inventory from Helper's data file ({cars:[...]} or [...]); keeps nothing old. */
-      load: function (data) { var l = Array.isArray(data) ? data : (data && data.cars); if (!Array.isArray(l)) return { ok: false, errors: ['bad_format'] }; var r = ingest(l); cars = r.cars; rebuild(); save(); return { ok: true, count: cars.length, skipped: r.skipped }; },
+      load: function (data) { var l = Array.isArray(data) ? data : (data && data.cars); if (!Array.isArray(l)) return { ok: false, errors: ['bad_format'] }; var r = ingest(l); cars = r.cars; rebuild(); var saved = save(); return { ok: true, count: cars.length, skipped: r.skipped, saved: saved }; },
       list: function () { return cars.map(copy); },
       get: function (vinOrId) { var i = at(vinOrId); return i < 0 ? null : copy(cars[i]); },
       add: function (input) { var r = normalize(input, clock()); if (!r.ok) return r; if (byVin[r.car.vin] != null || byId[r.car.id] != null) return { ok: false, errors: ['duplicate'] };
