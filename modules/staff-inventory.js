@@ -4,7 +4,7 @@
   var FIELD_LABELS = { vin: 'VIN (17 chars, no I/O/Q)', year: 'Year', make: 'Make', model: 'Model', price: 'Price', mileage: 'Mileage', status: 'Status', condition: 'Condition', id: 'ID', duplicate: 'A car with this VIN already exists', duplicate_stock: 'Another car already uses this stock #', not_found: 'Car not found' };
   function formToCar(v) { v = v || {}; return { vin: v.vin, stock_no: v.stock_no, year: v.year, make: v.make, model: v.model, trim: v.trim, price: v.price, mileage: v.mileage, color: v.color, condition: v.condition, status: v.status, body_type: v.body_type,
     photos: String(v.photos || '').split(/\s*\n\s*|\s+/).filter(Boolean), features: String(v.features || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean) }; }
-  function errorText(errors) { return 'Please fix: ' + (errors || []).map(function (e) { return FIELD_LABELS[e] || e; }).join(', '); }
+  function errorText(errors) { return 'Please fix: ' + (errors || []).map(function (e) { return Object.prototype.hasOwnProperty.call(FIELD_LABELS, e) ? FIELD_LABELS[e] : String(e); }).join(', '); }
   function buildQuery(s) { s = s || {}; var sort = String(s.sort || '').split(':'); var q = { text: s.text || '', make: s.make || '', body_type: s.body_type || '', status: s.status || '', sort: sort[0] || '', dir: sort[1] || 'asc', page: s.page || 1, pageSize: 24 };
     if (s.maxPrice !== '' && s.maxPrice != null && isFinite(+s.maxPrice)) q.maxPrice = +s.maxPrice; return q; }
   function fmtWhen(t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
