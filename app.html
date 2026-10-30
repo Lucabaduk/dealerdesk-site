@@ -242,49 +242,181 @@ const api = { MAX_CARS, SchemaError, ENUMS, safeUrl, normalizeCar, normalizeTest
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 else if (typeof window !== 'undefined') window.DealerDeskSchema = api;
 </script>
-<script>/* DealerDesk dashboard summary - local stand-in for Grok Master Helper's dashboard.js (same shape; swapped out automatically when
-   Helper's window.DealerDeskDashboard / window.DDDashboard is loaded). Pure functions, no DOM, works in Node.
-   summary(data, now) -> { counts, pipeline, sales, attention }
-     data: { cars[], deals[], leads[], test_drives[], service_bookings[], staff[] }  (schema.js shapes, prices in cents)
-     counts:   { cars, available, hold, sold, stock_value_cents, leads_open, leads_new, bookings_today, bookings_upcoming, deals_pending }
-     pipeline: [{ stage, count }]  lead stages in order new, contacted, qualified, won, lost
-     sales:    { closed, revenue_cents, avg_cents, pending, by_staff:[{ staff_id, name, deals, revenue_cents }] }
-     attention:[{ kind, id, text, severity:'high'|'medium' }]  most urgent first */
+<script>// DealerDesk sales dashboard data. Plain JS, no dependencies, pure functions (no DOM, no storage writes).
+// Node: require('./dashboard.js')   Browser: window.DealerDeskDashboard
+// Every function takes plain data plus `now` (Date, ms or ISO string; default = current time) and never throws
+// on missing/empty/odd input. Money is in cents. "Today/week/month" use the local time zone; weeks start Monday.
 (function (root) {
   'use strict';
-  var STAGES = ['new', 'contacted', 'qualified', 'won', 'lost'];
-  function day(t) { var d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-  function arr(x) { return Array.isArray(x) ? x : []; }
-  function summary(data, now) {
-    data = data || {}; now = now == null ? Date.now() : +now;
-    var cars = arr(data.cars), deals = arr(data.deals), leads = arr(data.leads), staff = arr(data.staff);
-    var bookings = arr(data.test_drives).map(function (b) { return { k: 'test_drive', b: b }; }).concat(arr(data.service_bookings).map(function (b) { return { k: 'service', b: b }; }));
-    var td = day(now), counts = { cars: cars.length, available: 0, hold: 0, sold: 0, stock_value_cents: 0, leads_open: 0, leads_new: 0, bookings_today: 0, bookings_upcoming: 0, deals_pending: 0 };
-    cars.forEach(function (c) { if (counts[c.status] != null) counts[c.status]++; if (c.status !== 'sold') counts.stock_value_cents += +c.price_cents || 0; });
-    var stage = {}; STAGES.forEach(function (s) { stage[s] = 0; });
-    leads.forEach(function (l) { if (stage[l.status] != null) stage[l.status]++; if (l.status !== 'won' && l.status !== 'lost') counts.leads_open++; if (l.status === 'new') counts.leads_new++; });
-    var live = bookings.filter(function (x) { return x.b && x.b.at && x.b.status !== 'cancelled' && x.b.status !== 'no_show'; });
-    live.forEach(function (x) { var d = String(x.b.at).slice(0, 10); if (d === td) counts.bookings_today++; if (d >= td) counts.bookings_upcoming++; });
-    var closed = deals.filter(function (d) { return d.status === 'closed'; }), by = {};
-    counts.deals_pending = deals.filter(function (d) { return d.status === 'pending'; }).length;
-    closed.forEach(function (d) { var k = d.staff_id || ''; by[k] = by[k] || { deals: 0, revenue_cents: 0 }; by[k].deals++; by[k].revenue_cents += +d.price_cents || 0; });
-    var rev = closed.reduce(function (a, d) { return a + (+d.price_cents || 0); }, 0);
-    var sales = { closed: closed.length, revenue_cents: rev, avg_cents: closed.length ? Math.round(rev / closed.length) : 0, pending: counts.deals_pending,
-      by_staff: staff.map(function (s) { var x = by[s.id] || { deals: 0, revenue_cents: 0 }; return { staff_id: s.id, name: s.name, deals: x.deals, revenue_cents: x.revenue_cents }; })
-        .sort(function (a, b) { return b.revenue_cents - a.revenue_cents; }) };
-    var att = [];
-    leads.forEach(function (l) { if (l.status === 'new') att.push({ kind: 'lead', id: l.id, severity: 'high', text: 'New lead not contacted yet: ' + (l.name || 'Unknown') }); });
-    live.forEach(function (x) { var d = String(x.b.at).slice(0, 10), who = (x.b.customer && x.b.customer.name) || 'Customer';
-      if (d === td && (x.b.status === 'requested' || x.b.status === 'booked')) att.push({ kind: x.k, id: x.b.id, severity: 'high', text: (x.k === 'service' ? 'Service' : 'Test drive') + ' today not confirmed: ' + who + ' at ' + String(x.b.at).slice(11, 16) });
-      else if (d < td && (x.b.status === 'requested' || x.b.status === 'booked' || x.b.status === 'confirmed')) att.push({ kind: x.k, id: x.b.id, severity: 'medium', text: (x.k === 'service' ? 'Service' : 'Test drive') + ' in the past still open: ' + who }); });
-    deals.forEach(function (d) { if (d.status === 'pending' && d.date && day(now - 3 * 864e5) > d.date) att.push({ kind: 'deal', id: d.id, severity: 'medium', text: 'Deal pending more than 3 days: ' + (d.buyer || '') }); });
-    att.sort(function (a, b) { return (a.severity === 'high' ? 0 : 1) - (b.severity === 'high' ? 0 : 1); });
-    return { counts: counts, pipeline: STAGES.map(function (s) { return { stage: s, count: stage[s] }; }), sales: sales, attention: att.slice(0, 50) };
+  var DAY = 86400000;
+  var arr = function (v) { return Array.isArray(v) ? v.filter(function (x) { return x && typeof x === 'object'; }) : []; };
+  var cents = function (v) { var n = Number(v); return Number.isFinite(n) && n > 0 ? Math.round(n) : 0; };
+  var inc = function (o, k) { k = k == null || k === '' ? 'unknown' : String(k); if (!Object.prototype.hasOwnProperty.call(o, k) && k in o) k = 'unknown:' + k; o[k] = (Object.prototype.hasOwnProperty.call(o, k) ? o[k] : 0) + 1; };
+  var pad = function (n) { return String(n).padStart(2, '0'); };
+  function toDate(v) {
+    if (v instanceof Date) return isNaN(v) ? null : v;
+    if (typeof v === 'number' && Number.isFinite(v)) return new Date(v);
+    if (typeof v === 'string' && v.trim()) {
+      var m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?$/.exec(v.trim()); // local date or local date-time
+      if (m) return new Date(+m[1], m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+      var d = new Date(v); return isNaN(d) ? null : d;
+    }
+    return null;
   }
-  var mod = { summary: summary, STAGES: STAGES };
-  if (typeof module !== 'undefined' && module.exports) module.exports = mod; else root.DDDashboardLocal = mod;
+  function nowDate(now) { return toDate(now == null ? Date.now() : now) || new Date(); }
+  function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function startOfWeek(d) { var s = startOfDay(d); s.setDate(s.getDate() - ((s.getDay() + 6) % 7)); return s; }
+  function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+
+  // When a record was created: createdAt / created_at / listed_at / added_at, else the app's uid() timestamp ("ld-<base36 ms><4 random>").
+  function createdTime(r) {
+    var v = r.createdAt != null ? r.createdAt : r.created_at != null ? r.created_at : r.listed_at != null ? r.listed_at : r.added_at;
+    var d = toDate(v); if (d) return d.getTime();
+    var m = /^[a-z]+-([0-9a-z]{7,9})[0-9a-z]{4}$/.exec(String(r.id || ''));
+    if (m) { var t = parseInt(m[1], 36); if (t > 1.5e12 && t < 4e12) return t; }
+    return null;
+  }
+  // Appointment time: schema `at` ("YYYY-MM-DDTHH:MM") or booking module `date` + `time`.
+  function apptTime(b) { return toDate(b.at || (b.date ? b.date + (b.time ? 'T' + b.time : '') : null)); }
+  function customerName(b) { var c = b.customer; return (c && typeof c === 'object' ? c.name : c) || b.name || ''; }
+
+  // Status normalisation across the app (schema names) and the booking module.
+  var TD_MAP = { booked: 'requested', 'no-show': 'no_show' };
+  var SV_MAP = { scheduled: 'booked', 'checked-in': 'in_progress', 'in-progress': 'in_progress', ready: 'in_progress', 'picked-up': 'done' };
+  var tdStatus = function (s) { s = String(s || 'requested').toLowerCase(); return TD_MAP[s] || s; };
+  var svStatus = function (s) { s = String(s || 'booked').toLowerCase(); return SV_MAP[s] || s; };
+
+  function pick(data, a, b) { data = data && typeof data === 'object' ? data : {}; return arr(data[a] != null ? data[a] : data[b]); }
+
+  function inventoryStats(cars, now) {
+    var n = nowDate(now).getTime(), list = arr(cars);
+    var out = { total: list.length, available: 0, hold: 0, sold: 0, by_body_type: {}, by_fuel: {}, by_make: {}, avg_price_cents: 0, avg_age_days: null, stock_value_cents: 0 };
+    var priceSum = 0, priceN = 0, ageSum = 0, ageN = 0;
+    list.forEach(function (c) {
+      var st = String(c.status || 'available').toLowerCase(); if (st === 'pending') st = 'hold';
+      if (st === 'available' || st === 'hold' || st === 'sold') out[st]++;
+      inc(out.by_body_type, c.body_type); inc(out.by_fuel, c.fuel_type || c.fuel); inc(out.by_make, c.make);
+      var p = cents(c.price_cents != null ? c.price_cents : Number(c.price) * 100);
+      if (st !== 'sold') { if (p) { priceSum += p; priceN++; } out.stock_value_cents += p; }
+      var t = createdTime(c); if (t != null && t <= n && st !== 'sold') { ageSum += (n - t) / DAY; ageN++; }
+    });
+    out.avg_price_cents = priceN ? Math.round(priceSum / priceN) : 0; // unsold cars only
+    out.avg_age_days = ageN ? Math.round(ageSum / ageN * 10) / 10 : null; // null when no car has a listed/created time
+    return out;
+  }
+
+  function leadStats(leads, now) {
+    var d = nowDate(now), day0 = startOfDay(d).getTime(), wk0 = startOfWeek(d).getTime(), list = arr(leads);
+    var out = { total: list.length, by_status: { new: 0, contacted: 0, qualified: 0, won: 0, lost: 0 }, by_source: {}, new_today: 0, new_this_week: 0, conversion_rate: 0, win_rate: 0 };
+    list.forEach(function (l) {
+      inc(out.by_status, String(l.status || 'new').toLowerCase()); inc(out.by_source, l.source || (l.interest ? 'website' : null));
+      var t = createdTime(l); if (t != null) { if (t >= day0) out.new_today++; if (t >= wk0) out.new_this_week++; }
+    });
+    var won = out.by_status.won, lost = out.by_status.lost;
+    out.conversion_rate = list.length ? Math.round(won / list.length * 1000) / 1000 : 0; // won / all leads
+    out.win_rate = won + lost ? Math.round(won / (won + lost) * 1000) / 1000 : 0;      // won / closed (won+lost)
+    return out;
+  }
+
+  function bookingStats(list, now, normStatus, inactive) {
+    var d = nowDate(now), today = dayKey(d), out = { total: 0, today: [], upcoming: [], by_status: {} };
+    arr(list).forEach(function (b) {
+      var s = normStatus(b.status); out.total++; inc(out.by_status, s);
+      var t = apptTime(b); if (!t || inactive[s]) return;
+      var item = { id: b.id, at: t.getTime(), when: dayKey(t) + 'T' + pad(t.getHours()) + ':' + pad(t.getMinutes()), customer: customerName(b), status: s, car_id: b.car_id || b.vin || b.stock || null, service_type: b.service_type || b.type || undefined };
+      if (dayKey(t) === today) out.today.push(item); else if (t > d) out.upcoming.push(item);
+    });
+    var by = function (a, b) { return a.at - b.at; }; out.today.sort(by); out.upcoming.sort(by);
+    return out;
+  }
+  var testDriveStats = function (list, now) { return bookingStats(list, now, tdStatus, { cancelled: 1, completed: 1, no_show: 1 }); };
+  var serviceStats = function (list, now) { return bookingStats(list, now, svStatus, { cancelled: 1, done: 1 }); };
+
+  // Deals (app: pending/closed/lost) and orders (any status string) as one pipeline.
+  function dealAmount(x) { return cents(x.price_cents != null ? x.price_cents : x.total_cents != null ? x.total_cents : Number(x.price != null ? x.price : x.total) * 100); }
+  function pipeline(deals, orders) {
+    var out = { stages: {}, open_count: 0, open_value_cents: 0 };
+    var add = function (x, kind) {
+      var s = String(x.status || x.stage || 'pending').toLowerCase(), a = dealAmount(x);
+      var g = out.stages[s] || (out.stages[s] = { count: 0, value_cents: 0, deals: 0, orders: 0 });
+      g.count++; g.value_cents += a; g[kind]++;
+      if (!/^(closed|won|sold|delivered|completed|lost|cancelled|canceled)$/.test(s)) { out.open_count++; out.open_value_cents += a; }
+    };
+    arr(deals).forEach(function (x) { add(x, 'deals'); }); arr(orders).forEach(function (x) { add(x, 'orders'); });
+    return out;
+  }
+
+  function salesTotals(deals, orders, now) {
+    var d = nowDate(now), wk0 = startOfWeek(d).getTime(), mo0 = startOfMonth(d).getTime(), end = d.getTime();
+    var out = { week_cents: 0, week_count: 0, month_cents: 0, month_count: 0 };
+    arr(deals).concat(arr(orders)).forEach(function (x) {
+      if (!/^(closed|won|sold|delivered|completed)$/.test(String(x.status || '').toLowerCase())) return;
+      var t = toDate(x.closed_at || x.closedAt || x.date || x.created_at || x.createdAt); if (!t) return; t = t.getTime();
+      if (t > end) return; // ignore future-dated
+      var a = dealAmount(x);
+      if (t >= wk0) { out.week_cents += a; out.week_count++; }
+      if (t >= mo0) { out.month_cents += a; out.month_count++; }
+    });
+    return out;
+  }
+
+  function needsAttention(data, now) {
+    var d = nowDate(now), n = d.getTime(), today = dayKey(d), out = [];
+    pick(data, 'leads').forEach(function (l) {
+      if (String(l.status || 'new').toLowerCase() !== 'new' || l.contacted_at || l.contactedAt) return;
+      var t = createdTime(l); if (t == null || n - t <= DAY) return;
+      out.push({ type: 'lead_uncontacted', id: l.id, name: l.name || '', hours_waiting: Math.floor((n - t) / 3600000), message: (l.name || 'A lead') + ' has waited over 24 hours with no contact.' });
+    });
+    pick(data, 'test_drives', 'testDrives').forEach(function (b) {
+      var t = apptTime(b); if (!t || dayKey(t) !== today || tdStatus(b.status) !== 'requested') return;
+      out.push({ type: 'test_drive_unconfirmed', id: b.id, name: customerName(b), at: t.getTime(), message: 'Test drive today at ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) + ' for ' + (customerName(b) || 'a customer') + ' is not confirmed.' });
+    });
+    return out.sort(function (a, b) { return (b.hours_waiting || 0) - (a.hours_waiting || 0) || (a.at || 0) - (b.at || 0); });
+  }
+
+  function summary(data, now) {
+    var d = nowDate(now);
+    var deals = pick(data, 'deals'), orders = pick(data, 'orders');
+    return {
+      generated_at: d.toISOString(),
+      inventory: inventoryStats(pick(data, 'cars'), d),
+      leads: leadStats(pick(data, 'leads'), d),
+      test_drives: testDriveStats(pick(data, 'test_drives', 'testDrives'), d),
+      service: serviceStats(pick(data, 'service_bookings', 'serviceBookings'), d),
+      pipeline: pipeline(deals, orders),
+      sales: salesTotals(deals, orders, d),
+      needs_attention: needsAttention(data, d),
+    };
+  }
+
+  // Convenience: build `data` from the live app's localStorage (read-only). getItem = key => string|null.
+  // baseCars = cars.json `cars`. Keys: 'dealerdesk.v2' (app state), 'dealerdesk.leads.v1' (web leads), 'dealerdesk_booking' (booking module).
+  function fromStorage(getItem, baseCars) {
+    var read = function (k) { try { var v = getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } };
+    var st = read('dealerdesk.v2') || {}, web = read('dealerdesk.leads.v1'), bk = read('dealerdesk_booking') || {};
+    var removed = {};
+    (Array.isArray(st.cars_removed) ? st.cars_removed : []).forEach(function (id) { removed[id] = 1; });
+    var ov = st.car_overrides && typeof st.car_overrides === 'object' ? st.car_overrides : {};
+    var seen = {}, all = arr(baseCars).concat(arr(st.cars_added));
+    var cars = all.reverse().filter(function (c) { if (c.id == null) return true; var k = String(c.id); if (seen[k]) return false; seen[k] = 1; return true; }).reverse()
+      .filter(function (c) { return !removed[c.id]; })
+      .map(function (c) { return ov[c.id] ? Object.assign({}, c, ov[c.id]) : c; });
+    return {
+      cars: cars,
+      leads: arr(st.leads).concat(arr(web)),
+      test_drives: arr(st.test_drives).concat(arr(bk.testDrives)),
+      service_bookings: arr(st.service_bookings).concat(arr(bk.serviceBookings || bk.services)),
+      deals: arr(st.deals),
+      orders: arr(st.orders),
+    };
+  }
+
+  var api = { summary: summary, inventoryStats: inventoryStats, leadStats: leadStats, testDriveStats: testDriveStats, serviceStats: serviceStats,
+    pipeline: pipeline, salesTotals: salesTotals, needsAttention: needsAttention, fromStorage: fromStorage, _createdTime: createdTime };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.DealerDeskDashboard = api;
 })(typeof self !== 'undefined' ? self : this);
-</script><script src="modules/dashboard.js"></script><script src="modules/store.js"></script><script src="modules/inventory.js"></script><script src="modules/favorites.js"></script><script src="modules/compare.js"></script><script src="modules/leads.js"></script><script src="modules/qr.js"></script><script src="modules/qr-label.js"></script><script src="modules/booking.js"></script><script src="modules/order.js"></script>
+</script><script src="modules/store.js"></script><script src="modules/inventory.js"></script><script src="modules/favorites.js"></script><script src="modules/compare.js"></script><script src="modules/leads.js"></script><script src="modules/qr.js"></script><script src="modules/qr-label.js"></script><script src="modules/booking.js"></script><script src="modules/order.js"></script>
 <script>
 (function(){
 'use strict';
@@ -340,13 +472,16 @@ var inv={q:'',status:'',condition:'',make:'',model:'',body:'',fuel:'',pmin:'',pm
 function invList(){var q=inv.q.toLowerCase();var l=cars().filter(function(c){return(!inv.status||c.status===inv.status)&&(!inv.condition||c.condition===inv.condition)&&(!inv.make||c.make===inv.make)&&(!inv.model||c.model===inv.model)&&(!inv.body||bodyType(c)===inv.body)&&(!inv.fuel||fuel(c)===inv.fuel)&&(inv.pmin===''||c.price_cents>=inv.pmin*100)&&(inv.pmax===''||c.price_cents<=inv.pmax*100)&&(inv.ymin===''||c.year>=+inv.ymin)&&(inv.ymax===''||c.year<=+inv.ymax)&&(inv.mmax===''||c.mileage<=+inv.mmax)&&(!q||(c.year+' '+c.make+' '+c.model+' '+c.trim+' '+c.vin+' '+c.stock_no+' '+c.color).toLowerCase().indexOf(q)>=0)});
  var f={price_asc:function(a,b){return a.price_cents-b.price_cents},price_desc:function(a,b){return b.price_cents-a.price_cents},year_desc:function(a,b){return b.year-a.year},mileage_asc:function(a,b){return a.mileage-b.mileage},newest:null}[inv.sort];return f?l.slice().sort(f):l}
 var views={
-dashboard:{label:'Dashboard',count:function(){return 0},render:function(){var D=window.DealerDeskDashboard||window.DDDashboard||window.DDDashboardLocal,r;
- try{r=D.summary({cars:cars(),deals:st.deals,leads:st.leads,test_drives:st.test_drives,service_bookings:st.service_bookings,staff:st.staff},Date.now())}catch(e){r=window.DDDashboardLocal.summary({cars:cars(),deals:st.deals,leads:st.leads,test_drives:st.test_drives,service_bookings:st.service_bookings,staff:st.staff},Date.now())}
- var c=r.counts||{},sa=r.sales||{},pl=r.pipeline||[],at=r.attention||[],pmax=Math.max.apply(null,[1].concat(pl.map(function(p){return p.count||0})));
- return'<h2>Sales dashboard</h2><div class="kpis">'+[['Revenue (closed)',money(sa.revenue_cents)],['Cars sold',sa.closed||0],['In stock',((c.available||0)+(c.hold||0)).toLocaleString()],['Stock value',money(c.stock_value_cents)],['Open leads',c.leads_open||0],['Bookings today',c.bookings_today||0],['Upcoming bookings',c.bookings_upcoming||0],['Pending deals',sa.pending||0]].map(function(k){return'<div class="kpi" data-kpi="'+esc(k[0])+'"><b>'+esc(k[1])+'</b><span>'+esc(k[0])+'</span></div>'}).join('')+'</div>'+
- '<div class="dash2"><div class="card"><h3 style="margin-top:0">Needs attention</h3>'+(at.length?'<ul class="att">'+at.slice(0,8).map(function(a){return'<li class="'+(a.severity==='high'?'hi':'')+'">'+esc(a.text)+'</li>'}).join('')+'</ul>'+(at.length>8?'<p class="muted">and '+(at.length-8)+' more</p>':''):'<p class="muted">All clear. Nothing needs follow-up.</p>')+'</div>'+
- '<div class="card"><h3 style="margin-top:0">Lead pipeline</h3>'+pl.map(function(p){return'<div class="pipe"><span>'+esc(label(p.stage))+'</span><i style="width:'+Math.round(100*(p.count||0)/pmax)+'%"></i><b>'+(p.count||0)+'</b></div>'}).join('')+'</div></div>'+
- '<h3>Sales by staff</h3><table><tr><th>Staff</th><th>Deals closed</th><th>Closed revenue</th></tr>'+((sa.by_staff||[]).length?sa.by_staff.map(function(s){return'<tr><td>'+esc(s.name)+'</td><td>'+(s.deals||0)+'</td><td>'+money(s.revenue_cents||0)+'</td></tr>'}).join(''):empty(3,'No staff yet. Add people in Staff.'))+'</table>'}},
+dashboard:{label:'Dashboard',render:function(){var D=window.DealerDeskDashboard,r=null;
+ try{r=D.summary(D.fromStorage(function(k){try{return localStorage.getItem(k)}catch(e){return null}},base.cars||[]),Date.now())}catch(e){r=null}
+ if(!r)return'<h2>Sales dashboard</h2><p class="muted">Dashboard data is loading.</p>';
+ var iv=r.inventory||{},ld=r.leads||{},tdv=r.test_drives||{},sv=r.service||{},pl=r.pipeline||{},sa=r.sales||{},at=r.needs_attention||[],stg=pl.stages||{},sk=Object.keys(stg),pmax=Math.max.apply(null,[1].concat(sk.map(function(k){return stg[k].count||0}))),bs=ld.by_status||{},lmax=Math.max.apply(null,[1].concat(Object.keys(bs).map(function(k){return bs[k]||0})));
+ function pct(x){return Math.round((+x||0)*100)+'%'}
+ return'<h2>Sales dashboard</h2><div class="kpis">'+[['Sales this week',money(sa.week_cents)+' · '+(sa.week_count||0)],['Sales this month',money(sa.month_cents)+' · '+(sa.month_count||0)],['In stock',((iv.available||0)+(iv.hold||0)).toLocaleString()],['Stock value',money(iv.stock_value_cents)],['Average price',money(iv.avg_price_cents)],['Average age',iv.avg_age_days==null?'—':Math.round(iv.avg_age_days)+' days'],['Open leads',(ld.total||0)-(bs.won||0)-(bs.lost||0)],['New leads this week',ld.new_this_week||0],['Win rate',pct(ld.win_rate)],['Test drives today',(tdv.today||[]).length],['Service today',(sv.today||[]).length],['Open pipeline',money(pl.open_value_cents)+' · '+(pl.open_count||0)]].map(function(k){return'<div class="kpi" data-kpi="'+esc(k[0])+'"><b>'+esc(k[1])+'</b><span>'+esc(k[0])+'</span></div>'}).join('')+'</div>'+
+ '<div class="dash2"><div class="card" id="needs-attention"><h3 style="margin-top:0">Needs attention'+(at.length?' <span class="badge">'+at.length+'</span>':'')+'</h3>'+(at.length?'<ul class="att">'+at.slice(0,10).map(function(a){return'<li class="'+(/uncontacted|unconfirmed/.test(a.type)?'hi':'')+'">'+esc(a.message||a.type)+'</li>'}).join('')+'</ul>'+(at.length>10?'<p class="muted">and '+(at.length-10)+' more</p>':''):'<p class="muted">All clear. Nothing needs follow-up.</p>')+'</div>'+
+ '<div class="card"><h3 style="margin-top:0">Lead pipeline</h3>'+['new','contacted','qualified','won','lost'].map(function(k){var n=bs[k]||0;return'<div class="pipe"><span>'+esc(label(k))+'</span><i style="width:'+Math.round(100*n/lmax)+'%"></i><b>'+n+'</b></div>'}).join('')+
+ (sk.length?'<h3>Deals and orders</h3>'+sk.map(function(k){return'<div class="pipe"><span>'+esc(label(k))+'</span><i style="width:'+Math.round(100*(stg[k].count||0)/pmax)+'%"></i><b>'+(stg[k].count||0)+'</b></div>'}).join(''):'')+'</div></div>'+
+ '<h3>Upcoming</h3><table><tr><th>When</th><th>Type</th><th>Customer</th></tr>'+((tdv.upcoming||[]).map(function(b){return['Test drive',b]}).concat((sv.upcoming||[]).map(function(b){return['Service',b]})).slice(0,8).map(function(x){var b=x[1];return'<tr><td>'+esc(String(b.at||b.date||'').replace('T',' '))+'</td><td>'+x[0]+'</td><td>'+esc(b.customer&&b.customer.name||b.name||'')+'</td></tr>'}).join('')||empty(3,'No upcoming bookings.'))+'</table>'}},
 inventory:{label:'Inventory',count:function(){return cars().filter(function(c){return c.status==='available'}).length},render:function(){
  var l=invList(),pages=Math.max(1,Math.ceil(l.length/PAGE));if(inv.page>=pages)inv.page=pages-1;var rows=l.slice(inv.page*PAGE,inv.page*PAGE+PAGE);
  var makes=Object.keys(cars().reduce(function(a,c){a[c.make]=1;return a},{})).sort();
@@ -389,7 +524,7 @@ function render(){document.getElementById('nav').innerHTML='<h1>'+esc(st.setting
 function fd(f){var o={};[].forEach.call(f.elements,function(e){if(e.name)o[e.name]=e.type==='checkbox'?e.checked:String(e.value).trim()});return o}
 var add={
  car:function(o){var n=S.normalizeCar({id:uid('car'),stock_no:o.stock_no,vin:o.vin.toUpperCase(),year:o.year,make:o.make,model:o.model,trim:o.trim,price:o.price,mileage:o.mileage,condition:o.condition,status:'available',photos:o.photo?[o.photo]:[]});
-  if(cars().some(function(c){return c.stock_no===n.stock_no}))throw new S.SchemaError('stock_no','already used');st.cars_added.push(n);dirty()},
+  if(cars().some(function(c){return c.stock_no===n.stock_no}))throw new S.SchemaError('stock_no','already used');n.listed_at=new Date().toISOString();st.cars_added.push(n);dirty()},
  lead:function(o){DD.addLead(o)},
  testdrive:function(o){DD.addTestDrive({customer:{name:o.name,phone:o.phone},car_id:o.car_id,at:o.at})},
  service:function(o){DD.addServiceBooking({customer:{name:o.name,phone:o.phone},vehicle:{year:o.year,make:o.make,model:o.model},service_type:o.service_type,at:o.at})},
@@ -399,7 +534,7 @@ var add={
  qr:function(o){setTimeout(function(){var e2=document.getElementById('qrout');if(e2)DDQRLabel.render(e2,o.vin,location.href.replace(/[?#].*$/,'').replace(/[^\/]*$/,''))},0)},
  settings:function(o){st.settings.dealer_name=o.dealer_name.slice(0,80);st.settings.currency=o.currency;st.settings.tax_rate=Math.min(30,Math.max(0,+o.tax_rate||0));st.settings.sound=!!o.sound}};
 function setCar(id,patch){var c=car(id);if(!c)return;var n=S.normalizeCar(Object.assign({},c,patch,{price:(patch.price_cents!=null?patch.price_cents:c.price_cents)/100}));
- var a=st.cars_added.findIndex(function(x){return x.id===id});if(a>=0)st.cars_added[a]=n;else st.car_overrides[id]=Object.assign(st.car_overrides[id]||{},{status:n.status,price_cents:n.price_cents});dirty()}
+ var a=st.cars_added.findIndex(function(x){return x.id===id});if(a>=0){if(st.cars_added[a].listed_at)n.listed_at=st.cars_added[a].listed_at;st.cars_added[a]=n}else st.car_overrides[id]=Object.assign(st.car_overrides[id]||{},{status:n.status,price_cents:n.price_cents});dirty()}
 document.addEventListener('submit',function(e){var f=e.target,k=f.getAttribute('data-form');if(!add[k])return;e.preventDefault();try{add[k](fd(f),f)}catch(err){toast(schemaErr(err));return}save();render();toast('Saved')});
 function showTA(q){var box=document.getElementById('ta');if(!box)return;var l=suggest(q);box.innerHTML=l.map(function(x,i){return'<div class="ta-item" role="option" data-make="'+esc(x.make)+'" data-model="'+esc(x.model)+'"><b>'+esc(x.make)+'</b> '+esc(x.model)+' <span class="muted">'+x.count+'</span></div>'}).join('');box.style.display=l.length?'block':'none'}
 var qT;document.addEventListener('input',function(e){var k=e.target.getAttribute('data-inv');if(k!=='q')return;var val=e.target.value;showTA(val);clearTimeout(qT);qT=setTimeout(function(){inv.q=val;inv.page=0;var p=document.querySelector('[data-inv=q]'),pos=p?p.selectionStart:0;render();var s=document.querySelector('[data-inv=q]');if(s&&p){s.focus();s.setSelectionRange(pos,pos);showTA(val)}},250)});

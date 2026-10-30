@@ -26,7 +26,7 @@ submit('car',{stock_no:'T3',vin:'1HGCM82633A004353',year:2020,make:'<b>x',model:
 // deals
 nav('deals');submit('deal',{car_id:c.id,buyer:'Pat',price:14500,staff_id:'st-2'});let d=DD.state.deals[0];ok(d.status==='pending'&&DD.car(c.id).status==='hold','deal pending holds car');
 doc.querySelector('[data-act=closedeal][data-id="'+d.id+'"]').click();ok(DD.car(c.id).status==='sold'&&doc.querySelector('.pill.closed'),'close -> sold');
-nav('dashboard');ok(doc.querySelector('[data-kpi="Cars sold"] b').textContent==='1','dashboard sold');
+nav('dashboard');ok(/· 1$/.test(doc.querySelector('[data-kpi="Sales this week"] b').textContent),'dashboard sold this week');
 // leads + bookings through schema
 nav('leads');submit('lead',{name:'Q',phone:'12'});ok(DD.state.leads.length===(carsJson.leads||[]).length,'bad phone rejected');
 submit('lead',{name:'Q',phone:'(313) 555-0100'});ok(DD.state.leads.length===(carsJson.leads||[]).length+1,'lead added');
