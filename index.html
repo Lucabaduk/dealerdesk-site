@@ -7,7 +7,7 @@ header{background:#14213d;color:#fff;padding:18px 6vw;display:flex;justify-conte
 section{padding:70px 6vw}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px}.f{border:1px solid #e3e7ee;border-radius:12px;padding:22px}.f h3{margin:0 0 6px}
 .alt{background:#f6f7fb}footer{padding:30px 6vw;color:#5c677d;font-size:14px;border-top:1px solid #e3e7ee}header nav a{display:inline-block;padding:12px 6px}</style></head><body>
 <header><b>DealerDesk</b><nav><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="app.html">Open app</a></nav></header>
-<div class="hero"><h1>Run your dealership from one clean screen.</h1><p>Inventory, leads, test drives, service bookings, deals and staff performance, built for independent car dealers. No installs, no contracts.</p><a class="cta" href="app.html">Try DealerDesk free</a></div>
+<div class="hero" style="background:linear-gradient(90deg,rgba(20,33,61,.92),rgba(20,33,61,.55)),url(assets/site/hero.webp) center/cover"><h1>Run your dealership from one clean screen.</h1><p>Inventory, leads, test drives, service bookings, deals and staff performance, built for independent car dealers. No installs, no contracts.</p><a class="cta" href="app.html">Try DealerDesk free</a></div>
 <section id="features"><h2>Everything the showroom needs</h2><div class="grid">
 <div class="f"><h3>Inventory</h3><p>Track every vehicle by VIN with price, mileage, photos and status from Available to Sold.</p></div>
 <div class="f"><h3>Leads</h3><p>Capture walk-ins, calls and website enquiries, and follow each one from New to Closed.</p></div>
@@ -16,8 +16,10 @@ section{padding:70px 6vw}.grid{display:grid;grid-template-columns:repeat(auto-fi
 <div class="f"><h3>Sales dashboard</h3><p>See revenue, units sold, stock value and sales by staff at a glance.</p></div>
 <div class="f"><h3>Private by design</h3><p>Your data stays in your browser. Export it anytime.</p></div></div></section>
 <section id="pricing" class="alt"><h2>Pricing</h2><p><b>Free during early access.</b> All features included. No card required.</p><a class="cta" href="app.html">Open the app</a></section>
-<footer>© 2026 DealerDesk. Sample data is fictional.</footer><div id="toast" style="position:fixed;right:18px;bottom:18px;background:#14213d;color:#fff;padding:10px 16px;border-radius:8px;display:none"></div><style>#toast.on{display:block!important}</style><script>(function(){var v=null,pend=false;function typing(){var a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)}
+<footer>© 2026 DealerDesk. Sample data is fictional.</footer><div id="toast" style="position:fixed;right:18px;bottom:18px;background:#14213d;color:#fff;padding:10px 16px;border-radius:8px;display:none"></div><style>#toast.on{display:block!important}</style><script>(function(){if(!/[?&]watch=1(&|$)/.test(location.search))return;var v=null,told=false;
+function busy(){var a=document.activeElement;if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName))return true;if(document.querySelector('dialog[open],.modal.open,details[open]'))return true;
+return[].some.call(document.querySelectorAll('input,textarea'),function(e){return e.type!=='checkbox'&&e.type!=='search'&&e.value!==e.defaultValue})}
 function note(){var t=document.getElementById('toast');if(t){t.textContent='Updated';t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2500)}}
-function chk(){if(!window.fetch||location.protocol==='file:')return;fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){if(v===null){v=j.v;return}if(j.v!==v){if(typing()){if(!pend){pend=true;note()}}else location.reload()}}).catch(function(){})}
-chk();setInterval(chk,10000);document.addEventListener('focusout',function(){if(pend)setTimeout(function(){if(!typing())location.reload()},1500)})})();</script>
+function chk(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){if(v===null){v=j.v;return}if(j.v!==v){if(busy()){if(!told){told=true;note()}}else location.replace(location.href)}}).catch(function(){})}
+chk();setInterval(chk,10000)})();</script>
 </body></html>

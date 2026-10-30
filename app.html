@@ -7,102 +7,338 @@
 nav{width:210px;background:var(--ink);color:#fff;padding:18px 0;flex-shrink:0}nav h1{font-size:18px;margin:0 20px 18px;letter-spacing:.5px}
 nav button{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:#cdd3e0;text-align:left;padding:10px 20px;font:inherit;cursor:pointer}
 nav button.on,nav button:hover{background:#22325a;color:#fff}.badge{background:var(--acc);color:#fff;border-radius:10px;padding:0 7px;font-size:12px}
-td.empty{text-align:center;color:var(--muted);padding:18px}main{flex:1;padding:24px;overflow:auto}h2{margin:0 0 16px;font-weight:600}
+main{flex:1;padding:24px;overflow:auto}h2{margin:0 0 16px;font-weight:600}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
 .kpi,.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}.kpi b{display:block;font-size:24px}.kpi span{color:var(--muted);font-size:13px}
 table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{background:#eef1f7;font-weight:600;color:var(--muted)}
-.pill{padding:2px 8px;border-radius:10px;font-size:12px;background:#eef1f7}.pill.Available,.pill.Closed{background:#e3f4ec;color:var(--ok)}.pill.Pending{background:#fbf0dc;color:var(--warn)}.pill.Sold,.pill.Lost{background:#f8e1de;color:var(--bad)}
+.pill{padding:2px 8px;border-radius:10px;font-size:12px;background:#eef1f7}.pill.closed{background:#e3f4ec;color:var(--ok)}.pill.pending{background:#fbf0dc;color:var(--warn)}.pill.lost{background:#f8e1de;color:var(--bad)}
 form.row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}input,select{padding:8px;border:1px solid var(--line);border-radius:6px;font:inherit}
 .btn{background:var(--acc);color:#fff;border:0;border-radius:6px;padding:8px 14px;font:inherit;cursor:pointer}.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
 .thumb{width:64px;height:42px;object-fit:cover;border-radius:4px;background:#eef1f7;display:block}.nophoto{width:64px;height:42px;border-radius:4px;background:#eef1f7}
 .toast{position:fixed;right:18px;bottom:18px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;opacity:0;transition:.3s}.toast.on{opacity:1}
 @media(max-width:700px){body{flex-direction:column}nav{width:100%;display:flex;overflow-x:auto;padding:8px}nav h1{display:none}nav button{width:auto;white-space:nowrap}main{padding:14px}table{display:block;overflow-x:auto;white-space:nowrap}.btn,input,select,nav button{min-height:44px}input,select{font-size:16px}}
 @media(prefers-color-scheme:dark){:root{--ink:#e6e9f2;--muted:#9aa5bd;--line:#2c3550;--bg:#0f1424;--card:#171e33}nav{background:#0a0f1d}th{background:#1f2740}.btn.ghost{background:var(--card)}input,select{background:#0f1424;color:var(--ink)}.toast{background:#2f5bea}.pill,.thumb,.nophoto{background:#1f2740}}
-</style></head><body>
+.muted{color:var(--muted)}.row input[type=search]{min-width:240px;flex:1}details summary{cursor:pointer;font-weight:600}.btn[disabled]{opacity:.45;cursor:default}</style></head><body>
 <nav id="nav"><h1>DealerDesk</h1></nav><main id="main"></main><div class="toast" id="toast"></div>
+<script>// DealerDesk data schema — standalone, no dependencies.
+// Every normalize* function returns a clean object or throws SchemaError.
+'use strict';
+
+class SchemaError extends Error {
+  constructor(field, message) { super(field + ': ' + message); this.field = field; }
+}
+
+const ENUMS = {
+  condition: ['new', 'used'],
+  carStatus: ['available', 'hold', 'sold'],
+  testDriveStatus: ['requested', 'confirmed', 'completed', 'cancelled', 'no_show'],
+  serviceType: ['oil_change', 'tires', 'brakes', 'inspection', 'detailing', 'diagnostic', 'other'],
+  serviceStatus: ['booked', 'in_progress', 'done', 'cancelled'],
+  leadSource: ['website', 'walk_in', 'phone', 'referral', 'social', 'other'],
+  leadStatus: ['new', 'contacted', 'qualified', 'won', 'lost'],
+};
+
+const text = (v, max) => (typeof v === 'string' || (typeof v === 'number' && Number.isFinite(v)))
+  ? String(v).replace(/[\u0000-\u001f\u007f\u2028\u2029]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max) : '';
+
+function req(field, v, max) { const t = text(v, max); if (!t) throw new SchemaError(field, 'is required'); return t; }
+function oneOf(field, v, list, dflt) {
+  if (v == null || v === '') { if (dflt !== undefined) return dflt; throw new SchemaError(field, 'is required'); }
+  const t = String(v).toLowerCase();
+  if (!list.includes(t)) throw new SchemaError(field, 'must be one of ' + list.join(', '));
+  return t;
+}
+function id(field, v) {
+  const t = String(v == null ? '' : v);
+  if (!/^[A-Za-z0-9_-]{1,40}$/.test(t)) throw new SchemaError(field, 'must be 1-40 letters, digits, - or _');
+  return t;
+}
+function num(field, v, min, max, int) {
+  const n = Number(v);
+  if (typeof v === 'boolean' || (typeof v === 'string' && !v.trim()) || v == null || !Number.isFinite(n) || n < min || n > max || (int && !Number.isInteger(n)))
+    throw new SchemaError(field, 'must be a ' + (int ? 'whole ' : '') + 'number from ' + min + ' to ' + max);
+  return n;
+}
+function vin(v) {
+  const t = text(v, 17).toUpperCase();
+  if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(t)) throw new SchemaError('vin', 'must be 17 characters (no I, O or Q)');
+  return t;
+}
+function phone(field, v, optional) {
+  const t = text(v, 30);
+  if (!t && optional) return '';
+  const digits = t.replace(/\D/g, '');
+  if (digits.length < 7 || digits.length > 15 || !/^[+0-9 ().-]+$/.test(t)) throw new SchemaError(field, 'is not a valid phone number');
+  return t;
+}
+function email(field, v, optional) {
+  const t = text(v, 120).toLowerCase();
+  if (!t && optional) return '';
+  if (!/^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/.test(t)) throw new SchemaError(field, 'is not a valid email');
+  return t;
+}
+// ISO local date-time "YYYY-MM-DDTHH:MM"
+function when(field, v) {
+  const t = text(v, 16);
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(t);
+  if (!m) throw new SchemaError(field, 'must look like 2026-11-02T14:30');
+  const d = new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]);
+  if (d.getMonth() !== m[2] - 1 || d.getDate() !== +m[3] || +m[4] > 23 || +m[5] > 59) throw new SchemaError(field, 'is not a real date/time');
+  return t;
+}
+// Photos: https URLs or relative paths to image files inside the site. Nothing else.
+function safeUrl(v) {
+  if (typeof v !== 'string') return '';
+  const u = v.trim();
+  if (!u || u.length > 500 || /[\s"'<>\\`]/.test(u) || u.includes('..')) return '';
+  if (/^https:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9_\/.%~+-]*)?(\?[A-Za-z0-9_=&.%-]*)?$/.test(u)) return u;
+  if (/^(\.\/)?[A-Za-z0-9_-][A-Za-z0-9_\/.-]*\.(webp|jpe?g|png|avif)$/i.test(u)) return u;
+  return '';
+}
+function list(v, max, itemMax) {
+  const out = [], seen = new Set();
+  for (const x of Array.isArray(v) ? v : []) {
+    const t = text(x, itemMax);
+    if (t && !seen.has(t.toLowerCase())) { seen.add(t.toLowerCase()); out.push(t); }
+  }
+  return out.slice(0, max);
+}
+function obj(v, what) { if (!v || typeof v !== 'object' || Array.isArray(v)) throw new SchemaError(what, 'must be an object'); return v; }
+
+function normalizeCustomer(c, field) {
+  obj(c, field);
+  const out = { name: req(field + '.name', c.name, 80), phone: phone(field + '.phone', c.phone, true), email: email(field + '.email', c.email, true) };
+  if (!out.phone && !out.email) throw new SchemaError(field, 'needs a phone or an email');
+  return out;
+}
+
+const YEAR_MAX = new Date().getFullYear() + 2;
+
+function normalizeCar(c) {
+  obj(c, 'car');
+  const condition = oneOf('condition', c.condition, ENUMS.condition);
+  const mileage = c.mileage == null || c.mileage === '' ? 0 : num('mileage', c.mileage, 0, 2000000, true);
+  return {
+    id: id('id', c.id),
+    stock_no: req('stock_no', c.stock_no, 20),
+    vin: vin(c.vin),
+    year: num('year', c.year, 1900, YEAR_MAX, true),
+    make: req('make', c.make, 40),
+    model: req('model', c.model, 60),
+    trim: text(c.trim, 60),
+    price_cents: Math.round(num('price', c.price, 0, 10000000) * 100),
+    mileage,
+    color: text(c.color, 30),
+    condition,
+    status: oneOf('status', c.status, ENUMS.carStatus, 'available'),
+    photos: (Array.isArray(c.photos) ? c.photos : []).map(safeUrl).filter(Boolean).slice(0, 30),
+    features: list(c.features, 40, 60),
+  };
+}
+
+function normalizeTestDrive(t, cars) {
+  obj(t, 'test_drive');
+  const out = {
+    id: id('id', t.id),
+    customer: normalizeCustomer(t.customer, 'customer'),
+    car_id: id('car_id', t.car_id),
+    at: when('at', t.at),
+    status: oneOf('status', t.status, ENUMS.testDriveStatus, 'requested'),
+    notes: text(t.notes, 300),
+  };
+  if (cars) {
+    const car = cars.find(c => c.id === out.car_id);
+    if (!car) throw new SchemaError('car_id', 'no car with that id');
+    if (car.status === 'sold' && out.status !== 'cancelled') throw new SchemaError('car_id', 'that car is sold');
+  }
+  return out;
+}
+
+function normalizeServiceBooking(s) {
+  obj(s, 'service_booking');
+  const v = obj(s.vehicle, 'vehicle');
+  return {
+    id: id('id', s.id),
+    customer: normalizeCustomer(s.customer, 'customer'),
+    vehicle: {
+      year: num('vehicle.year', v.year, 1900, YEAR_MAX, true),
+      make: req('vehicle.make', v.make, 40),
+      model: req('vehicle.model', v.model, 60),
+      vin: v.vin ? vin(v.vin) : '',
+      plate: text(v.plate, 12).toUpperCase(),
+    },
+    service_type: oneOf('service_type', s.service_type, ENUMS.serviceType),
+    at: when('at', s.at),
+    status: oneOf('status', s.status, ENUMS.serviceStatus, 'booked'),
+    notes: text(s.notes, 300),
+  };
+}
+
+function normalizeLead(l, cars) {
+  obj(l, 'lead');
+  const out = {
+    id: id('id', l.id),
+    name: req('name', l.name, 80),
+    phone: phone('phone', l.phone, true),
+    email: email('email', l.email, true),
+    interest_car_id: l.interest_car_id ? id('interest_car_id', l.interest_car_id) : null,
+    source: oneOf('source', l.source, ENUMS.leadSource, 'website'),
+    status: oneOf('status', l.status, ENUMS.leadStatus, 'new'),
+    notes: text(l.notes, 1000),
+  };
+  if (!out.phone && !out.email) throw new SchemaError('lead', 'needs a phone or an email');
+  if (cars && out.interest_car_id && !cars.some(c => c.id === out.interest_car_id)) throw new SchemaError('interest_car_id', 'no car with that id');
+  return out;
+}
+
+// Whole dealership dataset. Unique ids per collection, cross-references checked.
+function normalizeDealership(d) {
+  obj(d, 'dealership');
+  const arr = (v, name) => { if (v == null) return []; if (!Array.isArray(v)) throw new SchemaError(name, 'must be a list'); return v; };
+  const uniq = (arr, name) => { const s = new Set(); for (const x of arr) { if (s.has(x.id)) throw new SchemaError(name, 'duplicate id ' + x.id); s.add(x.id); } return arr; };
+  const cars = uniq(arr(d.cars, 'cars').slice(0, 2000).map(normalizeCar), 'cars');
+  const stock = new Set(); for (const c of cars) { if (stock.has(c.stock_no)) throw new SchemaError('cars', 'duplicate stock_no ' + c.stock_no); stock.add(c.stock_no); }
+  return {
+    dealer_name: text(d.dealer_name, 80) || 'Our dealership',
+    cars,
+    test_drives: uniq(arr(d.test_drives, 'test_drives').map(t => normalizeTestDrive(t, cars)), 'test_drives'),
+    service_bookings: uniq(arr(d.service_bookings, 'service_bookings').map(normalizeServiceBooking), 'service_bookings'),
+    leads: uniq(arr(d.leads, 'leads').map(l => normalizeLead(l, cars)), 'leads'),
+  };
+}
+
+const api = { SchemaError, ENUMS, safeUrl, normalizeCar, normalizeTestDrive, normalizeServiceBooking, normalizeLead, normalizeDealership };
+if (typeof module !== 'undefined' && module.exports) module.exports = api;
+else if (typeof window !== 'undefined') window.DealerDeskSchema = api;
+</script>
 <script>
 (function(){
 'use strict';
-var KEY='dealerdesk.v1';
-/* Schema adapter: Grok Master Helper's data model can replace DD.schema.normalize without touching views. */
-var schema={version:1,
- normalize:function(d){d=d||{};['cars','leads','bookings','deals','staff'].forEach(function(k){if(!Array.isArray(d[k]))d[k]=[]});
-  d.settings=Object.assign({dealer:'Northside Motors',currency:'USD',taxRate:6,sound:true},d.settings||{});d.schemaVersion=1;return d}};
-function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function sample(){var s=[{id:'s1',name:'Dana Reyes',role:'Sales Manager'},{id:'s2',name:'Marcus Lee',role:'Sales'},{id:'s3',name:'Priya Shah',role:'Service Advisor'}];
- var c=[['1HGCM82633A004352','Honda','Accord',2023,27900,14200,'Available'],['2T1BURHE0JC034567','Toyota','Corolla',2022,21500,22800,'Available'],['1FTFW1E50MFA12345','Ford','F-150',2021,38900,31000,'Pending'],['5YJ3E1EA7KF317000','Tesla','Model 3',2020,29900,41000,'Sold']]
-  .map(function(a,i){return{id:'c'+(i+1),vin:a[0],make:a[1],model:a[2],year:a[3],price:a[4],mileage:a[5],status:a[6],photo:''}});
- var t=new Date().toISOString().slice(0,10);
- return schema.normalize({cars:c,staff:s,
-  leads:[{id:'l1',name:'Jordan Kim',phone:'555-0101',carId:'c1',source:'Walk-in',status:'New',created:t},{id:'l2',name:'Alex Morgan',phone:'555-0144',carId:'c3',source:'Website',status:'Contacted',created:t}],
-  bookings:[{id:'b1',type:'Test drive',name:'Jordan Kim',carId:'c1',when:t+'T15:00',staffId:'s2'},{id:'b2',type:'Service',name:'Sam Ortiz',carId:'',when:t+'T10:30',staffId:'s3'}],
-  deals:[{id:'d1',carId:'c4',buyer:'Chris Patel',price:29000,staffId:'s1',status:'Closed',date:t},{id:'d2',carId:'c3',buyer:'Alex Morgan',price:38000,staffId:'s2',status:'Pending',date:t}]})}
-function load(){try{var r=localStorage.getItem(KEY);if(r)return schema.normalize(JSON.parse(r))}catch(e){}var d=sample();d.firstRun=true;return d}
-var db=load();function save(){localStorage.setItem(KEY,JSON.stringify(db))}save();
+var S=window.DealerDeskSchema,KEY='dealerdesk.v2',OLD='dealerdesk.v1',PAGE=50;
+function uid(p){return p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return'&#'+c.charCodeAt(0)+';'})}
-function money(n){try{return new Intl.NumberFormat('en-US',{style:'currency',currency:db.settings.currency,maximumFractionDigits:0}).format(+n||0)}catch(e){return'$'+(+n||0)}}
-function car(id){return db.cars.find(function(c){return c.id===id})}function carName(id){var c=car(id);return c?c.year+' '+c.make+' '+c.model:(id?'Removed car':'—')}
-function staff(id){var s=db.staff.find(function(x){return x.id===id});return s?s.name:(id?'Removed staff':'—')}
-function opts(list,lab,sel,blank){return(blank?'<option value="">'+blank+'</option>':'')+list.map(function(x){return'<option value="'+esc(x.id)+'"'+(x.id===sel?' selected':'')+'>'+esc(lab(x))+'</option>'}).join('')}
-var actx;function chime(){if(!db.settings.sound)return;try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();var o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=660;g.gain.setValueAtTime(0.0001,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.12,actx.currentTime+0.03);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+0.6);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+0.65)}catch(e){}}
-function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},1800)}
-function photo(c){return c.photo?'<img class="thumb" alt="" src="'+esc(c.photo)+'">':'<div class="nophoto" aria-label="No photo"></div>'}
+var base={dealer_name:'',cars:[],test_drives:[],service_bookings:[],leads:[]},baseOk=false;
+function blank(){return{schema:2,settings:{dealer_name:'',currency:'USD',tax_rate:6,sound:true},staff:[{id:'st-1',name:'Dana Reyes',role:'Sales Manager'},{id:'st-2',name:'Marcus Lee',role:'Sales'},{id:'st-3',name:'Priya Shah',role:'Service Advisor'}],
+ deals:[],leads:[],test_drives:[],service_bookings:[],seeded:false,car_overrides:{},cars_added:[],cars_removed:[]}}
+/* v1 -> v2 migration (old app field names -> schema.js names). Invalid old records are dropped, not crashed on. */
+function migrate(o){var d=blank(),bad=0;o=o||{};var st=o.settings||{};
+ d.settings={dealer_name:st.dealer||'',currency:st.currency||'USD',tax_rate:+st.taxRate||0,sound:st.sound!==false};
+ if(Array.isArray(o.staff)&&o.staff.length)d.staff=o.staff.map(function(s){return{id:'st-'+String(s.id).replace(/[^\w-]/g,''),name:String(s.name||''),role:String(s.role||'Sales')}});
+ var sample={c1:1,c2:1,c3:1,c4:1},map={};
+ (o.cars||[]).forEach(function(c){if(sample[c.id])return;try{var n=S.normalizeCar({id:'car-u'+String(c.id).replace(/[^\w-]/g,''),stock_no:'U'+String(c.id).slice(-8),vin:c.vin,year:c.year,make:c.make,model:c.model,price:+c.price||0,mileage:+c.mileage||0,condition:'used',status:{Pending:'hold',Sold:'sold'}[c.status]||'available',photos:c.photo?[c.photo]:[]});d.cars_added.push(n);map[c.id]=n.id}catch(e){bad++}});
+ d.leads=[];(o.leads||[]).forEach(function(l){try{d.leads.push(S.normalizeLead({id:'ld-u'+String(l.id).replace(/[^\w-]/g,''),name:l.name,phone:l.phone,interest_car_id:map[l.carId]||null,source:{'Walk-in':'walk_in',Phone:'phone',Website:'website'}[l.source]||'other',status:{New:'new',Contacted:'contacted',Qualified:'qualified',Closed:'won',Lost:'lost'}[l.status]||'new',notes:l.source==='QR'?'QR code':''}))}catch(e){bad++}});
+ d.test_drives=[];d.service_bookings=[];
+ (o.deals||[]).forEach(function(x){if(!map[x.carId])return;d.deals.push({id:'dl-u'+String(x.id).replace(/[^\w-]/g,''),car_id:map[x.carId],buyer:String(x.buyer||''),price_cents:Math.round((+x.price||0)*100),staff_id:'st-'+x.staffId,status:{Closed:'closed',Lost:'lost'}[x.status]||'pending',date:x.date||today()})});
+ d.seeded=true;d.migrated_from_v1=true;d.migration_dropped=bad;return d}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&d.schema===2)return Object.assign(blank(),d)}}catch(e){}
+ try{var o=localStorage.getItem(OLD);if(o){var m=migrate(JSON.parse(o));return m}}catch(e){}var b=blank();b.firstRun=true;return b}
+var st=load();function save(){var c=Object.assign({},st);delete c.firstRun;localStorage.setItem(KEY,JSON.stringify(c))}
+function seedFromBase(){if(!st.seeded&&baseOk){st.seeded=true;st.leads=base.leads.concat(st.leads);st.test_drives=base.test_drives.concat(st.test_drives);st.service_bookings=base.service_bookings.concat(st.service_bookings)}if(!st.settings.dealer_name)st.settings.dealer_name=base.dealer_name}
+var carCache=null;function cars(){if(carCache)return carCache;var rm={};st.cars_removed.forEach(function(i){rm[i]=1});
+ carCache=base.cars.filter(function(c){return!rm[c.id]}).map(function(c){var o=st.car_overrides[c.id];return o?Object.assign({},c,o):c}).concat(st.cars_added.filter(function(c){return!rm[c.id]}));
+ carCache.byId={};carCache.forEach(function(c){carCache.byId[c.id]=c});return carCache}
+function dirty(){carCache=null}
+function car(id){return cars().byId[id]}
+function carName(id){var c=car(id);return c?c.year+' '+c.make+' '+c.model+(c.trim?' '+c.trim:''):(id?'Removed car':'—')}
+function staff(id){var s=st.staff.find(function(x){return x.id===id});return s?s.name:(id?'Removed staff':'—')}
+function money(c){try{return new Intl.NumberFormat('en-US',{style:'currency',currency:st.settings.currency,maximumFractionDigits:0}).format((+c||0)/100)}catch(e){return'$'+Math.round((+c||0)/100)}}
+function label(s){return String(s||'').replace(/_/g,' ').replace(/^./,function(x){return x.toUpperCase()})}
+function opts(list,lab,sel,blankL){return(blankL!=null?'<option value="">'+esc(blankL)+'</option>':'')+list.map(function(x){var v=typeof x==='string'?x:x.id;return'<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(lab(x))+'</option>'}).join('')}
+function empty(n,msg){return'<tr><td class="empty" colspan="'+n+'">'+esc(msg)+'</td></tr>'}
+var actx;function chime(){if(!st.settings.sound)return;try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();var t=actx.currentTime,o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.setValueAtTime(660,t);o.frequency.linearRampToValueAtTime(880,t+0.18);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.12,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+0.6);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+0.65)}catch(e){}}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove('on')},2200)}
+var NOPHOTO='assets/site/no-photo.webp';
+function photo(c){var p=(c.photos&&c.photos[0])||NOPHOTO;return'<img class="thumb" loading="lazy" decoding="async" alt="" src="'+esc(p)+'" data-fallback="1">'}
+function schemaErr(e){return e&&e.field?label(e.field)+': '+(e.message||'invalid'):'Could not save: '+(e&&e.message||'invalid')}
+/* Inventory: minimal, swappable for coder 3's module via DealerDesk.registerView('inventory',...) */
+var inv={q:'',status:'',condition:'',make:'',sort:'newest',page:0};
+function invList(){var q=inv.q.toLowerCase();var l=cars().filter(function(c){return(!inv.status||c.status===inv.status)&&(!inv.condition||c.condition===inv.condition)&&(!inv.make||c.make===inv.make)&&(!q||(c.year+' '+c.make+' '+c.model+' '+c.trim+' '+c.vin+' '+c.stock_no+' '+c.color).toLowerCase().indexOf(q)>=0)});
+ var f={price_asc:function(a,b){return a.price_cents-b.price_cents},price_desc:function(a,b){return b.price_cents-a.price_cents},year_desc:function(a,b){return b.year-a.year},mileage_asc:function(a,b){return a.mileage-b.mileage},newest:null}[inv.sort];return f?l.slice().sort(f):l}
 var views={
-dashboard:{label:'Dashboard',render:function(){var closed=db.deals.filter(function(d){return d.status==='Closed'}),rev=closed.reduce(function(a,d){return a+(+d.price||0)},0);
- var inv=db.cars.filter(function(c){return c.status!=='Sold'});var by={};closed.forEach(function(d){by[d.staffId]=(by[d.staffId]||0)+(+d.price||0)});
- return'<h2>Sales dashboard</h2><div class="kpis">'+[['Revenue (closed)',money(rev)],['Cars sold',closed.length],['In stock',inv.length],['Stock value',money(inv.reduce(function(a,c){return a+(+c.price||0)},0))],['Open leads',db.leads.filter(function(l){return l.status!=='Closed'&&l.status!=='Lost'}).length],['Bookings',db.bookings.length]].map(function(k){return'<div class="kpi" data-kpi="'+esc(k[0])+'"><b>'+esc(k[1])+'</b><span>'+esc(k[0])+'</span></div>'}).join('')+'</div>'+
- '<h3>Sales by staff</h3><table><tr><th>Staff</th><th>Closed revenue</th></tr>'+db.staff.map(function(s){return'<tr><td>'+esc(s.name)+'</td><td>'+money(by[s.id]||0)+'</td></tr>'}).join('')+'</table>'}},
-inventory:{label:'Inventory',count:function(){return db.cars.filter(function(c){return c.status==='Available'}).length},render:function(){
- return'<h2>Inventory</h2><form class="row" data-form="car"><input name="vin" placeholder="VIN" required maxlength="17"><input name="make" placeholder="Make" required><input name="model" placeholder="Model" required><input name="year" type="number" placeholder="Year" required><input name="price" type="number" placeholder="Price"><input name="mileage" type="number" placeholder="Mileage"><input name="photo" type="url" placeholder="Photo URL (optional)"><button class="btn">Add car</button></form>'+
- '<table><tr><th></th><th>Vehicle</th><th>VIN</th><th>Price</th><th>Mileage</th><th>Status</th><th></th></tr>'+db.cars.map(function(c){return'<tr data-car="'+esc(c.id)+'"><td>'+photo(c)+'</td><td>'+esc(c.year+' '+c.make+' '+c.model)+'</td><td>'+esc(c.vin)+'</td><td>'+money(c.price)+'</td><td>'+(+c.mileage||0).toLocaleString()+' mi</td><td><select data-act="carstatus" data-id="'+esc(c.id)+'">'+['Available','Pending','Sold'].map(function(s){return'<option'+(s===c.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td><td><button class="btn ghost" data-act="delcar" data-id="'+esc(c.id)+'">Remove</button></td></tr>'}).join('')+'</table>'}},
-leads:{label:'Leads',count:function(){return db.leads.filter(function(l){return l.status==='New'}).length},render:function(){
- return'<h2>Leads</h2><form class="row" data-form="lead"><input name="name" placeholder="Name" required><input name="phone" type="tel" placeholder="Phone" pattern="[+0-9 ().\-]{7,20}" title="7–15 digits, may use + ( ) - . and spaces"><select name="carId">'+opts(db.cars,function(c){return carName(c.id)},'','Vehicle of interest')+'</select><select name="source"><option>Walk-in</option><option>Phone</option><option>Website</option><option>QR</option></select><button class="btn">Add lead</button></form>'+
- '<table><tr><th>Name</th><th>Phone</th><th>Vehicle</th><th>Source</th><th>Status</th></tr>'+db.leads.map(function(l){return'<tr><td>'+esc(l.name)+'</td><td>'+esc(l.phone)+'</td><td>'+esc(carName(l.carId))+'</td><td>'+esc(l.source)+'</td><td><select data-act="leadstatus" data-id="'+esc(l.id)+'">'+['New','Contacted','Qualified','Closed','Lost'].map(function(s){return'<option'+(s===l.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td></tr>'}).join('')+'</table>'}},
-bookings:{label:'Bookings',count:function(){return db.bookings.length},render:function(){
- return'<h2>Test drives &amp; service</h2><form class="row" data-form="booking"><select name="type"><option>Test drive</option><option>Service</option></select><input name="name" placeholder="Customer" required><select name="carId">'+opts(db.cars,function(c){return carName(c.id)},'','Vehicle')+'</select><input name="when" type="datetime-local" required><select name="staffId">'+opts(db.staff,function(s){return s.name},'')+'</select><button class="btn">Book</button></form>'+
- '<table><tr><th>When</th><th>Type</th><th>Customer</th><th>Vehicle</th><th>Staff</th><th></th></tr>'+db.bookings.slice().sort(function(a,b){return a.when<b.when?-1:1}).map(function(b){return'<tr><td>'+esc(b.when.replace('T',' '))+'</td><td>'+esc(b.type)+'</td><td>'+esc(b.name)+'</td><td>'+esc(carName(b.carId))+'</td><td>'+esc(staff(b.staffId))+'</td><td><button class="btn ghost" data-act="delbooking" data-id="'+esc(b.id)+'">Done</button></td></tr>'}).join('')+'</table>'}},
-deals:{label:'Deals',count:function(){return db.deals.filter(function(d){return d.status==='Pending'}).length},render:function(){
- var avail=db.cars.filter(function(c){return c.status!=='Sold'});
- return'<h2>Deals</h2><form class="row" data-form="deal"><select name="carId" required>'+opts(avail,function(c){return carName(c.id)+' · '+money(c.price)},'','Vehicle')+'</select><input name="buyer" placeholder="Buyer" required><input name="price" type="number" placeholder="Sale price" required><select name="staffId">'+opts(db.staff,function(s){return s.name},'')+'</select><button class="btn">Start deal</button></form>'+
- '<table><tr><th>Date</th><th>Vehicle</th><th>Buyer</th><th>Price</th><th>Tax</th><th>Total</th><th>Staff</th><th>Status</th><th></th></tr>'+db.deals.map(function(d){var tax=Math.round((+d.price||0)*db.settings.taxRate/100);return'<tr data-deal="'+esc(d.id)+'"><td>'+esc(d.date)+'</td><td>'+esc(carName(d.carId))+'</td><td>'+esc(d.buyer)+'</td><td>'+money(d.price)+'</td><td>'+money(tax)+'</td><td>'+money(+d.price+tax)+'</td><td>'+esc(staff(d.staffId))+'</td><td><span class="pill '+esc(d.status)+'">'+esc(d.status)+'</span></td><td>'+(d.status==='Pending'?'<button class="btn" data-act="closedeal" data-id="'+esc(d.id)+'">Close</button> <button class="btn ghost" data-act="lostdeal" data-id="'+esc(d.id)+'">Lost</button>':'')+'</td></tr>'}).join('')+'</table>'}},
-staff:{label:'Staff',render:function(){return'<h2>Staff</h2><form class="row" data-form="staff"><input name="name" placeholder="Name" required><select name="role"><option>Sales</option><option>Sales Manager</option><option>Service Advisor</option><option>Finance</option></select><button class="btn">Add staff</button></form><table><tr><th>Name</th><th>Role</th><th>Deals closed</th><th></th></tr>'+db.staff.map(function(s){return'<tr><td>'+esc(s.name)+'</td><td>'+esc(s.role)+'</td><td>'+db.deals.filter(function(d){return d.staffId===s.id&&d.status==='Closed'}).length+'</td><td><button class="btn ghost" data-act="delstaff" data-id="'+esc(s.id)+'">Remove</button></td></tr>'}).join('')+'</table>'}},
-settings:{label:'Settings',render:function(){var s=db.settings;return'<h2>Settings</h2><form class="card" data-form="settings" style="max-width:460px;display:grid;gap:10px"><label>Dealership name<br><input name="dealer" value="'+esc(s.dealer)+'" style="width:100%"></label><label>Currency<br><select name="currency">'+['USD','CAD','EUR','GBP','BRL'].map(function(c){return'<option'+(c===s.currency?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label><label>Sales tax %<br><input name="taxRate" type="number" step="0.01" value="'+esc(s.taxRate)+'"></label><label><input type="checkbox" name="sound"'+(s.sound?' checked':'')+'> Soft alert chime</label><div><button class="btn">Save settings</button> <button type="button" class="btn ghost" data-act="export">Export data</button> <button type="button" class="btn ghost" data-act="reset">Reset to sample data</button></div></form>'}}
+dashboard:{label:'Dashboard',render:function(){var cs=cars(),closed=st.deals.filter(function(d){return d.status==='closed'}),rev=closed.reduce(function(a,d){return a+d.price_cents},0);
+ var stock=cs.filter(function(c){return c.status!=='sold'}),by={},cnt={};closed.forEach(function(d){by[d.staff_id]=(by[d.staff_id]||0)+d.price_cents;cnt[d.staff_id]=(cnt[d.staff_id]||0)+1});
+ var open=st.leads.filter(function(l){return l.status!=='won'&&l.status!=='lost'}).length,td=today(),up=st.test_drives.concat(st.service_bookings).filter(function(b){return b.at.slice(0,10)>=td&&b.status!=='cancelled'});
+ return'<h2>Sales dashboard</h2><div class="kpis">'+[['Revenue (closed)',money(rev)],['Cars sold',closed.length],['In stock',stock.length.toLocaleString()],['Stock value',money(stock.reduce(function(a,c){return a+c.price_cents},0))],['Open leads',open],['Upcoming bookings',up.length],['Pending deals',st.deals.filter(function(d){return d.status==='pending'}).length]].map(function(k){return'<div class="kpi" data-kpi="'+esc(k[0])+'"><b>'+esc(k[1])+'</b><span>'+esc(k[0])+'</span></div>'}).join('')+'</div>'+
+ '<h3>Sales by staff</h3><table><tr><th>Staff</th><th>Deals closed</th><th>Closed revenue</th></tr>'+(st.staff.length?st.staff.map(function(s){return'<tr><td>'+esc(s.name)+'</td><td>'+(cnt[s.id]||0)+'</td><td>'+money(by[s.id]||0)+'</td></tr>'}).join(''):empty(3,'No staff yet. Add people in Staff.'))+'</table>'}},
+inventory:{label:'Inventory',count:function(){return cars().filter(function(c){return c.status==='available'}).length},render:function(){
+ var l=invList(),pages=Math.max(1,Math.ceil(l.length/PAGE));if(inv.page>=pages)inv.page=pages-1;var rows=l.slice(inv.page*PAGE,inv.page*PAGE+PAGE);
+ var makes=Object.keys(cars().reduce(function(a,c){a[c.make]=1;return a},{})).sort();
+ return'<h2>Inventory</h2><div class="row" id="invbar"><input type="search" data-inv="q" placeholder="Search make, model, VIN, stock #" value="'+esc(inv.q)+'"><select data-inv="status">'+opts(S.ENUMS.carStatus,label,inv.status,'Any status')+'</select><select data-inv="condition">'+opts(S.ENUMS.condition,label,inv.condition,'New & used')+'</select><select data-inv="make">'+opts(makes,String,inv.make,'All makes')+'</select><select data-inv="sort">'+opts(['newest','price_asc','price_desc','year_desc','mileage_asc'],function(s){return{newest:'Sort: default',price_asc:'Price: low to high',price_desc:'Price: high to low',year_desc:'Year: newest',mileage_asc:'Mileage: lowest'}[s]},inv.sort)+'</select></div>'+
+ '<details class="card" style="margin-bottom:14px"><summary>Add a car</summary><form class="row" data-form="car" style="margin-top:10px"><input name="stock_no" placeholder="Stock #" required><input name="vin" placeholder="VIN (17)" required maxlength="17"><input name="year" type="number" placeholder="Year" required><input name="make" placeholder="Make" required><input name="model" placeholder="Model" required><input name="trim" placeholder="Trim"><input name="price" type="number" placeholder="Price" required><input name="mileage" type="number" placeholder="Mileage"><select name="condition"><option value="used">Used</option><option value="new">New</option></select><input name="photo" placeholder="Photo URL (https://)"><button class="btn">Add car</button></form></details>'+
+ '<p class="muted" id="invcount">'+l.length.toLocaleString()+' cars'+(pages>1?' · page '+(inv.page+1)+' of '+pages:'')+'</p>'+
+ '<table><tr><th></th><th>Vehicle</th><th>Stock #</th><th>VIN</th><th>Price</th><th>Mileage</th><th>Status</th><th></th></tr>'+(rows.length?rows.map(function(c){return'<tr data-car="'+esc(c.id)+'"><td>'+photo(c)+'</td><td>'+esc(carName(c.id))+'<br><small class="muted">'+esc(label(c.condition))+(c.color?' · '+esc(c.color):'')+'</small></td><td>'+esc(c.stock_no)+'</td><td>'+esc(c.vin)+'</td><td>'+money(c.price_cents)+'</td><td>'+c.mileage.toLocaleString()+' mi</td><td><select data-act="carstatus" data-id="'+esc(c.id)+'">'+opts(S.ENUMS.carStatus,label,c.status)+'</select></td><td><button class="btn ghost" data-act="delcar" data-id="'+esc(c.id)+'">Remove</button></td></tr>'}).join(''):empty(8,baseOk||cars().length?'No cars match these filters.':'Loading inventory…'))+'</table>'+
+ (pages>1?'<div class="row pager" style="margin-top:12px"><button class="btn ghost" data-act="pg" data-id="-1"'+(inv.page?'':' disabled')+'>Previous</button><button class="btn ghost" data-act="pg" data-id="1"'+(inv.page<pages-1?'':' disabled')+'>Next</button></div>':'')}},
+leads:{label:'Leads',count:function(){return st.leads.filter(function(l){return l.status==='new'}).length},render:function(){var av=cars().filter(function(c){return c.status!=='sold'}).slice(0,500);if(preCar&&car(preCar)&&av.indexOf(car(preCar))<0)av.unshift(car(preCar));
+ return'<h2>Leads</h2><form class="row" data-form="lead"><input name="name" placeholder="Name" required><input name="phone" type="tel" placeholder="Phone"><input name="email" type="email" placeholder="Email"><select name="interest_car_id">'+opts(av,function(c){return carName(c.id)+' · '+c.stock_no},'', 'Vehicle of interest')+'</select><select name="source">'+opts(S.ENUMS.leadSource,label,'walk_in')+'</select><input name="notes" placeholder="Notes"><button class="btn">Add lead</button></form>'+
+ '<table><tr><th>Name</th><th>Contact</th><th>Vehicle</th><th>Source</th><th>Notes</th><th>Status</th></tr>'+(st.leads.length?st.leads.map(function(l){return'<tr><td>'+esc(l.name)+'</td><td>'+esc([l.phone,l.email].filter(Boolean).join(' · '))+'</td><td>'+esc(l.interest_car_id?carName(l.interest_car_id):'—')+'</td><td>'+esc(label(l.source))+'</td><td>'+esc(l.notes)+'</td><td><select data-act="leadstatus" data-id="'+esc(l.id)+'">'+opts(S.ENUMS.leadStatus,label,l.status)+'</select></td></tr>'}).join(''):empty(6,'No leads yet. New enquiries and QR scans show up here.'))+'</table>'}},
+bookings:{label:'Bookings',count:function(){var td=today();return st.test_drives.concat(st.service_bookings).filter(function(b){return b.at.slice(0,10)===td&&b.status!=='cancelled'}).length},render:function(){
+ var all=st.test_drives.map(function(b){return{k:'td',b:b,what:'Test drive',veh:carName(b.car_id)}}).concat(st.service_bookings.map(function(b){return{k:'sv',b:b,what:label(b.service_type),veh:[b.vehicle.year,b.vehicle.make,b.vehicle.model].join(' ')}})).sort(function(a,b){return a.b.at<b.b.at?-1:1});
+ return'<h2>Test drives &amp; service</h2><form class="row" data-form="testdrive"><strong style="align-self:center">Test drive</strong><input name="name" placeholder="Customer" required><input name="phone" type="tel" placeholder="Phone"><select name="car_id" required>'+opts(cars().filter(function(c){return c.status!=='sold'}).slice(0,500),function(c){return carName(c.id)+' · '+c.stock_no},'','Vehicle')+'</select><input name="at" type="datetime-local" required><button class="btn">Book test drive</button></form>'+
+ '<form class="row" data-form="service"><strong style="align-self:center">Service</strong><input name="name" placeholder="Customer" required><input name="phone" type="tel" placeholder="Phone"><input name="year" type="number" placeholder="Year" required><input name="make" placeholder="Make" required><input name="model" placeholder="Model" required><select name="service_type">'+opts(S.ENUMS.serviceType,label,'oil_change')+'</select><input name="at" type="datetime-local" required><button class="btn">Book service</button></form>'+
+ '<table><tr><th>When</th><th>Type</th><th>Customer</th><th>Vehicle</th><th>Status</th></tr>'+(all.length?all.map(function(x){var en=x.k==='td'?S.ENUMS.testDriveStatus:S.ENUMS.serviceStatus;return'<tr><td>'+esc(x.b.at.replace('T',' '))+'</td><td>'+esc(x.what)+'</td><td>'+esc(x.b.customer.name)+'<br><small class="muted">'+esc(x.b.customer.phone||x.b.customer.email||'')+'</small></td><td>'+esc(x.veh)+'</td><td><select data-act="bkstatus" data-k="'+x.k+'" data-id="'+esc(x.b.id)+'">'+opts(en,label,x.b.status)+'</select></td></tr>'}).join(''):empty(5,'No bookings yet.'))+'</table>'}},
+deals:{label:'Deals',count:function(){return st.deals.filter(function(d){return d.status==='pending'}).length},render:function(){
+ var avail=cars().filter(function(c){return c.status==='available'}).slice(0,500),tr=st.settings.tax_rate;
+ return'<h2>Deals</h2><form class="row" data-form="deal"><select name="car_id" required>'+opts(avail,function(c){return carName(c.id)+' · '+c.stock_no+' · '+money(c.price_cents)},'','Vehicle')+'</select><input name="buyer" placeholder="Buyer" required><input name="price" type="number" min="0" step="1" placeholder="Sale price" required><select name="staff_id">'+opts(st.staff,function(s){return s.name},'','Salesperson')+'</select><button class="btn">Start deal</button></form>'+
+ '<table><tr><th>Date</th><th>Vehicle</th><th>Buyer</th><th>Price</th><th>Tax</th><th>Total</th><th>Salesperson</th><th>Status</th><th></th></tr>'+(st.deals.length?st.deals.map(function(d){var tax=Math.round(d.price_cents*tr/100);return'<tr data-deal="'+esc(d.id)+'"><td>'+esc(d.date)+'</td><td>'+esc(carName(d.car_id))+'</td><td>'+esc(d.buyer)+'</td><td>'+money(d.price_cents)+'</td><td>'+money(tax)+'</td><td>'+money(d.price_cents+tax)+'</td><td>'+esc(staff(d.staff_id))+'</td><td><span class="pill '+esc(d.status)+'">'+esc(label(d.status))+'</span></td><td>'+(d.status==='pending'?'<button class="btn" data-act="closedeal" data-id="'+esc(d.id)+'">Close</button> <button class="btn ghost" data-act="lostdeal" data-id="'+esc(d.id)+'">Lost</button>':'')+'</td></tr>'}).join(''):empty(9,'No deals yet. Start one above.'))+'</table>'}},
+staff:{label:'Staff',render:function(){return'<h2>Staff</h2><form class="row" data-form="staff"><input name="name" placeholder="Name" required maxlength="80"><select name="role">'+opts(['Sales','Sales Manager','Service Advisor','Finance'],String,'Sales')+'</select><button class="btn">Add staff</button></form><table><tr><th>Name</th><th>Role</th><th>Deals closed</th><th></th></tr>'+(st.staff.length?st.staff.map(function(s){return'<tr><td>'+esc(s.name)+'</td><td>'+esc(s.role)+'</td><td>'+st.deals.filter(function(d){return d.staff_id===s.id&&d.status==='closed'}).length+'</td><td><button class="btn ghost" data-act="delstaff" data-id="'+esc(s.id)+'">Remove</button></td></tr>'}).join(''):empty(4,'No staff yet.'))+'</table>'}},
+settings:{label:'Settings',render:function(){var s=st.settings;return'<h2>Settings</h2><form class="card" data-form="settings" style="max-width:460px;display:grid;gap:10px"><label>Dealership name<br><input name="dealer_name" maxlength="80" value="'+esc(s.dealer_name)+'" style="width:100%"></label><label>Currency<br><select name="currency">'+opts(['USD','CAD','EUR','GBP','BRL'],String,s.currency)+'</select></label><label>Sales tax %<br><input name="tax_rate" type="number" step="0.01" min="0" max="30" value="'+esc(s.tax_rate)+'"></label><label><input type="checkbox" name="sound"'+(s.sound?' checked':'')+'> Soft alert chime for new leads and bookings</label><div><button class="btn">Save settings</button> <button type="button" class="btn ghost" data-act="export">Export data</button> <button type="button" class="btn ghost" data-act="reset">Reset to sample data</button></div></form>'}}
 };
-var cur='dashboard';
-function render(){document.getElementById('nav').innerHTML='<h1>'+esc(db.settings.dealer||'DealerDesk')+'</h1>'+Object.keys(views).map(function(k){var v=views[k],n=v.count?v.count():0;return'<button data-view="'+k+'"'+(k===cur?' class="on"':'')+'><span>'+v.label+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</button>'}).join('');document.getElementById('main').innerHTML=views[cur].render();[].forEach.call(document.querySelectorAll('#main table'),function(t){if(t.rows.length<2){var r=t.insertRow(),c=r.insertCell();c.colSpan=t.rows[0].cells.length;c.className='empty';c.textContent='Nothing here yet.'}});
- if(cur==='leads'&&preCar){var sel=document.querySelector('[data-form=lead] [name=carId]');if(sel&&car(preCar))sel.value=preCar;var so=document.querySelector('[data-form=lead] [name=source]');if(so)so.value='QR';preCar=''}
+var cur='dashboard',preCar='';
+function render(){document.getElementById('nav').innerHTML='<h1>'+esc(st.settings.dealer_name||'DealerDesk')+'</h1>'+Object.keys(views).map(function(k){var v=views[k],n=v.count?v.count():0;return'<button data-view="'+k+'"'+(k===cur?' class="on"':'')+'><span>'+esc(v.label)+'</span>'+(n?'<span class="badge">'+n.toLocaleString()+'</span>':'')+'</button>'}).join('');
+ document.getElementById('main').innerHTML=views[cur].render();
+ if(cur==='leads'&&preCar){var sel=document.querySelector('[data-form=lead] [name=interest_car_id]');if(!car(preCar))return DD.emit('render',cur);if(sel)sel.value=preCar;var so=document.querySelector('[data-form=lead] [name=source]');if(so)so.value='other';var no=document.querySelector('[data-form=lead] [name=notes]');if(no)no.value='QR code';preCar=''}
  DD.emit('render',cur)}
-function fd(f){var o={};new FormData(f).forEach(function(v,k){o[k]=typeof v==='string'?v.trim():v});return o}
-var preCar='';
-var add={car:function(o){db.cars.push({id:uid('c'),vin:o.vin.toUpperCase(),make:o.make,model:o.model,year:+o.year,price:+o.price||0,mileage:+o.mileage||0,status:'Available',photo:/^https:\/\//.test(o.photo)?o.photo:''})},
- lead:function(o){var dg=(o.phone||'').replace(/\D/g,'');if(o.phone&&(dg.length<7||dg.length>15||!/^[+0-9 ().-]+$/.test(o.phone))){toast('Enter a valid phone number');return false}DD.addLead(o)},booking:function(o){DD.addBooking(o)},
- deal:function(o){db.deals.push({id:uid('d'),carId:o.carId,buyer:o.buyer,price:+o.price,staffId:o.staffId,status:'Pending',date:new Date().toISOString().slice(0,10)});var c=car(o.carId);if(c)c.status='Pending'},
- staff:function(o){db.staff.push({id:uid('s'),name:o.name,role:o.role})},
- settings:function(o,f){db.settings.dealer=o.dealer||'DealerDesk';db.settings.currency=o.currency;db.settings.taxRate=Math.max(0,+o.taxRate||0);db.settings.sound=f.elements.sound.checked}};
-document.addEventListener('submit',function(e){var f=e.target,k=f.getAttribute('data-form');if(!add[k])return;e.preventDefault();if(add[k](fd(f),f)===false)return;save();render();toast('Saved')});
-document.addEventListener('change',function(e){var a=e.target.getAttribute('data-act'),id=e.target.getAttribute('data-id');if(a==='carstatus'){car(id).status=e.target.value}else if(a==='leadstatus'){db.leads.find(function(l){return l.id===id}).status=e.target.value}else return;save();render()});
+function fd(f){var o={};[].forEach.call(f.elements,function(e){if(e.name)o[e.name]=e.type==='checkbox'?e.checked:String(e.value).trim()});return o}
+var add={
+ car:function(o){var n=S.normalizeCar({id:uid('car'),stock_no:o.stock_no,vin:o.vin.toUpperCase(),year:o.year,make:o.make,model:o.model,trim:o.trim,price:o.price,mileage:o.mileage,condition:o.condition,status:'available',photos:o.photo?[o.photo]:[]});
+  if(cars().some(function(c){return c.stock_no===n.stock_no}))throw new S.SchemaError('stock_no','already used');st.cars_added.push(n);dirty()},
+ lead:function(o){DD.addLead(o)},
+ testdrive:function(o){DD.addTestDrive({customer:{name:o.name,phone:o.phone},car_id:o.car_id,at:o.at})},
+ service:function(o){DD.addServiceBooking({customer:{name:o.name,phone:o.phone},vehicle:{year:o.year,make:o.make,model:o.model},service_type:o.service_type,at:o.at})},
+ deal:function(o){var c=car(o.car_id);if(!c)throw new S.SchemaError('car_id','pick a vehicle');var p=Number(o.price);if(!(p>=0&&p<=1e7)||o.price==='')throw new S.SchemaError('price','enter a sale price');if(!o.buyer)throw new S.SchemaError('buyer','required');
+  st.deals.unshift({id:uid('dl'),car_id:c.id,buyer:o.buyer.slice(0,80),price_cents:Math.round(p*100),staff_id:o.staff_id||'',status:'pending',date:today()});setCar(c.id,{status:'hold'})},
+ staff:function(o){if(!o.name)throw new S.SchemaError('name','required');st.staff.push({id:uid('st'),name:o.name.slice(0,80),role:o.role})},
+ settings:function(o){st.settings.dealer_name=o.dealer_name.slice(0,80);st.settings.currency=o.currency;st.settings.tax_rate=Math.min(30,Math.max(0,+o.tax_rate||0));st.settings.sound=!!o.sound}};
+function setCar(id,patch){var c=car(id);if(!c)return;var n=S.normalizeCar(Object.assign({},c,patch,{price:(patch.price_cents!=null?patch.price_cents:c.price_cents)/100}));
+ var a=st.cars_added.findIndex(function(x){return x.id===id});if(a>=0)st.cars_added[a]=n;else st.car_overrides[id]=Object.assign(st.car_overrides[id]||{},{status:n.status,price_cents:n.price_cents});dirty()}
+document.addEventListener('submit',function(e){var f=e.target,k=f.getAttribute('data-form');if(!add[k])return;e.preventDefault();try{add[k](fd(f),f)}catch(err){toast(schemaErr(err));return}save();render();toast('Saved')});
+var qT;document.addEventListener('input',function(e){var k=e.target.getAttribute('data-inv');if(k!=='q')return;inv.q=e.target.value;inv.page=0;clearTimeout(qT);qT=setTimeout(function(){render();var s=document.querySelector('[data-inv=q]');if(s){s.focus();s.setSelectionRange(s.value.length,s.value.length)}},150)});
+document.addEventListener('change',function(e){var t=e.target,a=t.getAttribute('data-act'),id=t.getAttribute('data-id'),ik=t.getAttribute('data-inv');
+ if(ik&&ik!=='q'){inv[ik]=t.value;inv.page=0;render();return}
+ try{if(a==='carstatus')setCar(id,{status:t.value});else if(a==='leadstatus'){var l=st.leads.find(function(x){return x.id===id});l.status=S.normalizeLead(Object.assign({},l,{status:t.value})).status}
+ else if(a==='bkstatus'){var arr=t.getAttribute('data-k')==='td'?st.test_drives:st.service_bookings,b=arr.find(function(x){return x.id===id});b.status=t.value}else return}catch(err){toast(schemaErr(err));render();return}save();render()});
+document.addEventListener('error',function(e){var t=e.target;if(t.tagName==='IMG'&&t.getAttribute('data-fallback')&&t.getAttribute('src')!==NOPHOTO)t.src=NOPHOTO},true);
 document.addEventListener('click',function(e){var b=e.target.closest('[data-view],[data-act]');if(!b||b.tagName==='SELECT')return;var v=b.getAttribute('data-view');if(v){cur=v;render();return}
  var a=b.getAttribute('data-act'),id=b.getAttribute('data-id'),d;
- if(a==='closedeal'||a==='lostdeal'){d=db.deals.find(function(x){return x.id===id});d.status=a==='closedeal'?'Closed':'Lost';var c=car(d.carId);if(c)c.status=a==='closedeal'?'Sold':'Available'}
- else if(a==='delcar'){db.cars=db.cars.filter(function(c){return c.id!==id})}else if(a==='delbooking'){db.bookings=db.bookings.filter(function(x){return x.id!==id})}
- else if(a==='delstaff'){db.staff=db.staff.filter(function(x){return x.id!==id})}
- else if(a==='reset'){if(!window.confirm||window.confirm('Replace all data with sample data?')){db=sample()}}
- else if(a==='export'){var u=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'})),l=document.createElement('a');l.href=u;l.download='dealerdesk-data.json';l.click();return}else return;save();render()});
-/* Public hooks for crew modules (QR leads: coder 3, bookings: Coder 2). */
+ if(a==='pg'){inv.page+=+id;render();window.scrollTo&&window.scrollTo(0,0);return}
+ if(a==='closedeal'||a==='lostdeal'){d=st.deals.find(function(x){return x.id===id});d.status=a==='closedeal'?'closed':'lost';setCar(d.car_id,{status:a==='closedeal'?'sold':'available'})}
+ else if(a==='delcar'){st.cars_removed.push(id);dirty()}
+ else if(a==='delstaff'){st.staff=st.staff.filter(function(x){return x.id!==id})}
+ else if(a==='reset'){if(window.confirm&&!window.confirm('Replace all data with sample data?'))return;st=blank();seedFromBase();dirty()}
+ else if(a==='export'){var u=URL.createObjectURL(new Blob([JSON.stringify({dealership:Object.assign({},base,{cars:cars(),leads:st.leads,test_drives:st.test_drives,service_bookings:st.service_bookings}),app:st},null,2)],{type:'application/json'})),l=document.createElement('a');l.href=u;l.download='dealerdesk-data.json';l.click();return}else return;save();render()});
+/* Public hooks for crew modules: coder 3 (inventory screens, QR leads), Coder 2 (bookings). All writes go through schema.js. */
 var subs={};
-var DD=window.DealerDesk={get db(){return db},schema:schema,save:save,render:render,views:views,chime:chime,uid:uid,
+var DD=window.DealerDesk={schema:S,get state(){return st},cars:cars,car:car,save:save,render:render,views:views,inventory:inv,chime:chime,uid:uid,toast:toast,
  on:function(ev,fn){(subs[ev]=subs[ev]||[]).push(fn)},emit:function(ev,x){(subs[ev]||[]).forEach(function(fn){try{fn(x)}catch(e){}})},
- setSchema:function(s){schema=DD.schema=s;db=s.normalize(db);save();render()},
- registerView:function(k,v){views[k]=v;render()},
- addLead:function(o){var l={id:uid('l'),name:o.name,phone:o.phone||'',carId:o.carId||'',source:o.source||'Walk-in',status:'New',created:new Date().toISOString().slice(0,10)};db.leads.push(l);save();chime();DD.emit('lead',l);render();return l},
- addBooking:function(o){var b={id:uid('b'),type:o.type==='Service'?'Service':'Test drive',name:o.name,carId:o.carId||'',when:o.when,staffId:o.staffId||''};db.bookings.push(b);save();chime();DD.emit('booking',b);render();return b}};
-// QR lead deep link: app.html#lead?car=<id>
+ registerView:function(k,v){views[k]=v;render()},setCar:function(id,p){setCar(id,p);save();render()},
+ addLead:function(o){var l=S.normalizeLead(Object.assign({id:uid('ld'),status:'new'},o,{interest_car_id:o.interest_car_id||null}),cars());st.leads.unshift(l);save();chime();DD.emit('lead',l);render();return l},
+ addTestDrive:function(o){var t=S.normalizeTestDrive(Object.assign({id:uid('td'),status:'requested'},o),cars());st.test_drives.push(t);save();chime();DD.emit('booking',t);render();return t},
+ addServiceBooking:function(o){var s=S.normalizeServiceBooking(Object.assign({id:uid('sv'),status:'booked'},o));st.service_bookings.push(s);save();chime();DD.emit('booking',s);render();return s},
+ loadBase:function(raw){try{base=S.normalizeDealership(raw);baseOk=true}catch(err){toast('Inventory file problem: '+schemaErr(err))}seedFromBase();dirty();save();render()}};
 if(/^#lead/.test(location.hash)){cur='leads';var m=/[?&]car=([^&]+)/.exec(location.hash);if(m)preCar=decodeURIComponent(m[1])}
-render();if(db.firstRun){delete db.firstRun;save();toast('Sample data loaded. Reset anytime in Settings.')}
+render();
+var src=(document.querySelector('meta[name=dd-cars]')||{}).content||'cars.json';
+if(window.fetch&&location.protocol!=='file:')fetch(src,{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(DD.loadBase).catch(function(){seedFromBase();render();toast('Could not load the inventory file.')});
+else{seedFromBase();render()}
+if(st.firstRun)toast('Sample dealership loaded. Reset anytime in Settings.');else if(st.migrated_from_v1){delete st.migrated_from_v1;save();toast('Your data was upgraded to the new format.')}
 })();
-</script><script>(function(){var v=null,pend=false;function typing(){var a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)}
+</script>
+<script>(function(){if(!/[?&]watch=1(&|$)/.test(location.search))return;var v=null,told=false;
+function busy(){var a=document.activeElement;if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName))return true;if(document.querySelector('dialog[open],.modal.open,details[open]'))return true;
+return[].some.call(document.querySelectorAll('input,textarea'),function(e){return e.type!=='checkbox'&&e.type!=='search'&&e.value!==e.defaultValue})}
 function note(){var t=document.getElementById('toast');if(t){t.textContent='Updated';t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2500)}}
-function chk(){if(!window.fetch||location.protocol==='file:')return;fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){if(v===null){v=j.v;return}if(j.v!==v){if(typing()){if(!pend){pend=true;note()}}else location.reload()}}).catch(function(){})}
-chk();setInterval(chk,10000);document.addEventListener('focusout',function(){if(pend)setTimeout(function(){if(!typing())location.reload()},1500)})})();</script>
+function chk(){fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){if(v===null){v=j.v;return}if(j.v!==v){if(busy()){if(!told){told=true;note()}}else location.replace(location.href)}}).catch(function(){})}
+chk();setInterval(chk,10000)})();</script>
 </body></html>
