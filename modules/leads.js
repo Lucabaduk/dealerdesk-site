@@ -44,8 +44,8 @@
       counts: function () { var c = { new: 0, contacted: 0, qualified: 0, won: 0, lost: 0, total: leads.length }; leads.forEach(function (l) { c[l.status]++; }); return c; },
       exportJSON: function () { return JSON.stringify({ type: 'dealerdesk-leads', version: 1, leads: leads }, null, 2); },
       exportCSV: function () { var cols = ['id', 'createdAt', 'status', 'vin', 'interest_car_id', 'name', 'phone', 'email', 'interest', 'notes', 'staffNote'];
-        function cell(v) { v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v) && !isPhone(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
-        return [cols.join(',')].concat(leads.map(function (l) { return cols.map(function (k) { return cell(k === 'createdAt' ? new Date(l[k]).toISOString() : l[k]); }).join(','); })).join('\n'); }
+        function cell(v, k) { v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v) && !(k === 'phone' && isPhone(v))) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
+        return [cols.join(',')].concat(leads.map(function (l) { return cols.map(function (k) { return cell(k === 'createdAt' ? new Date(l[k]).toISOString() : l[k], k); }).join(','); })).join('\n'); }
     };
   }
   var mod = { create: create, validate: validate, cleanPhone: cleanPhone, KEY: KEY, INTERESTS: INTERESTS, STATUSES: STATUSES };
