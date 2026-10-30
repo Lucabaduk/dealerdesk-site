@@ -168,13 +168,18 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Chrysler 200 | [2015 Chrysler 200 Limited.jpg](https://commons.wikimedia.org/wiki/File:2015_Chrysler_200_Limited.jpg) | Greg Gjerdingen | CC BY 2.0 |
 | Toyota Corolla | [2023 Toyota Corolla Touring Sports Hybrid (E210) IMG 7679.jpg](https://commons.wikimedia.org/wiki/File:2023_Toyota_Corolla_Touring_Sports_Hybrid_(E210)_IMG_7679.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Ford F-150 | [Ford F-150 (fourteenth generation) Rutesheimer Autoschau 2025 DSC 9230.jpg](https://commons.wikimedia.org/wiki/File:Ford_F-150_(fourteenth_generation)_Rutesheimer_Autoschau_2025_DSC_9230.jpg) | Alexander Migl | CC BY-SA 4.0 |
-| Ford Explorer | [2020 Ford Explorer ST, 12.5.19.jpg](https://commons.wikimedia.org/wiki/File:2020_Ford_Explorer_ST,_12.5.19.jpg) | Ghostofakina | CC BY-SA 4.0 |
 | Jeep Cherokee | [Jeep Cherokee KL Shishi 01 2022-10-15.jpg](https://commons.wikimedia.org/wiki/File:Jeep_Cherokee_KL_Shishi_01_2022-10-15.jpg) | JamesYoung8167 | CC BY-SA 4.0 |
 | Dodge Hornet | [2023 Dodge Hornet GT in Blu Bayou, Front Left, 05-14-2023.jpg](https://commons.wikimedia.org/wiki/File:2023_Dodge_Hornet_GT_in_Blu_Bayou,_Front_Left,_05-14-2023.jpg) | Elise240SX | CC BY-SA 4.0 |
 | Lexus NX | [Lexus NX AZ10 Facelift Shishi 02 2022-06-18.jpg](https://commons.wikimedia.org/wiki/File:Lexus_NX_AZ10_Facelift_Shishi_02_2022-06-18.jpg) | JamesYoung8167 | CC BY-SA 4.0 |
 | Mercedes-Benz GLC | [2018 Mercedes-Benz GLC 250 Urban Edition 4MATIC 2.0 Front.jpg](https://commons.wikimedia.org/wiki/File:2018_Mercedes-Benz_GLC_250_Urban_Edition_4MATIC_2.0_Front.jpg) | Vauxford | CC BY-SA 4.0 |
 | Audi A4 | [2018 Audi A4 Sport TDi Quattro S-A 2.0.jpg](https://commons.wikimedia.org/wiki/File:2018_Audi_A4_Sport_TDi_Quattro_S-A_2.0.jpg) | Vauxford | CC BY-SA 4.0 |
 | Nissan Altima | [2019 Nissan Altima SL 2.5L front 3.22.19.jpg](https://commons.wikimedia.org/wiki/File:2019_Nissan_Altima_SL_2.5L_front_3.22.19.jpg) | Kevauto | CC BY-SA 4.0 |
+| Ford Mustang | [Ford Mustang S650 5.0 GT Race Red 01.jpg](https://commons.wikimedia.org/wiki/File:Ford_Mustang_S650_5.0_GT_Race_Red_01.jpg) | Ethan Llamas | CC BY-SA 4.0 |
+| Dodge Charger | [2019 Dodge Charger SXT in B5 Blue Pearl, Front Right, 05-21-2022.jpg](https://commons.wikimedia.org/wiki/File:2019_Dodge_Charger_SXT_in_B5_Blue_Pearl,_Front_Right,_05-21-2022.jpg) | Elise240SX | CC BY-SA 4.0 |
+| Mercedes-Benz E-Class | [Mercedes-Benz W214 1X7A0885.jpg](https://commons.wikimedia.org/wiki/File:Mercedes-Benz_W214_1X7A0885.jpg) | Alexander-93 | CC BY-SA 4.0 |
+| Acura ZDX | [2024 Acura ZDX A-Spec AWD (United States) front view.jpg](https://commons.wikimedia.org/wiki/File:2024_Acura_ZDX_A-Spec_AWD_(United_States)_front_view.jpg) | Charles | CC BY 2.0 |
+| Chrysler 300 | [2016 Chrysler 300 Limited AWD front 4.22.19.jpg](https://commons.wikimedia.org/wiki/File:2016_Chrysler_300_Limited_AWD_front_4.22.19.jpg) | Kevauto | CC BY-SA 4.0 |
+| Ford Explorer | [2020 Ford Explorer XLT, front 9.7.20.jpg](https://commons.wikimedia.org/wiki/File:2020_Ford_Explorer_XLT,_front_9.7.20.jpg) | Kevauto | CC BY-SA 4.0 |
 
 ## Site images (`assets/site/`)
 `hero.webp` and `no-photo.webp` are AI-generated (October 2026). They show made-up cars with no real brands, and are free to use in this project.
