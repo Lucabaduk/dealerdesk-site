@@ -17,7 +17,29 @@
 
   function defaults() {
     var h = {}; DAYS.forEach(function (d) { h[d] = d === 'sun' ? null : { open: '09:00', close: d === 'sat' ? '16:00' : '19:00' }; });
-    return { hours: h, slotMin: 30, testDriveMin: 30, bays: 4, leadTimeMin: 120, maxDaysAhead: 30, publicRequests: true };
+    return { hours: h, slotMin: 30, testDriveMin: 30, bays: 4, leadTimeMin: 120, maxDaysAhead: 30, publicRequests: true, dealerName: '', reminderHours: 24, templates: defaultTemplates() };
+  }
+  // ---------- reminder templates ----------
+  // Placeholders: {dealer} {customer} {first} {what} {car} {date} {time} {code}
+  var PLACEHOLDERS = ['dealer', 'customer', 'first', 'what', 'car', 'date', 'time', 'code'];
+  function defaultTemplates() { return {
+    sms: 'Hi {first}, this is {dealer}. A friendly reminder of your {what} for the {car} on {date} at {time}. Confirmation {code}. Reply or call us if you need to change it.',
+    emailSubject: 'Reminder: your {what} on {date} at {time}',
+    emailBody: 'Hi {first},\n\nThis is a friendly reminder of your {what} for the {car} on {date} at {time}.\n\nConfirmation code: {code}\n\nIf you need to change the time, just reply to this email or give us a call.\n\nSee you soon,\n{dealer}' }; }
+  var TPL_MAX = { sms: 480, emailSubject: 140, emailBody: 2000 };
+  var UNSAFE = /(javascript|vbscript|data|file|blob)\s*:/i;
+  function checkTemplate(k, v) {
+    v = String(v == null ? '' : v).replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim();
+    var name = { sms: 'Text message', emailSubject: 'Email subject', emailBody: 'Email message' }[k];
+    if (!v) throw err('bad_template', name + ' cannot be empty.');
+    if (v.length > TPL_MAX[k]) throw err('bad_template', name + ' is too long (max ' + TPL_MAX[k] + ' characters).');
+    if (k === 'emailSubject' && /\n/.test(v)) throw err('bad_template', 'Email subject must be one line.');
+    if (UNSAFE.test(v)) throw err('unsafe_link', name + ' contains an unsafe link. Only https:// links are allowed.');
+    var m = v.match(/[a-z][a-z0-9+.-]*:\/\/[^\s]*/gi) || [];
+    for (var i = 0; i < m.length; i++) if (!/^https:\/\//i.test(m[i])) throw err('unsafe_link', name + ' contains a link that is not https://.');
+    var bad = (v.match(/\{([^}]*)\}/g) || []).map(function (x) { return x.slice(1, -1); }).filter(function (x) { return PLACEHOLDERS.indexOf(x) < 0; });
+    if (bad.length) throw err('bad_placeholder', name + ' has an unknown placeholder {' + bad[0] + '}. Use: ' + PLACEHOLDERS.map(function (x) { return '{' + x + '}'; }).join(' '));
+    return v;
   }
   function fresh() { return { v: 1, seq: 1, settings: defaults(), testDrives: [], services: [], requests: [], salespeople: [], advisors: [] }; }
 
@@ -102,6 +124,9 @@
     function int(k, lo, hi) { if (p[k] === undefined) return; var n = Math.round(+p[k]); if (!(n >= lo && n <= hi)) throw err('bad_' + k, k + ' must be between ' + lo + ' and ' + hi + '.'); s[k] = n; }
     int('slotMin', 10, 240); int('testDriveMin', 15, 240); int('bays', 1, 50); int('leadTimeMin', 0, 10080); int('maxDaysAhead', 1, 365);
     if (p.publicRequests !== undefined) s.publicRequests = !!p.publicRequests;
+    if (p.reminderHours !== undefined) { var rh = +p.reminderHours; if (rh !== 24 && rh !== 48) throw err('bad_reminderHours', 'Reminder window must be 24 or 48 hours.'); s.reminderHours = rh; }
+    if (p.dealerName !== undefined) s.dealerName = clean(p.dealerName, 80);
+    if (p.templates) { s.templates = Object.assign(defaultTemplates(), s.templates || {}); ['sms', 'emailSubject', 'emailBody'].forEach(function (k) { if (p.templates[k] !== undefined) s.templates[k] = checkTemplate(k, p.templates[k]); }); }
     state.settings = s;
     if (!save() && store()) { state.settings = prev; throw err('save_failed', saveError || 'Could not save settings.'); }
     return settings();
@@ -156,7 +181,7 @@
     var o = normTD(p); o.status = 'booked';
     checkWindow(o.date, o.time, o.durationMin, Object.assign({ isNew: true }, opts));
     var c = tdConflicts(o); if (c.length) { var e = err('conflict', c[0].message); e.conflicts = c; throw e; }
-    o.id = nid('td'); o.createdAt = clock(); o.source = (opts && opts.source) || 'staff';
+    o.id = nid('td'); o.code = confCode(o.id); o.createdAt = clock(); o.source = (opts && opts.source) || 'staff';
     state.testDrives.push(o); save(); return o;
   }
   function updateTestDrive(id, p) {
@@ -217,7 +242,7 @@
   function addService(p, opts) {
     var o = normSV(p); o.status = 'scheduled';
     checkWindow(o.date, o.time, o.durationMin, Object.assign({ isNew: true }, opts)); placeBay(o);
-    o.id = nid('sv'); o.createdAt = clock(); o.source = (opts && opts.source) || 'staff';
+    o.id = nid('sv'); o.code = confCode(o.id); o.createdAt = clock(); o.source = (opts && opts.source) || 'staff';
     state.services.push(o); save(); return o;
   }
   function getSV(id) { for (var i = 0; i < state.services.length; i++) if (state.services[i].id === id) return state.services[i]; throw err('not_found', 'Appointment not found.'); }
@@ -265,11 +290,67 @@
     if (recent.length >= RATE.max) throw err('rate_limited', 'Too many requests from this number. Please call us.');
     var rec = kind === 'service' ? addService(p, { public: true, source: 'web' }) : addTestDrive(p, { public: true, source: 'web' });
     var r = { id: nid('rq'), kind: kind, refId: rec.id, createdAt: now, phoneDigits: String(rec.phone).replace(/\D/g, ''), seen: false, code: confCode(rec.id) };
-    state.requests.push(r); save(); return { ok: true, code: r.code, id: rec.id, date: rec.date, time: rec.time };
+    rec.code = r.code; state.requests.push(r); save(); return { ok: true, code: r.code, id: rec.id, kind: kind, date: rec.date, time: rec.time };
   }
   function confCode(id) { var h = 7; for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return 'DD-' + ('000' + (h % 46656).toString(36).toUpperCase()).slice(-3) + id.replace(/\D/g, '').slice(-3); }
   function newRequests() { return state.requests.filter(function (r) { return !r.seen; }); }
   function markSeen(id) { state.requests.forEach(function (r) { if (!id || r.id === id) r.seen = true; }); save(); }
+
+  // ---------- reminders (nothing is sent automatically: staff tap an sms:/mailto: link) ----------
+  var dealerOverride = '';
+  function setDealerName(n) { dealerOverride = clean(n, 80); }
+  function dealerName() { return dealerOverride || state.settings.dealerName || 'our dealership'; }
+  function findBooking(kind, id) {
+    var list = kind === 'service' ? state.services : state.testDrives;
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    throw err('not_found', 'Booking not found.');
+  }
+  function codeOf(b) { return b.code || confCode(b.id); }
+  function carOf(kind, b) { return kind === 'service' ? ([b.vehicle && b.vehicle.year, b.vehicle && b.vehicle.make, b.vehicle && b.vehicle.model].filter(Boolean).join(' ') || 'your vehicle') : (b.vehicleLabel || ('stock ' + (b.stock || b.vin))); }
+  function whatOf(kind, b) { return kind === 'service' ? (SV_TYPES[b.type] || 'service').toLowerCase() + ' appointment' : 'test drive'; }
+  function niceDate(date) { var d = parseDate(date); if (!d) return date; return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()] + ', ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()] + ' ' + d.getDate(); }
+  function niceTime(t) { var m = toMin(t); if (!(m >= 0)) return t; var h = Math.floor(m / 60), mm = m % 60; return ((h + 11) % 12 + 1) + ':' + pad(mm) + (h < 12 ? ' AM' : ' PM'); }
+  function fill(tpl, kind, b) {
+    var v = { dealer: dealerName(), customer: b.customer, first: String(b.customer || '').split(/\s+/)[0] || 'there', what: whatOf(kind, b), car: carOf(kind, b), date: niceDate(b.date), time: niceTime(b.time), code: codeOf(b) };
+    return String(tpl).replace(/\{(\w+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(v, k) ? String(v[k]) : m; });
+  }
+  function validEmailAddr(e) { return /^[^\s@?&#/\\:;,<>"'()]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(String(e || '')); }
+  // Only ever returns sms:, mailto: or data:text/calendar hrefs built here.
+  function safeHref(h) { return /^(sms:\+?\d{7,15}\?&body=|mailto:[^\s?&#]+@[^\s?&#]+\?subject=|data:text\/calendar;charset=utf-8,)/.test(h) ? h : ''; }
+  function reminderMessage(kind, id) {
+    var b = findBooking(kind, id), t = Object.assign(defaultTemplates(), state.settings.templates || {});
+    var digits = String(b.phone || '').replace(/\D/g, ''), smsTo = digits.length === 10 ? '+1' + digits : (digits.length >= 7 && digits.length <= 15 ? '+' + digits : '');
+    var text = fill(t.sms, kind, b), subject = fill(t.emailSubject, kind, b), body = fill(t.emailBody, kind, b);
+    return { text: text, subject: subject, body: body,
+      sms: smsTo ? safeHref('sms:' + smsTo + '?&body=' + encodeURIComponent(text)) : '',
+      mailto: validEmailAddr(b.email) ? safeHref('mailto:' + b.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body)) : '' };
+  }
+  function reminders(hours) {
+    var h = hours || state.settings.reminderHours || 24, now = clock(), end = now + h * 3600000, out = [];
+    state.testDrives.forEach(function (t) { var at = stamp(t.date, t.time); if (ACTIVE_TD[t.status] && !t.remindedAt && at >= now && at <= end) out.push({ kind: 'test-drive', id: t.id, at: at, b: t }); });
+    state.services.forEach(function (sv) { var at = stamp(sv.date, sv.time); if (sv.status === 'scheduled' && !sv.remindedAt && at >= now && at <= end) out.push({ kind: 'service', id: sv.id, at: at, b: sv }); });
+    return out.sort(function (a, b) { return a.at - b.at; });
+  }
+  function markReminded(kind, id, how) { var b = findBooking(kind, id); b.remindedAt = clock(); b.remindedVia = how === 'email' ? 'email' : how === 'text' ? 'text' : 'manual'; save(); return b; }
+  function unmarkReminded(kind, id) { var b = findBooking(kind, id); delete b.remindedAt; delete b.remindedVia; save(); return b; }
+
+  // ---------- calendar (.ics, RFC 5545; floating local time) ----------
+  function icsEsc(v) { return String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n').replace(/[\u0000-\u001f]/g, ''); }
+  function fold(line) { var out = '', cur = ''; for (var i = 0; i < line.length; i++) { var c = line[i], add = unescape(encodeURIComponent(c)).length; if (unescape(encodeURIComponent(cur)).length + add > 74) { out += cur + '\r\n '; cur = ''; } cur += c; } return out + cur; }
+  function icsStamp(ms) { var d = new Date(ms); return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z'; }
+  function icsLocal(date, min) { var d = parseDate(date); d.setMinutes(min); return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00'; }
+  function ics(kind, id) {
+    var b = findBooking(kind, id), start = toMin(b.time), dur = b.durationMin || 30, what = whatOf(kind, b);
+    var title = what.charAt(0).toUpperCase() + what.slice(1) + ' - ' + carOf(kind, b) + ' (' + dealerName() + ')';
+    var desc = 'Confirmation code: ' + codeOf(b) + (kind === 'service' && b.notes ? '\nNotes: ' + b.notes : '') + '\nNeed to change it? Contact ' + dealerName() + '.';
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//DealerDesk//Booking//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+      'UID:' + icsEsc(b.id + '-' + codeOf(b)) + '@dealerdesk', 'DTSTAMP:' + icsStamp(clock()), 'DTSTART:' + icsLocal(b.date, start), 'DTEND:' + icsLocal(b.date, start + dur),
+      'SUMMARY:' + icsEsc(title), 'DESCRIPTION:' + icsEsc(desc), 'LOCATION:' + icsEsc(dealerName()), 'STATUS:CONFIRMED',
+      'BEGIN:VALARM', 'TRIGGER:-PT1H', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc(title), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'];
+    return lines.map(fold).join('\r\n') + '\r\n';
+  }
+  function icsHref(kind, id) { return safeHref('data:text/calendar;charset=utf-8,' + encodeURIComponent(ics(kind, id))); }
+  function icsFileName(kind, id) { return 'dealerdesk-' + codeOf(findBooking(kind, id)).toLowerCase().replace(/[^a-z0-9-]/g, '') + '.ics'; }
 
   // ---------- staff lists ----------
   function setStaff(kind, names) { var k = kind === 'advisors' ? 'advisors' : 'salespeople'; state[k] = (names || []).map(function (n) { return clean(n, 40); }).filter(Boolean); save(); return state[k].slice(); }
@@ -287,9 +368,31 @@
 
   // =================== UI (staff) ===================
   var ui = { el: null, tab: 'drives', view: 'day', date: null, msg: '' };
+  function fmtStamp(ms) { var d = new Date(ms); return niceDate(ymd(d)) + ' ' + niceTime(pad(d.getHours()) + ':' + pad(d.getMinutes())); }
   function today() { return ymd(new Date(clock())); }
   function opt(list, sel, labels) { return list.map(function (v) { return '<option value="' + esc(v) + '"' + (v === sel ? ' selected' : '') + '>' + esc(labels ? labels[v] : v) + '</option>'; }).join(''); }
   function chip(s) { return '<span class="ddb-chip ddb-s-' + esc(s) + '">' + esc(s.replace('-', ' ')) + '</span>'; }
+  function detailsHTML(kind, b) {
+    return '<details class="ddb-det"><summary>Details</summary><div class="ddb-detbody"><div>Code <b>' + esc(codeOf(b)) + '</b></div>' +
+      (b.phone ? '<div>Phone ' + esc(b.phone) + '</div>' : '') + (b.email ? '<div>Email ' + esc(b.email) + '</div>' : '') +
+      '<div>' + (b.remindedAt ? 'Reminded ' + esc(fmtStamp(b.remindedAt)) + (b.remindedVia && b.remindedVia !== 'manual' ? ' by ' + esc(b.remindedVia) : '') : 'Not reminded yet') + '</div>' +
+      '<div class="ddb-actions"><a class="ddb-btn ddb-link" href="' + esc(icsHref(kind, b.id)) + '" download="' + esc(icsFileName(kind, b.id)) + '">Add to calendar</a></div></div></details>';
+  }
+  function renderReminders() {
+    var s = state.settings, list = reminders(), html = '<section class="ddb-card ddb-rem"><h3>Reminders <small>next ' + s.reminderHours + ' hours</small></h3>' +
+      '<p class="ddb-empty">Nothing is sent automatically. Tap Text or Email to open your phone\'s app with the message filled in.</p>';
+    if (!list.length) return html + '<p class="ddb-empty">No reminders due. Everyone in the next ' + s.reminderHours + ' hours has been reminded.</p></section>';
+    return html + list.map(function (r) {
+      var b = r.b, m = reminderMessage(r.kind, r.id);
+      return '<article class="ddb-item ddb-remitem" data-rem="' + esc(r.id) + '"><b>' + esc(niceDate(b.date) + ' ' + niceTime(b.time)) + '</b> ' + esc(b.customer) +
+        '<small>' + esc(r.kind === 'service' ? (SV_TYPES[b.type] || 'Service') : 'Test drive') + ' &middot; ' + esc(carOf(r.kind, b)) + ' &middot; ' + esc(codeOf(b)) + '</small>' +
+        '<div class="ddb-actions">' +
+        (m.sms ? '<a class="ddb-btn ddb-primary ddb-link" data-remind="text" data-kind="' + r.kind + '" data-id="' + esc(r.id) + '" href="' + esc(m.sms) + '">Text reminder</a>' : '<span class="ddb-empty">No valid phone</span>') +
+        (m.mailto ? '<a class="ddb-btn ddb-link" data-remind="email" data-kind="' + r.kind + '" data-id="' + esc(r.id) + '" href="' + esc(m.mailto) + '">Email reminder</a>' : '') +
+        '<button type="button" class="ddb-btn" data-mark="' + esc(r.id) + '" data-kind="' + r.kind + '">Mark reminded</button>' +
+        '<a class="ddb-btn ddb-link" href="' + esc(icsHref(r.kind, r.id)) + '" download="' + esc(icsFileName(r.kind, r.id)) + '">Add to calendar</a></div></article>';
+    }).join('') + '</section>';
+  }
   function renderDrives() {
     var d = ui.date, inv = vehicles(), html = '';
     html += '<form class="ddb-card ddb-form" data-form="td"><h3>New test drive</h3><div class="ddb-grid">' +
@@ -304,7 +407,7 @@
       var list = testDrivesOn(day);
       return '<section class="ddb-day' + (day === today() ? ' ddb-today' : '') + '"><h4>' + esc(day) + '</h4>' + (list.length ? list.map(function (t) {
         return '<article class="ddb-item ddb-s-' + t.status + '" data-id="' + t.id + '"><b>' + esc(t.time) + '</b> ' + esc(t.customer) + '<small>' + esc(t.vehicleLabel || t.stock || t.vin) + (t.salesperson ? ' &middot; ' + esc(t.salesperson) : '') + '</small>' + chip(t.status) +
-          '<select data-td-status="' + t.id + '" aria-label="Status">' + opt(TD_STATUS, t.status) + '</select></article>';
+          '<select data-td-status="' + t.id + '" aria-label="Status">' + opt(TD_STATUS, t.status) + '</select>' + detailsHTML('test-drive', t) + '</article>';
       }).join('') : '<p class="ddb-empty">No test drives</p>') + '</section>';
     }).join('') + '</div>';
     html += '<div class="ddb-card"><h3>Upcoming</h3>' + (upcoming(10).map(function (u) { return '<div class="ddb-row"><b>' + esc(u.date + ' ' + u.time) + '</b> ' + esc(u.customer) + ' <small>' + (u.kind === 'service' ? esc(SV_TYPES[u.type]) : 'Test drive') + '</small></div>'; }).join('') || '<p class="ddb-empty">Nothing upcoming</p>') + '</div>';
@@ -325,13 +428,13 @@
       b.bays.map(function (x) {
         return '<section class="ddb-bay"><header>Bay ' + x.bay + '<span class="ddb-meter"><i style="width:' + x.pct + '%"></i></span><small>' + x.pct + '%</small></header>' + (x.jobs.map(function (j) {
           return '<article class="ddb-item ddb-s-' + j.status + '"><b>' + j.time + '</b> ' + esc(j.customer) + '<small>' + esc(SV_TYPES[j.type]) + ' &middot; ' + esc([j.vehicle.year, j.vehicle.make, j.vehicle.model].filter(Boolean).join(' ')) + ' &middot; ' + j.durationMin + 'm</small>' + chip(j.status) +
-            (j.status !== 'picked-up' ? '<button class="ddb-btn ddb-sm" data-sv-next="' + j.id + '">Next: ' + esc(SV_STATUS[SV_STATUS.indexOf(j.status) + 1].replace('-', ' ')) + '</button>' : '') + '</article>';
+            (j.status !== 'picked-up' ? '<button class="ddb-btn ddb-sm" data-sv-next="' + j.id + '">Next: ' + esc(SV_STATUS[SV_STATUS.indexOf(j.status) + 1].replace('-', ' ')) + '</button>' : '') + detailsHTML('service', j) + '</article>';
         }).join('') || '<p class="ddb-empty">Free</p>') + '</section>';
       }).join('') + '</div>';
     return html;
   }
   function renderSettings() {
-    var s = state.settings;
+    var s = state.settings, tp = Object.assign(defaultTemplates(), s.templates || {});
     return '<form class="ddb-card ddb-form" data-form="settings"><h3>Business hours</h3><div class="ddb-hours">' + DAYS.map(function (d) {
       var h = s.hours[d]; return '<div class="ddb-hrow"><b>' + d.toUpperCase() + '</b><label class="ddb-inline"><input type="checkbox" name="open_' + d + '"' + (h ? ' checked' : '') + '> open</label><input type="time" name="from_' + d + '" value="' + (h ? h.open : '09:00') + '"><input type="time" name="to_' + d + '" value="' + (h ? h.close : '17:00') + '"></div>';
     }).join('') + '</div><h3>Booking rules</h3><div class="ddb-grid">' +
@@ -339,16 +442,23 @@
       '<label>Service bays<input type="number" name="bays" value="' + s.bays + '"></label><label>Minimum notice (min)<input type="number" name="leadTimeMin" value="' + s.leadTimeMin + '"></label>' +
       '<label>Book up to (days ahead)<input type="number" name="maxDaysAhead" value="' + s.maxDaysAhead + '"></label><label class="ddb-inline"><input type="checkbox" name="publicRequests"' + (s.publicRequests ? ' checked' : '') + '> Accept online requests</label>' +
       '<label class="ddb-wide">Salespeople (comma separated)<input name="salespeople" value="' + esc(state.salespeople.join(', ')) + '"></label><label class="ddb-wide">Service advisors<input name="advisors" value="' + esc(state.advisors.join(', ')) + '"></label>' +
+      '</div><h3>Reminders</h3><div class="ddb-grid">' +
+      '<label>Reminder window<select name="reminderHours">' + [24, 48].map(function (h) { return '<option value="' + h + '"' + (s.reminderHours === h ? ' selected' : '') + '>Next ' + h + ' hours</option>'; }).join('') + '</select></label>' +
+      '<label class="ddb-wide">Text message<textarea name="tpl_sms" rows="3" maxlength="480">' + esc(tp.sms) + '</textarea></label>' +
+      '<label class="ddb-wide">Email subject<input name="tpl_emailSubject" maxlength="140" value="' + esc(tp.emailSubject) + '"></label>' +
+      '<label class="ddb-wide">Email message<textarea name="tpl_emailBody" rows="6" maxlength="2000">' + esc(tp.emailBody) + '</textarea></label>' +
+      '<p class="ddb-wide ddb-empty">Placeholders: ' + PLACEHOLDERS.map(function (x) { return '{' + x + '}'; }).join(' ') + '. Only https:// links are allowed.</p>' +
+      '<label class="ddb-inline ddb-wide"><input type="checkbox" name="tpl_reset"> Reset messages to the defaults</label>' +
       '</div><button class="ddb-btn ddb-primary">Save settings</button></form>';
   }
   function renderHTML() {
-    var n = newRequests().length;
+    var n = newRequests().length, rc = reminders().length;
     return '<div class="ddb"><header class="ddb-top"><div class="ddb-tabs">' +
-      [['drives', 'Test drives'], ['service', 'Service'], ['settings', 'Settings']].map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (ui.tab === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') +
+      [['drives', 'Test drives'], ['service', 'Service'], ['reminders', 'Reminders'], ['settings', 'Settings']].map(function (t) { return '<button data-tab="' + t[0] + '" class="' + (ui.tab === t[0] ? 'on' : '') + '">' + t[1] + (t[0] === 'reminders' && rc ? ' <span class="ddb-count" data-rem-count>' + rc + '</span>' : '') + '</button>'; }).join('') +
       '</div><div class="ddb-datebar"><button data-shift="-1" aria-label="Previous">&lsaquo;</button><input type="date" data-date value="' + esc(ui.date) + '"><button data-shift="1" aria-label="Next">&rsaquo;</button><button data-today>Today</button></div>' +
       (n ? '<button class="ddb-badge" data-seen>' + n + ' new online request' + (n > 1 ? 's' : '') + '</button>' : '') + '</header>' +
       (ui.msg ? '<div class="ddb-msg" role="status">' + esc(ui.msg) + '</div>' : '') + (saveError ? '<div class="ddb-msg ddb-bad">' + esc(saveError) + '</div>' : '') +
-      (ui.tab === 'drives' ? renderDrives() : ui.tab === 'service' ? renderService() : renderSettings()) + '</div>';
+      (ui.tab === 'drives' ? renderDrives() : ui.tab === 'service' ? renderService() : ui.tab === 'reminders' ? renderReminders() : renderSettings()) + '</div>';
   }
   function refresh() { if (!ui.el) return; ui.el.innerHTML = renderHTML(); var i = ui.el.querySelector('[data-vsearch]'); if (i) bindPicker(i, ui.el.querySelector('[data-vresults]')); }
   function formData(f) { var o = {}; Array.prototype.forEach.call(f.elements, function (e) { if (!e.name) return; o[e.name] = e.type === 'checkbox' ? e.checked : e.value; }); return o; }
@@ -359,14 +469,22 @@
       else if (kind === 'sv') { var s = addService({ customer: d.customer, phone: d.phone, email: d.email, advisor: d.advisor, notes: d.notes, type: d.type, bay: d.bay, durationMin: d.durationMin, date: d.date, time: d.time, vehicle: { year: d.year, make: d.make, model: d.model, vin: d.vin, mileage: d.mileage } }); ui.msg = 'Scheduled in bay ' + s.bay + '.'; }
       else {
         var h = {}; DAYS.forEach(function (x) { h[x] = d['open_' + x] ? { open: d['from_' + x], close: d['to_' + x] } : null; });
-        updateSettings({ hours: h, slotMin: d.slotMin, testDriveMin: d.testDriveMin, bays: d.bays, leadTimeMin: d.leadTimeMin, maxDaysAhead: d.maxDaysAhead, publicRequests: d.publicRequests });
+        updateSettings({ hours: h, slotMin: d.slotMin, testDriveMin: d.testDriveMin, bays: d.bays, leadTimeMin: d.leadTimeMin, maxDaysAhead: d.maxDaysAhead, publicRequests: d.publicRequests,
+          reminderHours: d.reminderHours, templates: d.tpl_reset ? defaultTemplates() : { sms: d.tpl_sms, emailSubject: d.tpl_emailSubject, emailBody: d.tpl_emailBody } });
         setStaff('salespeople', d.salespeople.split(',')); setStaff('advisors', d.advisors.split(',')); ui.msg = 'Settings saved.';
       }
     } catch (e) { ui.msg = e.message; }
     refresh();
   }
   function onClick(ev) {
+    var a = ev.target.closest ? ev.target.closest('a[data-remind]') : null;
+    if (a && ui.el.contains(a)) { // let the sms:/mailto: link open, then mark reminded
+      if (!safeHref(a.getAttribute('href') || '')) { ev.preventDefault(); return; }
+      try { markReminded(a.getAttribute('data-kind'), a.getAttribute('data-id'), a.getAttribute('data-remind')); ui.msg = 'Marked as reminded.'; } catch (e) { ui.msg = e.message; }
+      setTimeout(refresh, 0); return;
+    }
     var t = ev.target.closest ? ev.target.closest('button') : null; if (!t || !ui.el.contains(t)) return;
+    if (t.hasAttribute('data-mark')) { try { markReminded(t.getAttribute('data-kind'), t.getAttribute('data-mark'), 'manual'); ui.msg = 'Marked as reminded.'; } catch (e) { ui.msg = e.message; } refresh(); return; }
     ui.msg = '';
     if (t.dataset.tab) ui.tab = t.dataset.tab; else if (t.dataset.view) ui.view = t.dataset.view;
     else if (t.dataset.shift) { var d = parseDate(ui.date); d.setDate(d.getDate() + (+t.dataset.shift) * (ui.view === 'week' && ui.tab === 'drives' ? 7 : 1)); ui.date = ymd(d); }
@@ -400,6 +518,8 @@
     setInventory: setInventory, toSchema: toSchema, vehicles: vehicles, findVehicle: findVehicle, searchVehicles: searchVehicles, bindPicker: bindPicker,
     addTestDrive: addTestDrive, updateTestDrive: updateTestDrive, setTestDriveStatus: setTDStatus, testDrivesOn: testDrivesOn, weekOf: weekOf, upcoming: upcoming,
     addService: addService, updateService: updateService, advanceService: advanceService, bayBoard: bayBoard,
+    reminders: reminders, reminderMessage: reminderMessage, markReminded: markReminded, unmarkReminded: unmarkReminded, setDealerName: setDealerName,
+    ics: ics, icsHref: icsHref, icsFileName: icsFileName, safeHref: safeHref, checkTemplate: checkTemplate, defaultTemplates: defaultTemplates, PLACEHOLDERS: PLACEHOLDERS,
     openSlots: openSlots, submitRequest: submitRequest, newRequests: newRequests, markSeen: markSeen,
     all: function () { return JSON.parse(JSON.stringify(state)); }, lastSaveError: function () { return saveError; },
     onChange: function (f) { listeners.push(f); }, mount: mount, renderHTML: renderHTML,

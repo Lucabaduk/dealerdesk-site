@@ -28,7 +28,7 @@
 .ddb-day h4{margin:0 0 8px;font-size:13px;color:var(--mute)}
 .ddb-item{border-left:4px solid var(--acc);background:rgba(13,148,136,.07);border-radius:10px;padding:8px 10px;margin:6px 0;display:flex;flex-direction:column;gap:3px}
 .ddb-item small{color:var(--mute)}
-.ddb-item select{min-height:36px;padding:4px 8px;font-size:14px}
+.ddb-item select{min-height:44px;padding:4px 8px;font-size:16px}
 .ddb-s-confirmed,.ddb-s-checked-in{border-color:#2563eb}.ddb-s-in-progress{border-color:var(--warn)}
 .ddb-s-completed,.ddb-s-ready{border-color:var(--ok)}.ddb-s-no-show,.ddb-s-cancelled{border-color:var(--bad);opacity:.6}.ddb-s-picked-up{opacity:.5}
 .ddb-chip{align-self:flex-start;font-size:11px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--line)}
@@ -62,3 +62,15 @@
 .ddb-results small{width:100%;color:var(--mute);font-size:12px}
 .ddb-hrow input[type=time]{width:100%;padding:10px 6px}
 .ddp-ymm>label{min-width:0}
+
+/* reminders + details */
+.ddb-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--warn);color:#111;font-size:12px;font-weight:800;margin-left:4px}
+.ddb-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ddb-actions .ddb-btn{flex:1 1 140px;min-height:44px;margin-top:0;text-align:center}
+a.ddb-btn,.ddb-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-height:44px}
+.ddb-rem h3 small{color:var(--mute);font-weight:500}
+.ddb-remitem{overflow-wrap:anywhere}
+.ddb-det summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600;color:var(--acc)}
+.ddb-detbody{display:grid;gap:4px;font-size:14px;overflow-wrap:anywhere}
+.ddb-tabs{flex-wrap:wrap;max-width:100%}
+.ddp-done .ddb-btn{margin-top:12px}
