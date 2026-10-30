@@ -5,6 +5,7 @@ cp ${H_SCHEMA:-$H/schema.js} src/schema.js; cp $H/test_schema.js $H/sample-data.
 if [ -f $H/inventory-5000.json ]; then cp $H/inventory-5000.json cars.json; elif [ -f $H/cars.json ]; then cp $H/cars.json cars.json; else cp $H/sample-data.json cars.json; fi
 mkdir -p data && cp cars.json data/cars.json
 rm -rf assets && mkdir assets && cp -r $H/assets/* assets/
-node -e 'const fs=require("fs");let s=fs.readFileSync("src/app.src.html","utf8");s=s.replace("/*@SCHEMA@*/",()=>fs.readFileSync("src/schema.js","utf8"));fs.writeFileSync("app.html",s)'
+node -e 'const fs=require("fs");let s=fs.readFileSync("src/app.src.html","utf8");s=s.replace("/*@SCHEMA@*/",()=>fs.readFileSync("src/schema.js","utf8")).replace("/*@DASH@*/",()=>fs.readFileSync("modules/dashboard-local.js","utf8"));fs.writeFileSync("app.html",s)'
 node -e 'const fs=require("fs");for(const f of ["cars.json","data/cars.json"]){const d=JSON.parse(fs.readFileSync(f));(d.cars||[]).forEach(c=>{const k="assets/cars/"+(c.make+"-"+c.model).toLowerCase().replace(/[^a-z0-9]+/g,"-")+".webp";c.photos=(c.photos||[]).filter(p=>!/^assets\//.test(p)||fs.existsSync(p));if(!c.photos.length&&fs.existsSync(k))c.photos=[k]});fs.writeFileSync(f,JSON.stringify(d))}'
+if [ -f $H/dashboard.js ]; then cp $H/dashboard.js modules/dashboard.js; else echo "/* Helper dashboard.js not shipped yet; app uses modules/dashboard-local.js */" > modules/dashboard.js; fi
 printf '{"v":"%s"}\n' "$(date +%s)" > version.json
