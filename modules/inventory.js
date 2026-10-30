@@ -54,6 +54,7 @@
     function ingest(listIn) { var out = [], seen = {}, skipped = 0; (listIn || []).slice(0, 20000).forEach(function (c) { var r = normalize(c, clock()); if (!r.ok || seen[r.car.vin] || seen['#' + r.car.id]) { skipped++; return; } seen[r.car.vin] = seen['#' + r.car.id] = 1; out.push(r.car); }); return { cars: out, skipped: skipped }; }
     try { var raw = JSON.parse(store.getItem(KEY) || 'null'); if (Array.isArray(raw)) cars = ingest(raw).cars; } catch (e) { cars = []; }
     rebuild();
+    function stockAt(st) { var k = String(st || '').toLowerCase(); if (!k) return -1; for (var j = 0; j < cars.length; j++) if (String(cars[j].stock_no).toLowerCase() === k) return j; return -1; }
     function copy(c) { return c ? JSON.parse(JSON.stringify(c)) : null; }
     function at(vinOrId) { var v = cleanVin(vinOrId); var i = byVin[v]; if (i == null) i = byId[String(vinOrId)]; return i == null ? -1 : i; }
     function order(field, dir) {
@@ -69,9 +70,11 @@
       list: function () { return cars.map(copy); },
       get: function (vinOrId) { var i = at(vinOrId); return i < 0 ? null : copy(cars[i]); },
       add: function (input) { var r = normalize(input, clock()); if (!r.ok) return r; if (byVin[r.car.vin] != null || byId[r.car.id] != null) return { ok: false, errors: ['duplicate'] };
+        if (stockAt(r.car.stock_no) >= 0) return { ok: false, errors: ['duplicate_stock'] };
         cars.push(r.car); rebuild(); save(); return { ok: true, car: copy(r.car) }; },
       update: function (vinOrId, patch) { var i = at(vinOrId); if (i < 0) return { ok: false, errors: ['not_found'] };
         var r = normalize(Object.assign({}, cars[i], patch || {}, { vin: cars[i].vin, id: cars[i].id }), clock()); if (!r.ok) return r;
+        var si = stockAt(r.car.stock_no); if (si >= 0 && si !== i) return { ok: false, errors: ['duplicate_stock'] };
         cars[i] = r.car; rebuild(); save(); return { ok: true, car: copy(r.car) }; },
       setStatus: function (v, s) { return api.update(v, { status: s }); },
       remove: function (vinOrId) { var i = at(vinOrId); if (i < 0) return false; cars.splice(i, 1); rebuild(); save(); return true; },

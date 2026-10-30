@@ -1,7 +1,7 @@
 /* Staff inventory screen (staff-inventory.html). Pure helpers exported for tests; UI uses textContent only. */
 (function (root) {
   'use strict';
-  var FIELD_LABELS = { vin: 'VIN (17 chars, no I/O/Q)', year: 'Year', make: 'Make', model: 'Model', price: 'Price', mileage: 'Mileage', status: 'Status', condition: 'Condition', id: 'ID', duplicate: 'A car with this VIN already exists', not_found: 'Car not found' };
+  var FIELD_LABELS = { vin: 'VIN (17 chars, no I/O/Q)', year: 'Year', make: 'Make', model: 'Model', price: 'Price', mileage: 'Mileage', status: 'Status', condition: 'Condition', id: 'ID', duplicate: 'A car with this VIN already exists', duplicate_stock: 'Another car already uses this stock #', not_found: 'Car not found' };
   function formToCar(v) { v = v || {}; return { vin: v.vin, stock_no: v.stock_no, year: v.year, make: v.make, model: v.model, trim: v.trim, price: v.price, mileage: v.mileage, color: v.color, condition: v.condition, status: v.status, body: v.body,
     photos: String(v.photos || '').split(/\s*\n\s*|\s+/).filter(Boolean), features: String(v.features || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean) }; }
   function errorText(errors) { return 'Please fix: ' + (errors || []).map(function (e) { return FIELD_LABELS[e] || e; }).join(', '); }

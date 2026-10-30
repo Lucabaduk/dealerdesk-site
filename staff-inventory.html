@@ -10,7 +10,8 @@
 header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px}h1{font-size:1.2rem;margin:0 auto 0 0}
 .tabs button[aria-selected=true]{background:var(--btn);color:#fff;border-color:var(--btn)}
 button,select,input,textarea{font-size:16px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;padding:0 12px}
-textarea{padding:8px 12px;width:100%}button.primary{background:var(--btn);color:#fff;border-color:var(--btn)}button.small{min-height:36px;font-size:14px;padding:0 10px}
+textarea{padding:8px 12px;width:100%}button.primary{background:var(--btn);color:#fff;border-color:var(--btn)}button.small{min-height:44px;min-width:44px;font-size:14px;padding:0 10px}
+#lrows td a{display:inline-flex;align-items:center;min-height:44px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px}.bar input[type=search]{flex:1 1 220px}.bar input[type=number]{width:120px}
 .wrap{overflow-x:auto;padding:0 8px}table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px}
 th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}th{color:var(--muted);font-weight:600;font-size:13px}
@@ -36,7 +37,7 @@ dialog{border:0;border-radius:14px;background:var(--card);color:var(--ink);width
     <select id="f-make" aria-label="Make"><option value="">All makes</option></select><select id="f-status" aria-label="Status"><option value="">Any status</option><option>available</option><option>hold</option><option>sold</option></select>
     <input type="number" id="f-max" placeholder="Max $" aria-label="Max price" inputmode="numeric"><select id="sort" aria-label="Sort"><option value="">Newest added</option><option value="price">Price ↑</option><option value="price:desc">Price ↓</option><option value="year:desc">Year ↓</option><option value="mileage">Mileage ↑</option><option value="stock">Stock #</option></select>
     <button class="primary" id="add">+ Add car</button><button id="print-page">Print QR (this page)</button>
-    <button id="export">Export JSON</button><label class="muted" style="display:flex;align-items:center;gap:6px"><input type="file" id="import" accept="application/json" style="min-height:0;border:0;padding:0;max-width:200px"></label></div>
+    <button id="export">Export JSON</button><label class="muted" style="display:flex;align-items:center;gap:6px"><input type="file" id="import" accept="application/json" style="min-height:44px;border:0;padding:0;max-width:200px"></label></div>
   <p class="muted" id="count" style="padding:0 16px"></p>
   <div class="wrap"><table><thead><tr><th></th><th>Car</th><th class="hide-sm">Stock #</th><th class="hide-sm">VIN</th><th class="num">Price</th><th class="num hide-sm">Miles</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
   <div class="pager"><button id="prev">‹ Prev</button><span id="pageinfo"></span><button id="next">Next ›</button></div>
