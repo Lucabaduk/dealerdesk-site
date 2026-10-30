@@ -13,20 +13,23 @@
   function price(c) { return c.price != null ? +c.price : c.price_cents != null ? c.price_cents / 100 : null; }
   function first(c, keys) { for (var i = 0; i < keys.length; i++) { var v = c[keys[i]]; if (v != null && v !== '') return v; } return null; }
   function economy(c) {
-    var r = first(c, ['range_mi', 'range']); if (r != null) return { text: int(r) + ' mi range', n: +r, better: 'high' };
-    var city = first(c, ['mpg_city']), hwy = first(c, ['mpg_hwy']), comb = first(c, ['mpg', 'mpg_combined']);
-    if (city != null && hwy != null) return { text: city + ' city / ' + hwy + ' hwy MPG', n: (+city + +hwy) / 2, better: 'high' };
-    if (comb != null) return { text: comb + ' MPG', n: +comb, better: 'high' }; return { text: '', n: null };
+    var r = first(c, ['range_miles', 'range_mi']); if (r != null) return { text: int(r) + ' mi range (EV)', n: null };
+    var city = first(c, ['mpg_city']), hwy = first(c, ['mpg_highway', 'mpg_hwy']), comb = first(c, ['mpg_combined', 'mpg']), e = first(c, ['mpge']);
+    if (city != null && hwy != null) return { text: city + ' city / ' + hwy + ' hwy MPG', n: (+city + +hwy) / 2 };
+    if (comb != null || e != null) return { text: [comb != null ? comb + ' MPG' : '', e != null ? e + ' MPGe' : ''].filter(Boolean).join(' · '), n: comb != null ? +comb : null };
+    if (c.fuel_type) return { text: 'Not EPA-rated (' + c.fuel_type + ')', n: null };
+    return { text: '', n: null };
   }
   // row: label, value(car) -> {text, n?}, better: 'low'|'high'|null for "best" mark
   var ROWS = [
     ['Price', function (c) { var p = price(c); return { text: money(p), n: p }; }, 'low'],
     ['Year', function (c) { return { text: c.year == null ? '' : String(c.year), n: c.year }; }, 'high'],
     ['Mileage', function (c) { return { text: c.mileage == null ? '' : int(c.mileage) + ' mi', n: c.mileage }; }, 'low'],
-    ['Body', function (c) { return { text: String(first(c, ['body', 'body_type']) || '') }; }],
+    ['Body', function (c) { return { text: String(first(c, ['body_type', 'body']) || '') }; }],
     ['Engine', function (c) { return { text: String(first(c, ['engine']) || '') }; }],
-    ['Horsepower', function (c) { var h = first(c, ['hp', 'horsepower']); return { text: h == null ? '' : int(h) + ' hp', n: h == null ? null : +h }; }, 'high'],
+    ['Horsepower', function (c) { var h = first(c, ['horsepower', 'hp']); return { text: h == null ? '' : int(h) + ' hp', n: h == null ? null : +h }; }, 'high'],
     ['MPG / range', economy, 'high'],
+    ['Fuel', function (c) { return { text: String(c.fuel_type || '') }; }],
     ['Seats', function (c) { var s = first(c, ['seats', 'seating']); return { text: s == null ? '' : String(s), n: s == null ? null : +s }; }],
     ['Drivetrain', function (c) { return { text: String(first(c, ['drivetrain']) || '') }; }],
     ['Transmission', function (c) { return { text: String(first(c, ['transmission']) || '') }; }],

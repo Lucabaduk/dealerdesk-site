@@ -5,6 +5,9 @@
   var KEY = 'dealerdesk.leads.v1';
   var INTERESTS = ['question', 'test_drive', 'price'], STATUSES = ['new', 'contacted', 'qualified', 'won', 'lost'] // = schema leadStatus;
   var EMAIL_RE = /^[^\s@<>"']{1,64}@[^\s@<>"']{1,190}\.[A-Za-z]{2,24}$/;
+  // plain phone numbers (+15551234567, +1 (555) 123-4567) are exported as-is; anything else starting = + - @ gets a ' guard
+  var PHONE_RE = /^\+?(\d{1,3}[ .-]?)?(\(\d{1,4}\)[ .-]?)?\d[\d .-]{4,18}\d$/;
+  function isPhone(v) { var d = v.replace(/\D/g, '').length; return PHONE_RE.test(v) && d >= 7 && d <= 15; }
   function cleanPhone(p) { p = String(p == null ? '' : p).replace(/[^0-9+]/g, ''); p = p.replace(/(?!^)\+/g, ''); var d = p.replace(/\D/g, ''); return d.length >= 7 && d.length <= 15 ? p : ''; }
   function rid() { var a = 'abcdefghijkmnpqrstuvwxyz23456789', s = '', i; for (i = 0; i < 10; i++) s += a[Math.floor(Math.random() * a.length)]; return 'L' + s; }
   function validate(input) {
@@ -41,8 +44,8 @@
       counts: function () { var c = { new: 0, contacted: 0, qualified: 0, won: 0, lost: 0, total: leads.length }; leads.forEach(function (l) { c[l.status]++; }); return c; },
       exportJSON: function () { return JSON.stringify({ type: 'dealerdesk-leads', version: 1, leads: leads }, null, 2); },
       exportCSV: function () { var cols = ['id', 'createdAt', 'status', 'vin', 'interest_car_id', 'name', 'phone', 'email', 'interest', 'notes', 'staffNote'];
-        function cell(v) { v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
-        return [cols.join(',')].concat(leads.map(function (l) { return cols.map(function (k) { return cell(k === 'createdAt' ? new Date(l[k]).toISOString() : l[k]); }).join(','); })).join('\n'); }
+        function cell(v, k) { v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v) && !(k === 'phone' && isPhone(v))) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
+        return [cols.join(',')].concat(leads.map(function (l) { return cols.map(function (k) { return cell(k === 'createdAt' ? new Date(l[k]).toISOString() : l[k], k); }).join(','); })).join('\n'); }
     };
   }
   var mod = { create: create, validate: validate, cleanPhone: cleanPhone, KEY: KEY, INTERESTS: INTERESTS, STATUSES: STATUSES };

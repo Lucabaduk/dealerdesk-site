@@ -13,7 +13,7 @@ t('labelData text lines', () => { const d = QL.labelData({ vin: '1hgcm82633a0043
 t('formToCar + errorText + buildQuery', () => { const c = SI.formToCar({ vin: 'v', photos: 'a.webp\n https://x.io/b.webp ', features: 'A, B,,C ' }); eq(c.photos, ['a.webp', 'https://x.io/b.webp']); eq(c.features, ['A', 'B', 'C']);
   ok(SI.errorText(['vin', 'price', 'weird']).includes('VIN (17 chars')); const q = SI.buildQuery({ text: 'camry', sort: 'price:desc', maxPrice: '30000', page: 3 }); eq([q.sort, q.dir, q.maxPrice, q.page, q.pageSize], ['price', 'desc', 30000, 3, 24]); eq(SI.buildQuery({ maxPrice: 'abc' }).maxPrice, undefined); });
 t('no HTML injection sinks in UI code', () => { ['modules/staff-inventory.js', 'modules/qr-label.js', 'modules/car-page.js', 'modules/compare-page.js', 'modules/favorites.js'].forEach(f => ok(!/innerHTML|outerHTML|insertAdjacentHTML|document\.write/.test(R(f).replace(/\/\*[\s\S]*?\*\//g, '')), f)); });
-t('print layout present', () => { const h = R('staff-inventory.html'); ok(/@media print/.test(h) && /\.dd-sheet\{display:grid;grid-template-columns:repeat\(3,1fr\)/.test(h) && /break-inside:avoid/.test(h)); ok(/prefers-color-scheme:dark/.test(h)); });
+t('print layout present', () => { const h = R('staff-inventory.html'); ok(/@media print/.test(h) && /\.dd-page\{display:grid;grid-template-columns:repeat\(3,1fr\);grid-template-rows:repeat\(4,63mm\)/.test(h) && /break-inside:avoid/.test(h)); ok(/prefers-color-scheme:dark/.test(h)); });
 // DOM run with jsdom if available
 let JSDOM = null; for (const p of ['/tmp/devmods/node_modules/jsdom', '/tmp/qrdev/node_modules/jsdom', 'jsdom']) { try { JSDOM = require(p).JSDOM; break; } catch (e) {} }
 async function dom() {
@@ -29,7 +29,7 @@ async function dom() {
   t('DOM staff: add car via form + validation', () => { d.getElementById('add').click(); const f = d.getElementById('carform'); f.elements.vin.value = 'bad'; f.dispatchEvent(new w.Event('submit', { cancelable: true })); ok(d.getElementById('formerr').textContent.includes('VIN')); ok(d.getElementById('dlg').hasAttribute('open'));
     Object.entries({ vin: '1HGCM82633A004352', year: '2023', make: 'Zeta', model: 'One', price: '19,990', mileage: '100' }).forEach(([k, v]) => f.elements[k].value = v); f.dispatchEvent(new w.Event('submit', { cancelable: true })); eq(d.getElementById('formerr').textContent, ''); ok(!d.getElementById('dlg').hasAttribute('open')); ok(d.getElementById('count').textContent.startsWith('61')); });
   t('DOM staff: status change + print QR sheet', () => { const sel = d.querySelector('#rows select'); sel.value = 'sold'; sel.dispatchEvent(new w.Event('change')); const vin = d.querySelector('#rows tr td.hide-sm.muted').textContent; ok(JSON.parse(w.localStorage.getItem('dealerdesk.inventory.v2')).find(c => c.vin === vin).status === 'sold');
-    d.getElementById('print-page').click(); eq(d.querySelectorAll('#print .dd-label').length, 24); ok(d.querySelector('#print .dd-label .dd-l4').textContent.startsWith('VIN ')); });
+    d.getElementById('print-page').click(); eq(d.querySelectorAll('#print .dd-label').length, 24); eq(d.querySelectorAll('#print .dd-page').length, 2); eq([...d.querySelectorAll('#print .dd-page')].map(p => p.children.length), [12, 12]); ok(d.querySelector('#print .dd-label .dd-l4').textContent.startsWith('VIN ')); });
   await new Promise(r => setTimeout(r, 80));
   t('DOM staff: printed', () => ok(w.__printed >= 1));
   // leads tab with a lead submitted from car page (same storage key, same origin)

@@ -2,10 +2,10 @@
 (function (root) {
   'use strict';
   var FIELD_LABELS = { vin: 'VIN (17 chars, no I/O/Q)', year: 'Year', make: 'Make', model: 'Model', price: 'Price', mileage: 'Mileage', status: 'Status', condition: 'Condition', id: 'ID', duplicate: 'A car with this VIN already exists', duplicate_stock: 'Another car already uses this stock #', not_found: 'Car not found' };
-  function formToCar(v) { v = v || {}; return { vin: v.vin, stock_no: v.stock_no, year: v.year, make: v.make, model: v.model, trim: v.trim, price: v.price, mileage: v.mileage, color: v.color, condition: v.condition, status: v.status, body: v.body,
+  function formToCar(v) { v = v || {}; return { vin: v.vin, stock_no: v.stock_no, year: v.year, make: v.make, model: v.model, trim: v.trim, price: v.price, mileage: v.mileage, color: v.color, condition: v.condition, status: v.status, body_type: v.body_type,
     photos: String(v.photos || '').split(/\s*\n\s*|\s+/).filter(Boolean), features: String(v.features || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean) }; }
   function errorText(errors) { return 'Please fix: ' + (errors || []).map(function (e) { return FIELD_LABELS[e] || e; }).join(', '); }
-  function buildQuery(s) { s = s || {}; var sort = String(s.sort || '').split(':'); var q = { text: s.text || '', make: s.make || '', status: s.status || '', sort: sort[0] || '', dir: sort[1] || 'asc', page: s.page || 1, pageSize: 24 };
+  function buildQuery(s) { s = s || {}; var sort = String(s.sort || '').split(':'); var q = { text: s.text || '', make: s.make || '', body_type: s.body_type || '', status: s.status || '', sort: sort[0] || '', dir: sort[1] || 'asc', page: s.page || 1, pageSize: 24 };
     if (s.maxPrice !== '' && s.maxPrice != null && isFinite(+s.maxPrice)) q.maxPrice = +s.maxPrice; return q; }
   function fmtWhen(t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); }
   var api = { formToCar: formToCar, errorText: errorText, buildQuery: buildQuery, fmtWhen: fmtWhen };
@@ -16,8 +16,9 @@
   function btn(txt, fn, cls) { var b = el('button', 'small' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; b.addEventListener('click', fn); return b; }
   var inv = DDInventory.create(), leads = DDLeads.create(), page = 1, editing = null, last = null;
   function money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
-  function fillMakes() { var s = $('f-make'), cur = s.value; while (s.options.length > 1) s.remove(1); inv.facets('make').forEach(function (f) { var o = el('option', '', f.value + ' (' + f.count + ')'); o.value = f.value; s.appendChild(o); }); s.value = cur; }
-  function state() { return { text: $('q').value, make: $('f-make').value, status: $('f-status').value, maxPrice: $('f-max').value, sort: $('sort').value, page: page }; }
+  function fillMakes() { fillFacet('f-body', 'body_type'); var s = $('f-make'), cur = s.value; while (s.options.length > 1) s.remove(1); inv.facets('make').forEach(function (f) { var o = el('option', '', f.value + ' (' + f.count + ')'); o.value = f.value; s.appendChild(o); }); s.value = cur; }
+  function fillFacet(id, field) { var s = $(id), cur = s.value; while (s.options.length > 1) s.remove(1); inv.facets(field).forEach(function (f) { var o = el('option', '', f.value + ' (' + f.count + ')'); o.value = f.value; s.appendChild(o); }); s.value = cur; }
+  function state() { return { text: $('q').value, make: $('f-make').value, body_type: $('f-body').value, status: $('f-status').value, maxPrice: $('f-max').value, sort: $('sort').value, page: page }; }
   function draw() {
     last = inv.query(buildQuery(state())); page = last.page; var tb = $('rows'); tb.textContent = '';
     last.items.forEach(function (c) { var tr = el('tr'), td0 = el('td'), img = el('img'); img.alt = ''; img.loading = 'lazy'; DDStore.setImg(img, c.photos[0]); td0.appendChild(img); tr.appendChild(td0);
@@ -32,7 +33,7 @@
     $('count').textContent = last.total.toLocaleString('en-US') + ' cars'; $('pageinfo').textContent = 'Page ' + last.page + ' of ' + last.pages; $('prev').disabled = last.page <= 1; $('next').disabled = last.page >= last.pages;
   }
   function openForm(car) { editing = car ? car.vin : null; var f = $('carform'); f.reset(); $('formerr').textContent = ''; $('dlg-title').textContent = car ? 'Edit car' : 'Add car'; f.elements.vin.readOnly = !!car;
-    if (car) ['vin', 'stock_no', 'year', 'make', 'model', 'trim', 'price', 'mileage', 'color', 'condition', 'status', 'body'].forEach(function (k) { if (car[k] != null) f.elements[k].value = car[k]; });
+    if (car) ['vin', 'stock_no', 'year', 'make', 'model', 'trim', 'price', 'mileage', 'color', 'condition', 'status', 'body_type'].forEach(function (k) { if (car[k] != null) f.elements[k].value = car[k]; });
     if (car) { f.elements.photos.value = car.photos.join('\n'); f.elements.features.value = car.features.join(', '); } showDlg(true); }
   $('carform').addEventListener('submit', function (e) { e.preventDefault(); var f = e.target.elements, v = {}; Array.prototype.forEach.call(f, function (x) { if (x.name) v[x.name] = x.value; });
     var r = editing ? inv.update(editing, formToCar(v)) : inv.add(formToCar(v)); if (!r.ok) { $('formerr').textContent = errorText(r.errors); return; } $('formerr').textContent = ''; showDlg(false); fillMakes(); draw(); });
@@ -40,13 +41,13 @@
   function showDlg(on) { var d = $('dlg'); if (on) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); } else { if (d.close) d.close(); else d.removeAttribute('open'); } }
   function printLabels(cars) { DDQRLabel.sheet($('print'), cars, location.href); setTimeout(function () { root.print(); }, 50); }
   $('print-page').addEventListener('click', function () { if (last && last.items.length) printLabels(last.items); });
-  ['q', 'f-make', 'f-status', 'f-max', 'sort'].forEach(function (id) { $(id).addEventListener(id === 'q' || id === 'f-max' ? 'input' : 'change', function () { page = 1; draw(); }); });
+  ['q', 'f-make', 'f-body', 'f-status', 'f-max', 'sort'].forEach(function (id) { $(id).addEventListener(id === 'q' || id === 'f-max' ? 'input' : 'change', function () { page = 1; draw(); }); });
   $('prev').addEventListener('click', function () { page--; draw(); }); $('next').addEventListener('click', function () { page++; draw(); });
   $('add').addEventListener('click', function () { openForm(null); });
   function download(name, text, type) { var a = el('a'); a.href = URL.createObjectURL(new Blob([text], { type: type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
   $('export').addEventListener('click', function () { download('dealerdesk-inventory.json', inv.exportJSON(), 'application/json'); });
   $('import').addEventListener('change', function (e) { var file = e.target.files[0]; if (!file) return; if (file.size > 20e6) { alert('File too large'); return; }
-    file.text().then(function (t) { var r = inv.importJSON(t, 'merge'); alert(r.ok ? 'Imported: ' + r.added + ' added, ' + r.updated + ' updated, ' + r.skipped + ' skipped' : 'Import failed: ' + r.errors.join(', ')); fillMakes(); draw(); e.target.value = ''; }); });
+    file.text().then(function (t) { var r = inv.importJSON(t, 'merge'); alert(r.ok ? 'Imported: ' + r.added + ' added, ' + r.updated + ' updated, ' + r.skipped + ' skipped' + (r.duplicateStock && r.duplicateStock.length ? '\nDuplicate stock # skipped: ' + r.duplicateStock.slice(0, 10).map(function (d) { return d.stock_no + ' (' + d.vin + ')'; }).join(', ') + (r.duplicateStock.length > 10 ? ' +' + (r.duplicateStock.length - 10) + ' more' : '') : '') : 'Import failed: ' + r.errors.join(', ')); fillMakes(); draw(); e.target.value = ''; }); });
   // leads tab
   function drawLeads() { var tb = $('lrows'); tb.textContent = ''; var list = leads.list({ status: $('l-status').value });
     list.forEach(function (l) { var tr = el('tr'); tr.appendChild(el('td', 'muted', fmtWhen(l.createdAt))); tr.appendChild(el('td', '', l.name));
