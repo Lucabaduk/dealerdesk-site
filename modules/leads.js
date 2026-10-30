@@ -99,6 +99,18 @@
         return [cols.join(',')].concat(rows.map(function (l) { return cols.map(function (k) { return cell(val(l, k), k); }).join(','); })).join('\n'); }
     };
   }
-  var mod = { create: create, validate: validate, cleanPhone: cleanPhone, migrate: migrate, ago: ago, parseDate: parseDate, isOverdue: isOverdue, channelOf: channelOf, CHANNELS: CHANNELS, KEY: KEY, STAFF_KEY: STAFF_KEY, INTERESTS: INTERESTS, STATUSES: STATUSES };
+  var LEAD_ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
+  function safeLeadId(id) { return typeof id === 'string' && LEAD_ID_RE.test(id) ? id : ''; }
+  /** relative deep link for a lead's drawer on the staff screen ('' if the id is not a safe lead id) */
+  function linkFor(id, page) { id = safeLeadId(id); return id ? (page || 'staff-inventory.html') + '?lead=' + encodeURIComponent(id) : ''; }
+  /** read ?lead= or #lead= : {present, id} where id is '' when the value is unsafe */
+  function leadFromUrl(search, hash) { var raw = null;
+    [String(search || '').replace(/^\?/, ''), String(hash || '').replace(/^#/, '')].forEach(function (part) { if (raw != null) return; part.split('&').forEach(function (kv) { if (raw != null) return; var i = kv.indexOf('='); if ((i < 0 ? kv : kv.slice(0, i)) === 'lead') { try { raw = decodeURIComponent((i < 0 ? '' : kv.slice(i + 1)).replace(/\+/g, ' ')); } catch (e) { raw = ''; } } }); });
+    return raw == null ? { present: false, id: '' } : { present: true, id: safeLeadId(raw) }; }
+  /** URL with ?lead= set (id) or removed (null); #lead= always removed */
+  function withLead(href, id) { var m = /^([^?#]*)(\?[^#]*)?(#.*)?$/.exec(String(href || '')), qs = (m[2] || '').replace(/^\?/, '').split('&').filter(function (kv) { return kv && kv.split('=')[0] !== 'lead'; });
+    var h = (m[3] || '').replace(/^#/, '').split('&').filter(function (kv) { return kv && kv.split('=')[0] !== 'lead'; }); id = safeLeadId(id); if (id) qs.push('lead=' + encodeURIComponent(id));
+    return m[1] + (qs.length ? '?' + qs.join('&') : '') + (h.length ? '#' + h.join('&') : ''); }
+  var mod = { linkFor: linkFor, leadFromUrl: leadFromUrl, withLead: withLead, safeLeadId: safeLeadId, create: create, validate: validate, cleanPhone: cleanPhone, migrate: migrate, ago: ago, parseDate: parseDate, isOverdue: isOverdue, channelOf: channelOf, CHANNELS: CHANNELS, KEY: KEY, STAFF_KEY: STAFF_KEY, INTERESTS: INTERESTS, STATUSES: STATUSES };
   if (typeof module !== 'undefined' && module.exports) module.exports = mod; else root.DDLeads = mod;
 })(typeof self !== 'undefined' ? self : this);

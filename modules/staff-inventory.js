@@ -75,8 +75,13 @@
     $('ld-follow').value = l.followUpAt ? isoDay(l.followUpAt) : ''; $('ld-overdue').textContent = ''; if (leads.isOverdue(l)) $('ld-overdue').appendChild(el('span', 'od', 'Overdue'));
     var nl = $('ld-notes'); nl.textContent = ''; l.notesLog.slice().reverse().forEach(function (n) { nl.appendChild(li(n.at, (n.by ? n.by + ': ' : '') + n.text)); }); if (!l.notesLog.length) nl.appendChild(el('li', 'muted', 'No notes yet.'));
     var tl = $('ld-time'); tl.textContent = ''; l.history.slice().reverse().forEach(function (h) { tl.appendChild(li(h.at, h.from ? h.from + ' \u2192 ' + h.to + (h.by ? ' (' + h.by + ')' : '') : 'Lead received (' + h.to + ')')); }); }
-  function openLead(id) { openId = id; fillLead(); var d = $('ldrawer'); if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
-  function closeLead() { var d = $('ldrawer'); if (d.close) d.close(); else d.removeAttribute('open'); openId = null; drawLeads(); }
+  function setUrl(id) { try { var u = DDLeads.withLead(location.pathname + location.search + location.hash, id); if (u !== location.pathname + location.search + location.hash) history.replaceState(history.state, '', u); } catch (e) {} }
+  function notice(text) { var n = $('l-notice'); n.textContent = text || ''; n.hidden = !text; }
+  function openLead(id) { if (!leads.get(id)) { notice('Lead not found'); setUrl(null); return false; } notice(''); openId = id; fillLead(); var d = $('ldrawer'); if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); } setUrl(id); return true; }
+  function closeLead() { var d = $('ldrawer'); if (d.open) { if (d.close) d.close(); else d.removeAttribute('open'); } if (openId != null) { openId = null; setUrl(null); drawLeads(); } }
+  $('ldrawer').addEventListener('close', function () { if (openId != null) { openId = null; setUrl(null); drawLeads(); } });
+  function fromUrl() { var p = DDLeads.leadFromUrl(location.search, location.hash); if (!p.present) { if (openId != null) closeLead(); return; } tab('leads'); if (!p.id) { notice('Lead not found'); setUrl(null); return; } if (p.id !== openId) openLead(p.id); }
+  root.addEventListener('popstate', fromUrl); root.addEventListener('hashchange', fromUrl);
   function me() { return $('ld-assign').value; }
   $('ld-close').addEventListener('click', closeLead);
   $('ld-status').addEventListener('change', function () { leads.setStatus(openId, $('ld-status').value, null, me()); badge(); fillLead(); drawLeads(); });
@@ -87,6 +92,6 @@
   $('csv').addEventListener('click', function () { download('dealerdesk-leads.csv', leads.exportCSV(leads.search(lq())), 'text/csv'); });
   function tab(which) { var isInv = which === 'inv'; $('pane-inv').hidden = !isInv; $('pane-leads').hidden = isInv; $('tab-inv').setAttribute('aria-selected', String(isInv)); $('tab-leads').setAttribute('aria-selected', String(!isInv)); if (!isInv) drawLeads(); }
   $('tab-inv').addEventListener('click', function () { tab('inv'); }); $('tab-leads').addEventListener('click', function () { tab('leads'); });
-  function start() { fillMakes(); draw(); badge(); }
+  function start() { fillMakes(); draw(); badge(); fromUrl(); }
   if (inv.size()) start(); else fetch('data/cars.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { inv.load(d); }).catch(function () {}).then(start);
 })(typeof self !== 'undefined' ? self : this);
