@@ -22,9 +22,14 @@
     box.appendChild(tx); return box;
   }
   /** fill container with a print sheet (CSS in staff-inventory.html: .dd-sheet / @media print) */
-  function sheet(container, cars, baseUrl) { container.textContent = ''; var s = el('div', 'dd-sheet'); (cars || []).slice(0, 200).forEach(function (c) { s.appendChild(label(c, baseUrl)); }); container.appendChild(s); return s; }
+  var PER_PAGE = 12; // 3 x 4 on US Letter
+  /** split into pages of 12 (pure, for tests) */
+  function pages(cars) { var out = [], l = (cars || []).slice(0, 240); for (var i = 0; i < l.length; i += PER_PAGE) out.push(l.slice(i, i + PER_PAGE)); return out; }
+  /** fill container with print pages: .dd-sheet > .dd-page (12 labels each); CSS breaks between pages only */
+  function sheet(container, cars, baseUrl) { container.textContent = ''; var s = el('div', 'dd-sheet');
+    pages(cars).forEach(function (pg) { var p = el('div', 'dd-page'); pg.forEach(function (c) { p.appendChild(label(c, baseUrl)); }); s.appendChild(p); }); container.appendChild(s); return s; }
   function render(container, vin, baseUrl) { var d = labelData({ vin: vin }, baseUrl || location.href); container.textContent = '';
     if (!d.svg) { container.textContent = d.error; return ''; } var img = el('img'); img.alt = 'QR code for VIN ' + I.cleanVin(vin); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(d.svg); container.appendChild(img); return d.url; }
-  var api = { labelData: labelData, label: label, sheet: sheet, render: render };
+  var api = { PER_PAGE: PER_PAGE, pages: pages, labelData: labelData, label: label, sheet: sheet, render: render };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.DDQRLabel = api;
 })(typeof self !== 'undefined' ? self : this);
