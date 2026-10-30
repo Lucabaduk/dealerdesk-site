@@ -11,7 +11,7 @@
 #stickers{padding:16px;display:grid;gap:16px;justify-content:center}
 .ws{width:8.5in;min-height:11in;height:11in;background:#fff;padding:.45in .5in;display:flex;flex-direction:column;gap:.16in;overflow:hidden;box-shadow:0 2px 10px #0003;border-top:.18in solid #14213d}
 .ws-dealer{font-size:13pt;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#14213d}.ws-title{font-size:34pt;line-height:1.05;margin:.04in 0 0;font-weight:800}.ws-trim{font-size:18pt;color:#333}
-.ws-top{display:grid;grid-template-columns:1.25fr 1fr;gap:.2in}.ws-photo img{width:100%;height:2.9in;object-fit:cover;border-radius:6px;background:#d9dee6;display:block}
+.ws-top{display:grid;grid-template-columns:1.25fr 1fr;gap:.2in}.ws-credit{font-size:7pt;color:#555;margin-top:2px}.ws-photo img{width:100%;height:2.75in;object-fit:cover;border-radius:6px;background:#d9dee6;display:block}
 .ws-pricebox{border:2px solid #14213d;border-radius:8px;padding:.14in;display:flex;flex-direction:column;gap:.08in}.ws-plabel{font-size:11pt;text-transform:uppercase;color:#444}.ws-price{font-size:36pt;font-weight:800;line-height:1}
 .ws-ids{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0;font-size:10.5pt}.ws-ids dt{font-weight:700}.ws-ids dd{margin:0;word-break:break-all}.mono{font-family:ui-monospace,Menlo,monospace}
 .ws-econ{margin-top:auto;background:#eef6f1;border-radius:6px;padding:.08in .1in}.ws-econ.none{background:#f2f2f2}.ws-elabel{font-size:9.5pt;text-transform:uppercase;color:#444}.ws-ebig{font-size:22pt;font-weight:800}.ws-esmall{font-size:10pt}
@@ -21,7 +21,7 @@
 .ws-desc{margin:0;font-size:10.5pt;color:#222;max-height:1.1in;overflow:hidden}
 .ws-foot{display:flex;gap:.2in;align-items:center;border-top:2px solid #14213d;padding-top:.12in}.ws-qr img{width:1.9in;height:1.9in;display:block}.ws-scan{font-size:16pt;font-weight:700}.ws-dealer2{font-size:12pt;color:#333;margin-top:4px}
 @page{size:letter portrait;margin:0}
-@media print{body{background:#fff}.bar,#msg{display:none!important}#stickers{display:block;padding:0}.ws{box-shadow:none;margin:0;break-after:page;page-break-after:always}.ws:last-child{break-after:auto;page-break-after:auto}}
+@media print{body{background:#fff}.bar,#msg{display:none!important}#stickers{display:block;padding:0;zoom:1!important}.ws{box-shadow:none;margin:0;break-after:page;page-break-after:always}.ws:last-child{break-after:auto;page-break-after:auto}}
 </style></head><body>
 <div class="bar"><b>Window sticker</b><span id="count"></span><button id="print" type="button">Print</button></div>
 <p id="msg" role="status" hidden></p>

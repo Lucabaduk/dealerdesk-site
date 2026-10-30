@@ -45,7 +45,7 @@
   function pickedVins() { return Object.keys(picked); }
   function pickUi() { var n = pickedVins().length; $('stickers').textContent = n ? 'Print stickers (' + n + ' selected)' : 'Print stickers (filtered)'; }
   function openSticker(u) { if (!u) return; var w = root.open(u, '_blank', 'noopener'); if (!w) location.href = u; }
-  $('stickers').addEventListener('click', function () { var vins = pickedVins(); if (!vins.length) vins = inv.query(Object.assign(buildQuery(state()), { page: 1, pageSize: DDSticker.MAX_BATCH })).items.map(function (c) { return c.vin; });
+  $('stickers').addEventListener('click', function () { var vins = pickedVins(); if (!vins.length) vins = inv.query(Object.assign(buildQuery(state()), { page: 1, pageSize: 1e9 })).items.map(function (c) { return c.vin; });
     if (!vins.length) return; var bu = DDSticker.batchUrl(vins); if (bu) openSticker(bu + '&print=1'); });
   function printLabels(cars) { DDQRLabel.sheet($('print'), cars, location.href); setTimeout(function () { root.print(); }, 50); }
   $('print-page').addEventListener('click', function () { if (last && last.items.length) printLabels(last.items); });

@@ -1,0 +1,10 @@
+const { t, eq, ok, done, genCars } = require('./_h.js');
+const fs = require('fs'), path = require('path'), S = require('../modules/store.js'), WS = require('../modules/window-sticker.js');
+const dir = path.join(__dirname, '..');
+t('QA: cap is reported, not silent (parseVins total)', () => { const ss = S.memoryStorage(), vins = genCars(5000).map(c => c.vin); eq(WS.batchUrl(vins, ss), 'window-sticker.html?batch=1'); const r = WS.parseVins('?batch=1', ss); eq(r.vins.length, WS.MAX_BATCH); eq(r.total, 5000); eq(WS.vinsFromUrl('?batch=1', ss).length, WS.MAX_BATCH); });
+t('QA: parseVins dedupes + drops hostile', () => { const r = WS.parseVins('?vins=' + encodeURIComponent(['1HGCM82633A004352', '1hgcm82633a004352', '__proto__', 'javascript:alert(1)', '<img>'].join(','))); eq(r, { vins: ['1HGCM82633A004352'], total: 1 }); eq(WS.parseVins('?vin=constructor'), { vins: [], total: 0 }); });
+t('QA: Wikimedia photo credit only for our model photos', () => { ok(/Wikimedia Commons/.test(WS.photoCredit('assets/cars/toyota-camry.webp'))); eq(WS.photoCredit('https://x/y.jpg'), ''); eq(WS.photoCredit(''), ''); });
+const html = fs.readFileSync(path.join(dir, 'window-sticker.html'), 'utf8'), page = fs.readFileSync(path.join(dir, 'modules/window-sticker-page.js'), 'utf8');
+t('QA: screen view zooms to fit phones, print resets zoom', () => { ok(/zoom:1!important/.test(html)); ok(/function fit\(\)/.test(page) && /addEventListener\('resize', fit\)/.test(page)); });
+t('QA: staff filtered button passes full list so the cap message can show', () => ok(/pageSize: 1e9 \}\)\)\.items\.map/.test(fs.readFileSync(path.join(dir, 'modules/staff-inventory.js'), 'utf8'))));
+done('window sticker qa');

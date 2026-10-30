@@ -4,7 +4,7 @@
   'use strict';
   var node = typeof module !== 'undefined' && module.exports;
   var I = node ? require('./inventory.js') : root.DDInventory, Q = node ? require('./qr.js') : root.DDQR, S = node ? require('./store.js') : root.DDStore;
-  var MAX_BATCH = 500, BATCH_KEY = 'dealerdesk.sticker.batch';
+  var MAX_BATCH = 500, MAX_STORED = 20000, BATCH_KEY = 'dealerdesk.sticker.batch';
   function has(o, k) { return o != null && Object.prototype.hasOwnProperty.call(o, k); }
   function get(o, k) { return has(o, k) ? o[k] : null; }
   function num(v) { return v == null || v === '' || !isFinite(+v) ? null : +v; }
@@ -38,13 +38,15 @@
       photo: photos[0] || '', specs: specs, economy: economy(car), features: (Array.isArray(get(car, 'features')) ? car.features : []).map(function (f) { return S.cleanText(f, 60); }).filter(Boolean).slice(0, 40),
       description: t('description', 900), url: url, svg: svg, qrError: qrError, dealer: S.cleanText(opts.dealer, 80) || 'DealerDesk', status: t('status') };
   }
+  /** our model photos (assets/cars/) are Wikimedia Commons under CC licenses: attribution must travel with a printed copy */
+  function photoCredit(photo) { return /^assets\/cars\//.test(String(photo || '')) ? 'Photo: Wikimedia Commons, free license. Author and license: see CREDITS.md on our website.' : ''; }
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
   function sticker(d) {
     var s = el('article', 'ws'); s.setAttribute('data-vin', d.vin);
     var hd = el('header', 'ws-head'); hd.appendChild(el('div', 'ws-dealer', d.dealer)); var h = el('h1', 'ws-title', d.title); hd.appendChild(h); if (d.trim) hd.appendChild(el('div', 'ws-trim', d.trim)); s.appendChild(hd);
     var top = el('section', 'ws-top'), ph = el('div', 'ws-photo');
     if (d.photo) { var img = el('img'); img.alt = d.title; S.setImg(img, d.photo); ph.appendChild(img); } else { var im2 = el('img'); im2.alt = 'Photo coming soon'; im2.src = S.NOPHOTO; ph.appendChild(im2); }
-    top.appendChild(ph); var pr = el('div', 'ws-pricebox'); pr.appendChild(el('div', 'ws-plabel', 'Our price')); pr.appendChild(el('div', 'ws-price', d.price || 'Call for price'));
+    if (d.photo && photoCredit(d.photo)) ph.appendChild(el('div', 'ws-credit', photoCredit(d.photo))); top.appendChild(ph); var pr = el('div', 'ws-pricebox'); pr.appendChild(el('div', 'ws-plabel', 'Our price')); pr.appendChild(el('div', 'ws-price', d.price || 'Call for price'));
     var ids = el('dl', 'ws-ids'); [['VIN', d.vin], ['Stock #', d.stock]].forEach(function (r) { if (!r[1]) return; ids.appendChild(el('dt', '', r[0])); ids.appendChild(el('dd', r[0] === 'VIN' ? 'mono' : '', r[1])); }); pr.appendChild(ids);
     var ec = el('div', 'ws-econ ' + d.economy.kind); ec.appendChild(el('div', 'ws-elabel', d.economy.label)); ec.appendChild(el('div', 'ws-ebig', d.economy.big)); if (d.economy.small) ec.appendChild(el('div', 'ws-esmall', d.economy.small)); pr.appendChild(ec);
     top.appendChild(pr); s.appendChild(top);
@@ -63,11 +65,17 @@
     return { count: count, bad: bad }; }
   /** where staff buttons go: single VIN or a batch stashed in sessionStorage (filtered lists can be thousands long) */
   function urlFor(vin) { var v = I.cleanVin(vin); return I.isValidVin(v) ? 'window-sticker.html?vin=' + v : ''; }
-  function batchUrl(vins, session) { var list = []; var seen = Object.create(null); (vins || []).forEach(function (v) { v = I.cleanVin(v); if (I.isValidVin(v) && !seen[v] && list.length < MAX_BATCH) { seen[v] = 1; list.push(v); } });
+  function batchUrl(vins, session) { var list = []; var seen = Object.create(null); (vins || []).forEach(function (v) { v = I.cleanVin(v); if (I.isValidVin(v) && !seen[v] && list.length < MAX_STORED) { seen[v] = 1; list.push(v); } });
     try { (session || root.sessionStorage).setItem(BATCH_KEY, JSON.stringify(list)); } catch (e) { return list.length <= 30 ? 'window-sticker.html?vins=' + list.join(',') : ''; } return 'window-sticker.html?batch=1'; }
   function vinsFromUrl(search, session) { var p = new URLSearchParams(String(search || '')), out = [];
     if (p.get('vin')) out = [p.get('vin')]; else if (p.get('vins')) out = String(p.get('vins')).split(','); else if (p.get('batch')) { try { var a = JSON.parse((session || root.sessionStorage).getItem(BATCH_KEY) || '[]'); if (Array.isArray(a)) out = a; } catch (e) {} }
-    var seen = Object.create(null); return out.map(function (v) { return I.cleanVin(v); }).filter(function (v) { if (!I.isValidVin(v) || seen[v]) return false; seen[v] = 1; return true; }).slice(0, MAX_BATCH); }
-  var api = { stickerData: stickerData, economy: economy, dealerName: dealerName, render: render, urlFor: urlFor, batchUrl: batchUrl, vinsFromUrl: vinsFromUrl, MAX_BATCH: MAX_BATCH, BATCH_KEY: BATCH_KEY };
+    return parseList(out).vins; }
+  /** like vinsFromUrl but also reports how many valid VINs were asked for, so the page can say when the cap cut the list */
+  function parseVins(search, session) { var p = new URLSearchParams(String(search || '')), out = [];
+    if (p.get('vin')) out = [p.get('vin')]; else if (p.get('vins')) out = String(p.get('vins')).split(','); else if (p.get('batch')) { try { var a = JSON.parse((session || root.sessionStorage).getItem(BATCH_KEY) || '[]'); if (Array.isArray(a)) out = a; } catch (e) {} }
+    return parseList(out); }
+  function parseList(out) { var seen = Object.create(null), all = out.map(function (v) { return I.cleanVin(v); }).filter(function (v) { if (!I.isValidVin(v) || seen[v]) return false; seen[v] = 1; return true; });
+    return { vins: all.slice(0, MAX_BATCH), total: all.length }; }
+  var api = { stickerData: stickerData, economy: economy, dealerName: dealerName, render: render, urlFor: urlFor, batchUrl: batchUrl, vinsFromUrl: vinsFromUrl, parseVins: parseVins, photoCredit: photoCredit, MAX_BATCH: MAX_BATCH, BATCH_KEY: BATCH_KEY };
   if (node) module.exports = api; else root.DDSticker = api;
 })(typeof self !== 'undefined' ? self : this);
