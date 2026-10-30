@@ -65,7 +65,7 @@ var actx;function chime(){if(!st.settings.sound)return;try{actx=actx||new(window
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove('on')},2200)}
 var NOPHOTO='assets/site/no-photo.webp';
 function photo(c){var p=(c.photos&&c.photos[0])||NOPHOTO;return'<img class="thumb" loading="lazy" decoding="async" alt="" src="'+esc(p)+'" data-fallback="1">'}
-function schemaErr(e){return e&&e.field?label(e.field)+': '+(e.message||'invalid'):'Could not save: '+(e&&e.message||'invalid')}
+function schemaErr(e){var m=String(e&&e.message||'invalid');if(!(e&&e.field))return'Could not save: '+m;var f=String(e.field);if(m.toLowerCase().indexOf(f.toLowerCase()+':')===0)m=m.slice(f.length+1).replace(/^\s+/,'');return label(f)+': '+m}
 var BODY={sedan:'Sedan',suv:'SUV',pickup:'Pickup',hatch:'Hatchback',ev:'Sedan',minivan:'Minivan',coupe:'Coupe',convertible:'Convertible',wagon:'Wagon',luxury:'Sedan',compact:'Hatchback'};
 function bodyType(c){if(c.body_type){var bt=String(c.body_type).toLowerCase();return{suv:'SUV',pickup:'Pickup',truck:'Pickup',hatchback:'Hatchback',van:'Minivan',minivan:'Minivan'}[bt]||label(bt)}var m=/cars\/([a-z]+)-/.exec((c.photos||[])[0]||'');return m&&BODY[m[1]]||'Other'}
 var UV={};function uniqVals(fn){var cs=cars(),k=fn.name+cs.length;if(UV[k])return UV[k];var o={};cs.forEach(function(c){o[fn(c)]=1});return UV[k]=Object.keys(o).sort()}

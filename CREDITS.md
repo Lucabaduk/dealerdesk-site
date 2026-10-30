@@ -146,7 +146,6 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Acura TLX | [2015 Acura TLX (front left).jpg](https://commons.wikimedia.org/wiki/File:2015_Acura_TLX_(front_left).jpg) | Mr.choppers | CC BY-SA 3.0 |
 | Acura RDX | [Acura RDX (TC1, TC2) IMG 8360.jpg](https://commons.wikimedia.org/wiki/File:Acura_RDX_(TC1,_TC2)_IMG_8360.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Acura MDX | [ACURA MDX (YD2) China (13).jpg](https://commons.wikimedia.org/wiki/File:ACURA_MDX_(YD2)_China_(13).jpg) | Dinkun Chen | CC BY-SA 4.0 |
-| Acura ZDX | [Moscow, Acura ZDX Sept 2025 03.jpg](https://commons.wikimedia.org/wiki/File:Moscow,_Acura_ZDX_Sept_2025_03.jpg) | Retired electrician | CC0 |
 | Buick Envista | [Buick Envista GS 01 -- 2022-12-16.jpg](https://commons.wikimedia.org/wiki/File:Buick_Envista_GS_01_--_2022-12-16.jpg) | Rtu718629 | CC BY-SA 4.0 |
 | Buick Encore GX | [Buick Encore GX 001.jpg](https://commons.wikimedia.org/wiki/File:Buick_Encore_GX_001.jpg) | Jengtingchen | CC BY-SA 4.0 |
 | Buick Envision | [BUICK ENVISION PLUS China.jpg](https://commons.wikimedia.org/wiki/File:BUICK_ENVISION_PLUS_China.jpg) | Dinkun Chen | CC BY-SA 4.0 |
@@ -175,7 +174,6 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Lexus NX | [Lexus NX AZ10 Facelift Shishi 02 2022-06-18.jpg](https://commons.wikimedia.org/wiki/File:Lexus_NX_AZ10_Facelift_Shishi_02_2022-06-18.jpg) | JamesYoung8167 | CC BY-SA 4.0 |
 | Mercedes-Benz GLC | [2018 Mercedes-Benz GLC 250 Urban Edition 4MATIC 2.0 Front.jpg](https://commons.wikimedia.org/wiki/File:2018_Mercedes-Benz_GLC_250_Urban_Edition_4MATIC_2.0_Front.jpg) | Vauxford | CC BY-SA 4.0 |
 | Audi A4 | [2018 Audi A4 Sport TDi Quattro S-A 2.0.jpg](https://commons.wikimedia.org/wiki/File:2018_Audi_A4_Sport_TDi_Quattro_S-A_2.0.jpg) | Vauxford | CC BY-SA 4.0 |
-| Chrysler 300 | [Chrysler 300C Sanming 02 2023-02-08.jpg](https://commons.wikimedia.org/wiki/File:Chrysler_300C_Sanming_02_2023-02-08.jpg) | JamesYoung8167 | CC BY-SA 4.0 |
 | Nissan Altima | [2019 Nissan Altima SL 2.5L front 3.22.19.jpg](https://commons.wikimedia.org/wiki/File:2019_Nissan_Altima_SL_2.5L_front_3.22.19.jpg) | Kevauto | CC BY-SA 4.0 |
 
 ## Site images (`assets/site/`)
