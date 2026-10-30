@@ -83,17 +83,18 @@
   function curUrl() { return location.pathname + location.search + location.hash; }
   function setUrl(id) { try { var u = DDLeads.withLead(curUrl(), id); if (u !== curUrl()) history.replaceState(history.state, '', u); } catch (e) {} }
   function notice(text) { var n = $('l-notice'); n.textContent = text || ''; n.hidden = !text; }
-  function openLead(id, fromLink) { meUi(); if (!DDStore.getStaffName()) { try { $('l-me').focus(); } catch (e) {} } if (!leads.get(id)) { notice('Lead not found'); setUrl(null); return false; } notice(''); openId = id; fillLead(); var d = $('ldrawer');
+  function openLead(id, fromLink) { meUi(); if (!DDStore.getStaffName()) { try { $('l-me').focus(); } catch (e) {} } if (typeof id !== 'string' || !leads.get(id)) { notice('Lead not found'); setUrl(openId); return false; } notice(''); openId = id; fillLead(); var d = $('ldrawer');
     if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
     if (fromLink) setUrl(id); else { try { var u = DDLeads.withLead(curUrl(), id); if (pushed) history.replaceState({ ddLead: id }, '', u); else { history.pushState({ ddLead: id }, '', u); pushed = true; } } catch (e) { setUrl(id); } }
     return true; }
-  function onClosed(viaPop) { if (openId == null) return; openId = null; drawLeads();
+  function onClosed(viaPop) { if (openId == null) return; openId = null; drawLeads(true);
     if (pushed) { pushed = false; if (!viaPop) { try { history.back(); return; } catch (e) {} } } if (!viaPop) setUrl(null); }
   function closeLead(viaPop) { var d = $('ldrawer'); if (d.open) { if (d.close) { d.close(); } else d.removeAttribute('open'); } onClosed(viaPop); }
   $('ldrawer').addEventListener('close', function () { onClosed(false); });
-  function fromUrl(ev) { var p = DDLeads.leadFromUrl(location.search, location.hash), pop = !!(ev && ev.type === 'popstate');
+  function fromUrl(ev) { var pop = !!(ev && ev.type === 'popstate'), hc = !!(ev && ev.type === 'hashchange'), p = hc ? DDLeads.leadFromUrl('', location.hash) : { present: false };
+    if (!p.present) p = DDLeads.leadFromUrl(location.search, location.hash);
     if (!p.present) { if (openId != null) { if (pop) pushed = false; closeLead(pop); } return; }
-    tab('leads'); if (!p.id) { notice('Lead not found'); setUrl(null); return; } if (p.id !== openId) openLead(p.id, true); }
+    tab('leads'); if (!p.id) { notice('Lead not found'); setUrl(openId); return; } if (p.id !== openId) openLead(p.id, true); else if (hc) setUrl(openId); }
   root.addEventListener('popstate', fromUrl); root.addEventListener('hashchange', fromUrl);
   // author for notes/timeline = the staff member using this device (not the lead's salesperson)
   function me() { return DDStore.getStaffName() || 'Staff'; }

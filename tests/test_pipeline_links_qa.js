@@ -1,0 +1,22 @@
+// QA: pipeline "Open lead" links with odd/deleted/missing lead ids
+const {JSDOM}=require('jsdom'),fs=require('fs'),path=require('path'),R=path.join(__dirname,'..');
+let pass=0,fail=0;const ok=(c,m)=>{c?pass++:(fail++,console.log('FAIL',m))};
+const html=fs.readFileSync(R+'/app.html','utf8'),data=JSON.parse(fs.readFileSync(R+'/src/sample-data.json','utf8'));
+const mods=['store.js','leads.js'].map(f=>fs.readFileSync(R+'/modules/'+f,'utf8'));
+const ids=['ld-ok','LD-OK','ld-ok-deleted','ld-proto'];
+data.leads=ids.map((id,i)=>({id,name:'N'+i,email:'n'+i+'@example.com',status:'new',source:'website'}));data.test_drives=[];data.service_bookings=[];
+const web=['ld-ok','__proto__','constructor','ld x','ld<img>','ld-proto'].map(id=>({id,status:'new',name:'W',email:'w@example.com',vin:'1HGCM82633A004352',createdAt:1.7e12}));
+const VC=new (require('jsdom').VirtualConsole)();const w=new JSDOM(html,{virtualConsole:VC,runScripts:'dangerously',url:'https://x.test/app.html',beforeParse(w){w.localStorage.setItem('dealerdesk.leads.v1',JSON.stringify(web));mods.forEach(m=>w.eval(m));w.alert=()=>{w.__a=1};w.fetch=u=>String(u).startsWith('version')?new Promise(()=>{}):Promise.resolve({ok:true,json:()=>Promise.resolve(JSON.parse(JSON.stringify(data)))})}}).window;
+setTimeout(()=>{const d=w.document;
+ const link=id=>{const c=[...d.querySelectorAll('.pcard')].find(c=>c.getAttribute('data-id')===id);return c?(c.querySelector('a.plink')||{getAttribute:()=>null}).getAttribute('href'):'nocard'};
+d.querySelector('[data-view=pipeline]').click();
+ ok(link('ld-ok')==='staff-inventory.html?lead=ld-ok','ok id links');
+ ok(link('LD-OK')===null,'case-different id not linked to ld-ok');
+ ok(link('ld-proto')==='staff-inventory.html?lead=ld-proto','web store with __proto__/odd ids still links others');
+ ok(link('ld-ok-deleted')===null,'lead missing from web store (deleted) -> no link');
+ ok(!d.querySelector('.pcard img')&&!w.__a,'no markup/alert');
+ const S=w.DealerDesk.state,C0=(typeof w.DealerDesk.cars==='function'?w.DealerDesk.cars():S.cars)[0].id;S.deals.push({id:'dl-nolead',car_id:C0,buyer:'B',price_cents:100,date:'2026-10-30',status:'pending',stage:'negotiating'},{id:'dl-gone',car_id:C0,buyer:'C',price_cents:100,date:'2026-10-30',status:'pending',stage:'negotiating',lead_id:'ld-ok-deleted'});
+ d.querySelector('[data-view=dashboard]').click();d.querySelector('[data-view=pipeline]').click();
+ ok(link('dl-nolead')===null&&link('dl-gone')===null,'deal with no lead / deleted lead: card renders, no link');
+ ok(({}).polluted===undefined&&typeof ({}).constructor==='function','no prototype damage');
+ console.log('pipeline links QA: '+pass+' passed, '+fail+' failed');process.exit(fail?1:0)},1500);
