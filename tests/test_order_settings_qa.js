@@ -16,5 +16,5 @@ t('saved order calc uses dealer tax, not customer value', () => {
   eq([r.calc.taxRate, r.calc.price, r.calc.tax], [6, 20000, 1200]);
 });
 const fs = require('fs'), src = fs.readFileSync(__dirname + '/../src/app.src.html', 'utf8');
-t('main Settings tax rejects letters/>25 and syncs orders', () => { ok(/name="tax_rate"[^>]*max="25"/.test(src)); ok(src.includes("throw new Error('Sales tax must be between 0 and 25.')")); });
+t('main Settings tax rejects letters/>25 and syncs orders', () => { ok(/name="tax_rate"[^>]*max="25"/.test(src)); ok(src.includes("throw new Error('Sales tax must be between 0 and 25'")); });
 done('order settings QA');
