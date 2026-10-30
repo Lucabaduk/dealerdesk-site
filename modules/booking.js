@@ -90,7 +90,8 @@
   // ---------- settings / hours ----------
   function settings() { return JSON.parse(JSON.stringify(state.settings)); }
   function updateSettings(p) {
-    var s = state.settings;
+    // validate everything on a copy first; only apply (and save) when all fields are valid
+    var prev = state.settings, s = JSON.parse(JSON.stringify(prev));
     if (p.hours) DAYS.forEach(function (d) {
       if (!(d in p.hours)) return; var h = p.hours[d];
       if (h === null) { s.hours[d] = null; return; }
@@ -101,7 +102,9 @@
     function int(k, lo, hi) { if (p[k] === undefined) return; var n = Math.round(+p[k]); if (!(n >= lo && n <= hi)) throw err('bad_' + k, k + ' must be between ' + lo + ' and ' + hi + '.'); s[k] = n; }
     int('slotMin', 10, 240); int('testDriveMin', 15, 240); int('bays', 1, 50); int('leadTimeMin', 0, 10080); int('maxDaysAhead', 1, 365);
     if (p.publicRequests !== undefined) s.publicRequests = !!p.publicRequests;
-    save(); return settings();
+    state.settings = s;
+    if (!save() && store()) { state.settings = prev; throw err('save_failed', saveError || 'Could not save settings.'); }
+    return settings();
   }
   function hoursFor(date) { var d = parseDate(date); if (!d) return null; var h = state.settings.hours[DAYS[d.getDay()]]; return h ? { open: toMin(h.open), close: toMin(h.close) } : null; }
   function checkWindow(date, time, dur, opts) {
@@ -119,13 +122,17 @@
   // ---------- test drives ----------
   function vehicleKey(o) { return o.vin || (o.stock ? 'STK:' + String(o.stock).toUpperCase() : ''); }
   function tdConflicts(o, ignoreId) {
-    var s1 = stamp(o.date, o.time), s2 = s1 + o.durationMin * 60000, vk = vehicleKey(o), out = [];
+    var s1 = stamp(o.date, o.time), s2 = s1 + o.durationMin * 60000, vk = vehicleKey(o), out = [], overlapping = 0;
     state.testDrives.forEach(function (t) {
       if (t.id === ignoreId || !ACTIVE_TD[t.status]) return;
       var t1 = stamp(t.date, t.time), t2 = t1 + t.durationMin * 60000; if (!overlap(s1, s2, t1, t2)) return;
       if (vk && vehicleKey(t) === vk) out.push({ type: 'vehicle', id: t.id, message: 'This vehicle is already booked ' + t.time + '-' + fromMin(toMin(t.time) + t.durationMin) + '.' });
       if (o.salesperson && t.salesperson && t.salesperson.toLowerCase() === o.salesperson.toLowerCase()) out.push({ type: 'salesperson', id: t.id, message: t.salesperson + ' already has a test drive at ' + t.time + '.' });
+      overlapping++;
     });
+    // capacity: one drive per slot when no salespeople are set up, otherwise one per salesperson
+    var cap = state.salespeople.length || 1;
+    if (!out.length && overlapping >= cap) out.push({ type: 'capacity', message: cap === 1 ? 'Another test drive is already booked at that time.' : 'All ' + cap + ' salespeople are busy at that time.' });
     return out;
   }
   function normTD(p, base) {
@@ -243,7 +250,7 @@
       else {
         var probe = { date: date, time: time, durationMin: dur, vin: o.vin || '', stock: o.stock || '', salesperson: o.salesperson || '' };
         if (o.vin || o.stock) { if (tdConflicts(probe).some(function (c) { return c.type === 'vehicle'; })) continue; }
-        else { var active = state.testDrives.filter(function (t) { return ACTIVE_TD[t.status] && t.date === date && overlap(m, m + dur, toMin(t.time), toMin(t.time) + t.durationMin); }).length; if (state.salespeople.length && active >= state.salespeople.length) continue; }
+        else { var active = state.testDrives.filter(function (t) { return ACTIVE_TD[t.status] && t.date === date && overlap(m, m + dur, toMin(t.time), toMin(t.time) + t.durationMin); }).length; if (active >= (state.salespeople.length || 1)) continue; }
       }
       out.push(time);
     }

@@ -1,0 +1,25 @@
+/* DealerDesk Orders - extends booking.css (same tokens) */
+.ddo-car{padding:0;overflow:hidden}
+.ddo-photo{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:linear-gradient(135deg,#1e293b,#0f766e)}
+.ddo-nophoto{display:flex;align-items:center;justify-content:center;color:#fff;opacity:.8}
+.ddo-carhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:14px 14px 0}
+.ddo-carhead h2{margin:0;font-size:18px}.ddo-price{font-size:22px;color:var(--acc)}
+.ddo-specs{list-style:none;margin:0;padding:10px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.ddo-specs li{display:flex;flex-direction:column;min-width:0}.ddo-specs small{color:var(--mute);font-size:11px;text-transform:uppercase}.ddo-specs span{overflow-wrap:anywhere}
+.ddo-feats{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 14px}
+.ddp-choice small{display:block;font-weight:400;color:var(--mute);font-size:12px;margin-top:2px}
+.ddo-sec summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px}.ddo-sec summary small{color:var(--mute);font-weight:400}
+.ddo-out{margin-top:12px}.ddo-out .ddb-btn{margin-left:8px}
+.ddo-monthly b{font-size:32px;color:var(--acc)}.ddo-monthly span{color:var(--mute);margin-left:6px}
+.ddo-break{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin:10px 0 0;font-size:14px}.ddo-break dt{color:var(--mute)}.ddo-break dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.ddo-formula{font-size:12px;color:var(--mute);margin:10px 0 0}
+.ddo-note{background:rgba(245,158,11,.12);border-left:4px solid var(--warn);border-radius:10px;padding:10px 12px;font-size:14px}
+.ddo-search{flex:1;min-width:180px}
+.ddo-row{display:flex;flex-direction:column;gap:4px;border-left:4px solid var(--acc)}
+.ddo-rowhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.ddo-kind{margin-left:auto;font-weight:700;font-size:13px}
+.ddo-row small{color:var(--mute)}.ddo-contact a{color:var(--acc);margin-right:10px;overflow-wrap:anywhere}
+.ddo-notes{margin:4px 0;font-size:14px;white-space:pre-wrap}
+.ddo-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}.ddo-actions select{min-height:44px}
+.ddo-actions a.ddb-btn{text-decoration:none;display:inline-flex;align-items:center;margin-top:0;min-height:44px}
+.ddb-s-new{border-color:var(--acc)}.ddb-s-contacted{border-color:#2563eb}.ddb-s-deposit{border-color:var(--warn)}.ddb-s-sold{border-color:var(--ok)}
+@media (max-width:600px){.ddo-kind{margin-left:0}.ddo-monthly b{font-size:28px}}
