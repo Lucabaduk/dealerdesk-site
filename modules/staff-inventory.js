@@ -77,15 +77,30 @@
     $('ld-follow').value = l.followUpAt ? isoDay(l.followUpAt) : ''; $('ld-overdue').textContent = ''; if (leads.isOverdue(l)) $('ld-overdue').appendChild(el('span', 'od', 'Overdue'));
     var nl = $('ld-notes'); nl.textContent = ''; l.notesLog.slice().reverse().forEach(function (n) { nl.appendChild(li(n.at, (n.by ? n.by + ': ' : '') + n.text)); }); if (!l.notesLog.length) nl.appendChild(el('li', 'muted', 'No notes yet.'));
     var tl = $('ld-time'); tl.textContent = ''; l.history.slice().reverse().forEach(function (h) { tl.appendChild(li(h.at, h.from ? h.from + ' \u2192 ' + h.to + (h.by ? ' (' + h.by + ')' : '') : 'Lead received (' + h.to + ')')); }); }
-  // drawer: Esc, the close button and the phone Back button all close it the same way (QA: Esc left openId set, Back left the page)
+  // Drawer + deep link. Opening from a card pushes ?lead=<id> (so phone Back closes it, Code Checker 6e076a1);
+  // opening from a URL (refresh/link) doesn't push. Esc, close button and Back all go through onClosed.
   var pushed = false;
-  function openLead(id) { openId = id; fillLead(); var d = $('ldrawer'); if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); try { history.pushState({ ddLead: id }, ''); pushed = true; } catch (e) {} } }
-  function onClosed() { if (openId == null) return; openId = null; drawLeads(); if (pushed) { pushed = false; try { history.back(); } catch (e) {} } }
-  function closeLead() { var d = $('ldrawer'); if (d.close && d.open) d.close(); else { d.removeAttribute('open'); onClosed(); } }
-  $('ldrawer').addEventListener('close', onClosed);
-  window.addEventListener('popstate', function () { if (openId == null) return; pushed = false; closeLead(); });
-  function me() { return $('ld-assign').value; }
-  $('ld-close').addEventListener('click', closeLead);
+  function curUrl() { return location.pathname + location.search + location.hash; }
+  function setUrl(id) { try { var u = DDLeads.withLead(curUrl(), id); if (u !== curUrl()) history.replaceState(history.state, '', u); } catch (e) {} }
+  function notice(text) { var n = $('l-notice'); n.textContent = text || ''; n.hidden = !text; }
+  function openLead(id, fromLink) { meUi(); if (!DDStore.getStaffName()) { try { $('l-me').focus(); } catch (e) {} } if (!leads.get(id)) { notice('Lead not found'); setUrl(null); return false; } notice(''); openId = id; fillLead(); var d = $('ldrawer');
+    if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
+    if (fromLink) setUrl(id); else { try { var u = DDLeads.withLead(curUrl(), id); if (pushed) history.replaceState({ ddLead: id }, '', u); else { history.pushState({ ddLead: id }, '', u); pushed = true; } } catch (e) { setUrl(id); } }
+    return true; }
+  function onClosed(viaPop) { if (openId == null) return; openId = null; drawLeads();
+    if (pushed) { pushed = false; if (!viaPop) { try { history.back(); return; } catch (e) {} } } if (!viaPop) setUrl(null); }
+  function closeLead(viaPop) { var d = $('ldrawer'); if (d.open) { if (d.close) { d.close(); } else d.removeAttribute('open'); } onClosed(viaPop); }
+  $('ldrawer').addEventListener('close', function () { onClosed(false); });
+  function fromUrl(ev) { var p = DDLeads.leadFromUrl(location.search, location.hash), pop = !!(ev && ev.type === 'popstate');
+    if (!p.present) { if (openId != null) { if (pop) pushed = false; closeLead(pop); } return; }
+    tab('leads'); if (!p.id) { notice('Lead not found'); setUrl(null); return; } if (p.id !== openId) openLead(p.id, true); }
+  root.addEventListener('popstate', fromUrl); root.addEventListener('hashchange', fromUrl);
+  // author for notes/timeline = the staff member using this device (not the lead's salesperson)
+  function me() { return DDStore.getStaffName() || 'Staff'; }
+  function meUi() { var v = DDStore.getStaffName(), inp = $('l-me'); if (document.activeElement !== inp) inp.value = v; $('l-me-hint').textContent = v ? '' : 'Enter your name once so notes show who wrote them.';
+    var dl = $('l-me-list'); dl.textContent = ''; var seen = Object.create(null); DDStore.appStaffNames().concat(leads.salespeople()).forEach(function (n) { if (seen[n.toLowerCase()]) return; seen[n.toLowerCase()] = 1; var o = el('option'); o.value = n; dl.appendChild(o); }); }
+  $('l-me').addEventListener('change', function () { DDStore.setStaffName($('l-me').value); meUi(); });
+  $('ld-close').addEventListener('click', function () { closeLead(false); });
   $('ld-status').addEventListener('change', function () { leads.setStatus(openId, $('ld-status').value, null, me()); badge(); fillLead(); drawLeads(); });
   $('ld-assign').addEventListener('change', function () { leads.assign(openId, $('ld-assign').value); fillLead(); drawLeads(); });
   $('ld-follow').addEventListener('change', function () { leads.setFollowUp(openId, $('ld-follow').value || null); fillLead(); drawLeads(); });
@@ -94,6 +109,6 @@
   $('csv').addEventListener('click', function () { download('dealerdesk-leads.csv', leads.exportCSV(leads.search(lq())), 'text/csv'); });
   function tab(which) { var isInv = which === 'inv'; $('pane-inv').hidden = !isInv; $('pane-leads').hidden = isInv; $('tab-inv').setAttribute('aria-selected', String(isInv)); $('tab-leads').setAttribute('aria-selected', String(!isInv)); if (!isInv) drawLeads(); }
   $('tab-inv').addEventListener('click', function () { tab('inv'); }); $('tab-leads').addEventListener('click', function () { tab('leads'); });
-  function start() { fillMakes(); draw(); badge(); }
+  function start() { fillMakes(); draw(); badge(); meUi(); fromUrl(); }
   if (inv.size()) start(); else fetch('data/cars.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { inv.load(d); }).catch(function () {}).then(start);
 })(typeof self !== 'undefined' ? self : this);
