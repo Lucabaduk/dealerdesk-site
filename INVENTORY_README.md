@@ -39,3 +39,11 @@ Render 24 per page (or append next page on scroll) — never render all 5,000.
 - car.html reads `data/cars.json` (then falls back to this device's localStorage).
 
 Tests: `node tests/test_inventory.js && node tests/test_leads.js`
+
+## Favorites & compare
+- `modules/favorites.js` (`DDFavorites`): `const fav = DDFavorites.create()` → `add/remove/toggle/has/list/count/clear`, `onChange(fn)` (returns unsubscribe; event `{type, vin, count, vins}`), syncs across tabs. VINs only, max 200, stored at `dealerdesk.favorites.v1`.
+  DOM helpers: `DDFavorites.heart(fav, vin)` → heart `<button>` (aria-pressed), `DDFavorites.badge(fav, el)` → keeps a count badge updated.
+- `modules/compare.js` (`DDCompare`): `build(cars)` (2–4) → `{cars, rows:[{label, cells:[{text, best, missing}], differs}], features:[{name, has[], differs}]}`; `parseVins(location.search)`, `shareUrl(base, vins)`.
+- `compare.html?vins=A,B,C` (+ `modules/compare-page.js`): side-by-side table, sticky labels, horizontal scroll on phones, dark mode, differences highlighted, best value ✓, "Differences only" toggle, Share (native share / copy). With no `vins` it uses the last 4 favorites. Reads `data/cars.json`, falls back to local inventory.
+- Rows: price, year, mileage, body, engine, hp, MPG (city/hwy) or EV range, seats, drivetrain, transmission, color, condition, status, features.
+  Spec fields are optional on cars (`body|body_type, engine, transmission, drivetrain, hp, seats, mpg_city, mpg_hwy, range_mi`); inventory keeps them when valid. Helper's cars.json doesn't have them yet → those rows show "—".

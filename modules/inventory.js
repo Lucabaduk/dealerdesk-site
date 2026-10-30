@@ -32,9 +32,13 @@
     var status = String(input.status || 'available').toLowerCase(); if (STATUSES.indexOf(status) < 0) errors.push('status');
     var condition = String(input.condition || (mileage < 500 ? 'new' : 'used')).toLowerCase(); if (CONDITIONS.indexOf(condition) < 0) errors.push('condition');
     if (errors.length) return { ok: false, errors: errors };
-    return { ok: true, car: { id: id, stock_no: stock, vin: vin, year: year, make: make, model: model, trim: S.cleanText(input.trim, 60), price: price, mileage: mileage,
+    var r0 = { id: id, stock_no: stock, vin: vin, year: year, make: make, model: model, trim: S.cleanText(input.trim, 60), price: price, mileage: mileage,
       color: S.cleanText(input.color, 30), condition: condition, status: status,
-      photos: (Array.isArray(input.photos) ? input.photos : []).map(safeUrl).filter(Boolean).slice(0, 30), features: list(input.features, 40, 60) } };
+      photos: (Array.isArray(input.photos) ? input.photos : []).map(safeUrl).filter(Boolean).slice(0, 30), features: list(input.features, 40, 60) };
+    // optional spec fields (kept only when present & valid) for detail/compare pages
+    var car = r0; ['body', 'engine', 'transmission', 'drivetrain'].forEach(function (k) { var t = S.cleanText(input[k] != null ? input[k] : (k === 'body' ? input.body_type : null), 60); if (t) car[k] = t; });
+    [['hp', 1, 2500], ['seats', 1, 15], ['mpg_city', 1, 200], ['mpg_hwy', 1, 200], ['range_mi', 1, 1500]].forEach(function (d) { if (input[d[0]] != null && input[d[0]] !== '') { var n = num(input[d[0]], d[1], d[2], true); if (n != null) car[d[0]] = n; } });
+    return { ok: true, car: car };
   }
   function create(opts) {
     opts = opts || {}; var store = opts.storage || S.defaultStorage(), clock = opts.now || Date.now, persist = opts.persist !== false;
