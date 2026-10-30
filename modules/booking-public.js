@@ -4,7 +4,7 @@
   'use strict';
   var B = window.DDBooking, $ = function (id) { return document.getElementById(id); };
   var q = new URLSearchParams(location.search), kind = q.get('type') === 'service' ? 'service' : 'test-drive', time = '';
-  if (q.get('name')) { $('ddp-name').textContent = 'Book with ' + q.get('name').slice(0, 60); document.title = $('ddp-name').textContent; }
+  if (q.get('name')) { B.setDealerName(q.get('name')); $('ddp-name').textContent = 'Book with ' + q.get('name').slice(0, 60); document.title = $('ddp-name').textContent; }
   if (q.get('vehicle')) $('ddp-vehicle').value = q.get('vehicle').slice(0, 20);
   B.bindPicker($('ddp-vehicle'), $('ddp-results'), function () { slots(); });
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -31,7 +31,7 @@
     var p = { customer: f.customer.value, phone: f.phone.value, email: f.email.value, date: f.date.value, time: time };
     if (kind === 'service') { p.type = f.type.value; p.notes = f.notes.value; p.vehicle = { year: f.year.value, make: f.make.value, model: f.model.value, vin: f.vin.value, mileage: f.mileage.value }; }
     else p.vehicle = f.vehicle.value;
-    try { var r = B.submitRequest(kind, p); e.target.hidden = true; $('ddp-done').hidden = false; $('ddp-code').textContent = r.code; $('ddp-when').textContent = r.date + ' at ' + r.time; }
+    try { var r = B.submitRequest(kind, p); e.target.hidden = true; $('ddp-done').hidden = false; $('ddp-code').textContent = r.code; $('ddp-when').textContent = r.date + ' at ' + r.time; var ic = $('ddp-ics'), href = B.icsHref(r.kind, r.id); if (href) { ic.href = href; ic.setAttribute('download', B.icsFileName(r.kind, r.id)); ic.hidden = false; } }
     catch (x) { err.textContent = x.message; err.hidden = false; slots(); }
   });
   setKind(kind);
