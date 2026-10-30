@@ -13,6 +13,8 @@ h1{font-size:1.35rem;margin:.4rem 0}.price{font-size:1.6rem;font-weight:700;colo
 label{display:block;margin:10px 0 4px;font-weight:600}input,textarea,select{width:100%;padding:12px;font-size:16px;border:1px solid #9aa6ba66;border-radius:10px;background:transparent;color:inherit}
 .chips{display:flex;gap:8px;flex-wrap:wrap}.chips label{flex:1;margin:0;font-weight:500;border:1px solid #9aa6ba66;border-radius:10px;padding:10px;min-height:44px;text-align:center}
 .chips input{width:auto;margin-right:6px}button{width:100%;min-height:48px;margin-top:14px;border:0;border-radius:12px;background:var(--btn);color:#fff;font-size:1.05rem;font-weight:600}
+.favbar{display:flex;gap:10px;margin-top:10px}.favbar button,.favbar a{flex:1;margin:0;min-height:48px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;font-size:1rem;font-weight:600;text-decoration:none}
+.dd-heart{background:var(--card);color:#d6336c;border:1px solid #9aa6ba66}.dd-heart[aria-pressed=true]{background:#d6336c;color:#fff}.favbar a{border:1px solid #9aa6ba66;color:inherit}.favbar .n{background:var(--btn);color:#fff;border-radius:99px;padding:0 8px;font-size:.85rem}
 .hp{position:absolute;left:-9999px}.err{color:#c0392b;min-height:1.2em}.ok{color:var(--accent);font-weight:600}
 </style></head><body><main>
 <div id="car" class="card"><p class="meta">Loading vehicle…</p></div>
@@ -27,5 +29,5 @@ label{display:block;margin:10px 0 4px;font-weight:600}input,textarea,select{widt
   <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
   <button type="submit">Send</button><p id="msg" class="err" role="status"></p>
 </form></main>
-<script src="modules/store.js"></script><script src="modules/inventory.js"></script><script src="modules/leads.js"></script><script src="modules/car-page.js"></script>
+<script src="modules/store.js"></script><script src="modules/inventory.js"></script><script src="modules/leads.js"></script><script src="modules/favorites.js"></script><script src="modules/car-page.js"></script>
 </body></html>

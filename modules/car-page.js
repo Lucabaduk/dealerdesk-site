@@ -17,6 +17,8 @@
     box.appendChild(el('div', 'price', money(car.price)));
     box.appendChild(el('p', 'meta', Number(car.mileage).toLocaleString('en-US') + ' miles' + (car.color ? ' · ' + car.color : '') + ' · VIN ' + car.vin));
     if (car.features && car.features.length) box.appendChild(el('p', '', car.features.join(' · ')));
+    if (window.DDFavorites) { var fav = DDFavorites.create(), bar = el('div', 'favbar'), h = DDFavorites.heart(fav, car.vin), a = el('a', '', 'Compare'), n = el('span', 'n');
+      a.href = 'compare.html'; a.appendChild(n); DDFavorites.badge(fav, n); bar.appendChild(h); bar.appendChild(a); box.appendChild(bar); }
     form.hidden = false;
   }
   function fromLocal() { return DDInventory.create().get(vin); }

@@ -4,7 +4,7 @@
   var MIN = 2, MAX = 4, VIN_RE = /^[A-HJ-NPR-Z0-9]{17}$/;
   function cv(v) { return String(v == null ? '' : v).toUpperCase().replace(/[^A-Z0-9]/g, ''); }
   function parseVins(search) {
-    var m = /[?&]vins=([^&#]*)/.exec(String(search || '')), raw = m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : '';
+    var m = /[?&]vins=([^&#]*)/.exec(String(search || '')), raw = ''; if (m) { raw = m[1].replace(/\+/g, ' '); try { raw = decodeURIComponent(raw); } catch (e) { raw = raw.replace(/%2C/gi, ','); } }
     var out = []; raw.split(/[,\s]+/).forEach(function (v) { v = cv(v); if (VIN_RE.test(v) && out.indexOf(v) < 0 && out.length < MAX) out.push(v); }); return out;
   }
   function shareUrl(base, vins) { return String(base || '').replace(/[?#].*$/, '').replace(/[^/]*$/, '') + 'compare.html?vins=' + vins.map(cv).filter(function (v) { return VIN_RE.test(v); }).slice(0, MAX).join(','); }
