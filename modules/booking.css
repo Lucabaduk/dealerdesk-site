@@ -6,18 +6,18 @@
 .ddb{padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
 .ddb-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;top:0;z-index:5;background:inherit;padding:6px 0}
 .ddb-tabs,.ddb-seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
-.ddb-tabs button,.ddb-seg button{border:0;background:none;color:var(--mute);padding:8px 14px;border-radius:999px;font:inherit;font-weight:600;min-height:40px;cursor:pointer}
+.ddb-tabs button,.ddb-seg button{border:0;background:none;color:var(--mute);padding:8px 14px;border-radius:999px;font:inherit;font-weight:600;min-height:44px;cursor:pointer}
 .ddb-tabs .on,.ddb-seg .on{background:var(--acc);color:#fff}
 .ddb-seg{display:inline-flex;margin:12px 0}
 .ddb-datebar{display:flex;gap:4px;margin-left:auto}
-.ddb-datebar button,.ddb-datebar input{min-height:40px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:0 10px;font:inherit}
+.ddb-datebar button,.ddb-datebar input{min-height:44px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:0 10px;font:inherit}
 .ddb-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0;box-shadow:0 1px 2px rgba(15,23,42,.05)}
 .ddb-card h3,.ddb-h{margin:0 0 10px;font-size:16px}
 .ddb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .ddb label,.ddp label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.03em}
 .ddb-inline{flex-direction:row!important;align-items:center;text-transform:none!important}
 .ddb-wide{grid-column:1/-1}
-.ddb input,.ddb select,.ddb textarea,.ddp input,.ddp select,.ddp textarea{font:inherit;font-size:16px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:44px;text-transform:none;letter-spacing:0}
+.ddb input,.ddb select,.ddb textarea,.ddp input,.ddp select,.ddp textarea{font:inherit;font-size:16px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:44px;text-transform:none;letter-spacing:0;min-width:0;max-width:100%}
 .ddb input:focus,.ddb select:focus,.ddp input:focus,.ddp select:focus{outline:2px solid var(--acc2);border-color:transparent}
 .ddb-btn{border:0;border-radius:12px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer;min-height:44px;background:var(--line);color:var(--ink)}
 .ddb-primary{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;margin-top:12px}
@@ -39,8 +39,8 @@
 .ddb-empty{color:var(--mute);font-size:13px;margin:4px 0}
 .ddb-row{padding:8px 0;border-bottom:1px solid var(--line)}
 .ddb-msg{background:#ccfbf1;color:#134e4a;border-radius:10px;padding:10px 12px;margin:8px 0}.ddb-bad{background:#ffe4e6;color:#881337}
-.ddb-badge{border:0;background:var(--warn);color:#111;border-radius:999px;padding:8px 14px;font-weight:700}
-.ddb-hrow{display:grid;grid-template-columns:48px 80px 1fr 1fr;gap:8px;align-items:center;margin:4px 0}
+.ddb-badge{min-height:44px;border:0;background:var(--warn);color:#111;border-radius:999px;padding:8px 14px;font-weight:700}
+.ddb-hrow{display:grid;grid-template-columns:40px auto minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;margin:4px 0}
 @media (max-width:600px){.ddb-datebar{margin-left:0;width:100%}.ddb-datebar input{flex:1}.ddb-cal-week{grid-template-columns:repeat(7,85%)}}
 @media (prefers-reduced-motion:reduce){.ddb *,.ddp *{transition:none!important;scroll-behavior:auto!important}}
 /* public page */
@@ -60,3 +60,5 @@
 .ddb-results button{display:flex;flex-wrap:wrap;gap:4px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);padding:10px 12px;font:inherit;font-weight:400;min-height:44px;cursor:pointer}
 .ddb-results button:hover,.ddb-results button:focus{background:rgba(20,184,166,.12)}
 .ddb-results small{width:100%;color:var(--mute);font-size:12px}
+.ddb-hrow input[type=time]{width:100%;padding:10px 6px}
+.ddp-ymm>label{min-width:0}

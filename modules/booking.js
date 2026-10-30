@@ -112,7 +112,8 @@
       var t = stamp(date, time), now = clock();
       if (t < now + state.settings.leadTimeMin * 60000) throw err('lead_time', 'Please book at least ' + Math.round(state.settings.leadTimeMin / 60 * 10) / 10 + ' hours ahead.');
       if (t > now + state.settings.maxDaysAhead * 86400000) throw err('too_far', 'Please book within ' + state.settings.maxDaysAhead + ' days.');
-    } else if (stamp(date, time) + dur * 60000 < clock() - 86400000 * 365) throw err('bad_date', 'Date looks wrong.');
+    } else if (opts && opts.isNew && stamp(date, time) < clock()) throw err('past', 'That time has already passed.');
+    else if (stamp(date, time) + dur * 60000 < clock() - 86400000 * 365) throw err('bad_date', 'Date looks wrong.');
   }
 
   // ---------- test drives ----------
@@ -133,7 +134,7 @@
     if (p.vehicle !== undefined || p.vin !== undefined || p.stock !== undefined) {
       var ref = p.vehicle || p.vin || p.stock, v = findVehicle(ref);
       if (v) { if (v.status === 'sold') throw err('sold', 'That car has been sold.'); o.carId = v.id; o.vin = v.vin; o.stock = v.stock; o.vehicleLabel = vLabel(v); }
-      else { o.carId = null; var r = normVin(ref); if (validVin(r)) { o.vin = r; o.stock = ''; } else { o.vin = ''; o.stock = clean(ref, 20).toUpperCase(); } o.vehicleLabel = clean(p.vehicleLabel || '', 80); }
+      else { if (String(ref || '').trim() && vehicles().length) throw err('unknown_vehicle', 'We could not find that vehicle. Check the stock number or VIN.'); o.carId = null; var r = normVin(ref); if (validVin(r)) { o.vin = r; o.stock = ''; } else { o.vin = ''; o.stock = clean(ref, 20).toUpperCase(); } o.vehicleLabel = clean(p.vehicleLabel || '', 80); }
     }
     o.durationMin = p.durationMin ? Math.round(+p.durationMin) : (o.durationMin || state.settings.testDriveMin);
     if (o.email) o.email = o.email.toLowerCase();
@@ -146,7 +147,7 @@
   }
   function addTestDrive(p, opts) {
     var o = normTD(p); o.status = 'booked';
-    checkWindow(o.date, o.time, o.durationMin, opts);
+    checkWindow(o.date, o.time, o.durationMin, Object.assign({ isNew: true }, opts));
     var c = tdConflicts(o); if (c.length) { var e = err('conflict', c[0].message); e.conflicts = c; throw e; }
     o.id = nid('td'); o.createdAt = clock(); o.source = (opts && opts.source) || 'staff';
     state.testDrives.push(o); save(); return o;
@@ -208,7 +209,7 @@
   }
   function addService(p, opts) {
     var o = normSV(p); o.status = 'scheduled';
-    checkWindow(o.date, o.time, o.durationMin, opts); placeBay(o);
+    checkWindow(o.date, o.time, o.durationMin, Object.assign({ isNew: true }, opts)); placeBay(o);
     o.id = nid('sv'); o.createdAt = clock(); o.source = (opts && opts.source) || 'staff';
     state.services.push(o); save(); return o;
   }

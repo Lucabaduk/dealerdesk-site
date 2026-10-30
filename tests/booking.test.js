@@ -5,15 +5,17 @@ function t(n, f) { try { f(); pass++; console.log('ok  - ' + n); } catch (e) { c
 function fake(init) { const m = Object.assign({}, init); return { _m: m, getItem: k => k in m ? m[k] : null, setItem(k, v) { m[k] = String(v); }, removeItem: k => { delete m[k]; } }; }
 const MOD = path.join(__dirname, '..', 'modules', 'booking.js');
 const NOW = new Date(2026, 10, 4, 8, 0).getTime(); // Wed Nov 4 2026 08:00 local
-const INV = JSON.stringify({ cars: [{ id: 'car-a', stock_no: 'A100', vin: '1HGCM82633A100000', year: 2022, make: 'Honda', model: 'Accord', status: 'available' }, { id: 'car-b', stock_no: 'B200', vin: '2T1BURHE0JC123456', year: 2021, make: 'Toyota', model: 'Corolla', status: 'sold' }] });
+const INV = JSON.stringify({ cars: [{ id: 'car-a', stock_no: 'A100', vin: '1HGCM82633A100000', year: 2022, make: 'Honda', model: 'Accord', status: 'available' }, { id: 'car-b', stock_no: 'B200', vin: '2T1BURHE0JC123456', year: 2021, make: 'Toyota', model: 'Corolla', status: 'sold' }, { id: 'car-x', stock_no: 'XYZ9', vin: '', year: 2020, make: 'Kia', model: 'Soul', status: 'available' }, { id: 'car-c', stock_no: 'C3', vin: '', year: 2019, make: 'Ford', model: 'Focus', status: 'available' }] });
 function load(st) { globalThis.localStorage = st || fake({ dealerdesk_data: INV }); delete require.cache[MOD]; const B = require(MOD); B._setClock(() => NOW); return B; }
 function throwsCode(f, code) { try { f(); } catch (e) { assert.strictEqual(e.code, code, 'got ' + e.code + ': ' + e.message); return e; } throw new Error('expected ' + code); }
 const td = (o) => Object.assign({ vehicle: 'A100', customer: 'Ann Lee', phone: '313-555-0101', email: 'ann@example.com', salesperson: 'Maria', date: '2026-11-04', time: '10:00' }, o);
 const sv = (o) => Object.assign({ customer: 'Bob Ray', phone: '(313) 555-0199', type: 'oil-change', vehicle: { year: 2018, make: 'Ford', model: 'F-150', mileage: 61000 }, date: '2026-11-04', time: '09:00' }, o);
 
 let B = load();
+t('QA: unknown vehicle is rejected when inventory is loaded', () => { throwsCode(() => B.addTestDrive(td({ vehicle: 'NOPE999', salesperson: 'Zed' })), 'unknown_vehicle'); });
+t('QA: new staff booking in the past is rejected', () => { throwsCode(() => B.addTestDrive(td({ date: '2026-11-03', salesperson: 'Zed' })), 'past'); throwsCode(() => B.addService(sv({ date: '2026-11-02' })), 'past'); });
 t('defaults: Mon-Fri 9-7, Sat 9-4, Sun closed, 4 bays', () => { const s = B.settings(); assert.strictEqual(s.hours.sun, null); assert.deepStrictEqual(s.hours.sat, { open: '09:00', close: '16:00' }); assert.strictEqual(s.bays, 4); });
-t('vehicle picker reads DealerDesk inventory; lookup by stock and VIN', () => { assert.strictEqual(B.vehicles().length, 2); assert.strictEqual(B.findVehicle('a100').model, 'Accord'); assert.strictEqual(B.findVehicle('2t1burhe0jc123456').stock, 'B200'); });
+t('vehicle picker reads DealerDesk inventory; lookup by stock and VIN', () => { assert.strictEqual(B.vehicles().length, 4); assert.strictEqual(B.findVehicle('a100').model, 'Accord'); assert.strictEqual(B.findVehicle('2t1burhe0jc123456').stock, 'B200'); });
 t('book test drive by stock number fills VIN + label, status booked', () => { const r = B.addTestDrive(td()); assert.strictEqual(r.vin, '1HGCM82633A100000'); assert.strictEqual(r.vehicleLabel, '2022 Honda Accord'); assert.strictEqual(r.status, 'booked'); });
 t('blocks double-booking the same car (overlapping)', () => { const e = throwsCode(() => B.addTestDrive(td({ vehicle: '1HGCM82633A100000', salesperson: 'Ken', time: '10:15' })), 'conflict'); assert.strictEqual(e.conflicts[0].type, 'vehicle'); });
 t('blocks double-booking the same salesperson (case-insensitive)', () => { const e = throwsCode(() => B.addTestDrive(td({ vehicle: 'XYZ9', salesperson: 'maria', time: '10:00' })), 'conflict'); assert.strictEqual(e.conflicts[0].type, 'salesperson'); });
