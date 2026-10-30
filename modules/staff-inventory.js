@@ -30,7 +30,7 @@
       act.appendChild(document.createTextNode(' ')); act.appendChild(btn('Remove', function () { if (confirm('Remove ' + c.year + ' ' + c.make + ' ' + c.model + ' (' + c.vin + ')?')) { inv.remove(c.vin); fillMakes(); draw(); } })); tr.appendChild(act);
       tb.appendChild(tr); });
     if (!last.items.length) { var tr = el('tr'), td = el('td', 'muted', inv.size() ? 'No cars match.' : 'No cars yet. Add one or import JSON.'); td.colSpan = 8; tr.appendChild(td); tb.appendChild(tr); }
-    $('count').textContent = last.total.toLocaleString('en-US') + ' cars'; $('pageinfo').textContent = 'Page ' + last.page + ' of ' + last.pages; $('prev').disabled = last.page <= 1; $('next').disabled = last.page >= last.pages;
+    $('count').textContent = last.total.toLocaleString('en-US') + (last.total === 1 ? ' car' : ' cars'); $('pageinfo').textContent = 'Page ' + last.page + ' of ' + last.pages; $('prev').disabled = last.page <= 1; $('next').disabled = last.page >= last.pages;
   }
   function openForm(car) { editing = car ? car.vin : null; var f = $('carform'); f.reset(); $('formerr').textContent = ''; $('dlg-title').textContent = car ? 'Edit car' : 'Add car'; f.elements.vin.readOnly = !!car;
     if (car) ['vin', 'stock_no', 'year', 'make', 'model', 'trim', 'price', 'mileage', 'color', 'condition', 'status', 'body_type'].forEach(function (k) { if (car[k] != null) f.elements[k].value = car[k]; });

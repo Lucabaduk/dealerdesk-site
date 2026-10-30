@@ -149,7 +149,7 @@
   var ui = { el: null, status: '', q: '', msg: '' };
   function fmtTime(t) { var d = new Date(t); return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); }
   function renderHTML() {
-    var rows = list({ status: ui.status, q: ui.q }), counts = {}; state.orders.forEach(function (o) { counts[o.status] = (counts[o.status] || 0) + 1; });
+    var rows = list({ status: ui.status, q: ui.q }), counts = Object.create(null); state.orders.forEach(function (o) { counts[o.status] = (counts[o.status] || 0) + 1; });
     return '<div class="ddb ddo-staff"><header class="ddb-top"><div class="ddb-tabs">' + [''].concat(STATUS).map(function (s) {
       return '<button data-filter="' + s + '" class="' + (ui.status === s ? 'on' : '') + '">' + (s || 'All') + (s && counts[s] ? ' <small>' + counts[s] + '</small>' : '') + '</button>'; }).join('') +
       '</div><input class="ddo-search" data-q type="search" placeholder="Search name, phone, stock, code" value="' + esc(ui.q) + '"></header>' +

@@ -29,6 +29,7 @@ t('validation: name, phone, email, vehicle, hours, closed day', () => {
 t('week view: Monday-first 7 days', () => { assert.deepStrictEqual(B.weekOf('2026-11-04'), ['2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06', '2026-11-07', '2026-11-08']); });
 t('service: auto bay, default duration by type', () => { const r = B.addService(sv()); assert.strictEqual(r.bay, 1); assert.strictEqual(r.durationMin, 45); assert.strictEqual(r.status, 'scheduled'); });
 t('service: VIN check + year check', () => { throwsCode(() => B.addService(sv({ vehicle: { make: 'Ford', vin: 'SHORT' } })), 'bad_vin'); throwsCode(() => B.addService(sv({ vehicle: { make: 'Ford', year: 1900 } })), 'bad_year'); throwsCode(() => B.addService(sv({ type: 'wash' })), 'bad_type'); });
+t('QA: proto-ish service type rejected (no function duration)', () => { ['constructor','toString','__proto__','hasOwnProperty','valueOf'].forEach(ty => throwsCode(() => B.addService(sv({ type: ty })), 'bad_type')); });
 t('service: explicit busy bay rejected; capacity full rejected', () => {
   throwsCode(() => B.addService(sv({ bay: 1 })), 'bay_busy'); [2, 3, 4].forEach(() => B.addService(sv({ type: 'brakes' })));
   throwsCode(() => B.addService(sv({ time: '09:30' })), 'full'); throwsCode(() => B.addService(sv({ bay: 9, time: '15:00' })), 'bad_bay'); });

@@ -10,8 +10,8 @@
   var KEY = 'dealerdesk_booking', INV_KEY = 'dealerdesk_data';
   var TD_STATUS = ['booked', 'confirmed', 'completed', 'no-show', 'cancelled'];
   var SV_STATUS = ['scheduled', 'checked-in', 'in-progress', 'ready', 'picked-up'];
-  var SV_TYPES = { 'oil-change': 'Oil change', tires: 'Tires', brakes: 'Brakes', inspection: 'Inspection', other: 'Other' };
-  var SV_DEFAULT_MIN = { 'oil-change': 45, tires: 60, brakes: 120, inspection: 60, other: 60 };
+  var SV_TYPES = Object.assign(Object.create(null), { 'oil-change': 'Oil change', tires: 'Tires', brakes: 'Brakes', inspection: 'Inspection', other: 'Other' });
+  var SV_DEFAULT_MIN = Object.assign(Object.create(null), { 'oil-change': 45, tires: 60, brakes: 120, inspection: 60, other: 60 });
   var ACTIVE_TD = { booked: 1, confirmed: 1 }, DONE_SV = { 'picked-up': 1 };
   var DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -194,7 +194,7 @@
     }
     o.vehicle = veh;
     if (p.type !== undefined) o.type = p.type;
-    if (!SV_TYPES[o.type]) throw err('bad_type', 'Choose a service type.');
+    if (typeof o.type !== 'string' || !Object.prototype.hasOwnProperty.call(SV_TYPES, o.type)) throw err('bad_type', 'Choose a service type.');
     o.durationMin = p.durationMin ? Math.round(+p.durationMin) : (o.durationMin || SV_DEFAULT_MIN[o.type]);
     if (!(o.durationMin >= 10 && o.durationMin <= 600)) throw err('bad_duration', 'Duration must be 10-600 minutes.');
     if (p.bay !== undefined) o.bay = p.bay === '' || p.bay == null ? 0 : Math.round(+p.bay);
@@ -275,8 +275,8 @@
   function setStaff(kind, names) { var k = kind === 'advisors' ? 'advisors' : 'salespeople'; state[k] = (names || []).map(function (n) { return clean(n, 40); }).filter(Boolean); save(); return state[k].slice(); }
 
   // ---------- export to DealerDesk schema ----------
-  var TD_MAP = { booked: 'requested', confirmed: 'confirmed', completed: 'completed', 'no-show': 'no_show', cancelled: 'cancelled' };
-  var SV_MAP = { scheduled: 'booked', 'checked-in': 'in_progress', 'in-progress': 'in_progress', ready: 'done', 'picked-up': 'done' };
+  var TD_MAP = Object.assign(Object.create(null), { booked: 'requested', confirmed: 'confirmed', completed: 'completed', 'no-show': 'no_show', cancelled: 'cancelled' });
+  var SV_MAP = Object.assign(Object.create(null), { scheduled: 'booked', 'checked-in': 'in_progress', 'in-progress': 'in_progress', ready: 'done', 'picked-up': 'done' });
   function toSchema() {
     function cust(x) { return { name: x.customer, phone: x.phone, email: x.email || '' }; }
     return {

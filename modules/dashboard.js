@@ -38,8 +38,8 @@
   function customerName(b) { var c = b.customer; return (c && typeof c === 'object' ? c.name : c) || b.name || ''; }
 
   // Status normalisation across the app (schema names) and the booking module.
-  var TD_MAP = { booked: 'requested', 'no-show': 'no_show' };
-  var SV_MAP = { scheduled: 'booked', 'checked-in': 'in_progress', 'in-progress': 'in_progress', ready: 'in_progress', 'picked-up': 'done' };
+  var TD_MAP = Object.assign(Object.create(null), { booked: 'requested', 'no-show': 'no_show' });
+  var SV_MAP = Object.assign(Object.create(null), { scheduled: 'booked', 'checked-in': 'in_progress', 'in-progress': 'in_progress', ready: 'in_progress', 'picked-up': 'done' });
   var tdStatus = function (s) { s = String(s || 'requested').toLowerCase(); return TD_MAP[s] || s; };
   var svStatus = function (s) { s = String(s || 'booked').toLowerCase(); return SV_MAP[s] || s; };
 
