@@ -52,13 +52,15 @@
   var SRC = Object.assign(Object.create(null), { qr: 'QR code', web: 'Website', walk_in: 'Walk-in' }), openId = null;
   function lq() { return { text: $('l-q').value, status: $('l-status').value, channel: $('l-source').value, overdue: $('l-overdue').checked }; }
   function when(t) { return fmtWhen(t); }
-  function drawLeads() { var box = $('lrows'); box.textContent = ''; var list = leads.search(lq());
+  var LEAD_PAGE = 200, leadShow = LEAD_PAGE; // QA: 5,000 cards per keystroke took ~400 ms on a phone
+  function drawLeads(more) { var box = $('lrows'); box.textContent = ''; var list = leads.search(lq()); if (more !== true) leadShow = LEAD_PAGE;
     $('l-count').textContent = list.length === 1 ? '1 lead' : list.length + ' leads';
-    list.forEach(function (l) { var b = el('button', 'lcard'); b.type = 'button'; var top = el('div', 'top');
+    var rest = list.length - leadShow; list.slice(0, leadShow).forEach(function (l) { var b = el('button', 'lcard'); b.type = 'button'; var top = el('div', 'top');
       top.appendChild(el('b', '', l.name)); if (leads.isOverdue(l)) top.appendChild(el('span', 'od', 'Overdue')); top.appendChild(el('span', 'pill ' + l.status, l.status)); b.appendChild(top);
       var car = inv.get(l.vin); b.appendChild(el('div', '', String(l.interest).replace('_', ' ') + ' \u00b7 ' + (car ? car.year + ' ' + car.make + ' ' + car.model : l.vin)));
       b.appendChild(el('div', 'src', leads.ago(l.createdAt) + ' \u00b7 ' + (SRC[l.channel] || 'Website') + (l.assignee ? ' \u00b7 ' + l.assignee : '')));
       b.addEventListener('click', function () { openLead(l.id); }); box.appendChild(b); });
+    if (rest > 0) { var mb = el('button', 'lcard', 'Show ' + Math.min(rest, LEAD_PAGE) + ' more of ' + rest); mb.type = 'button'; mb.id = 'l-more'; mb.addEventListener('click', function () { leadShow += LEAD_PAGE; drawLeads(true); }); box.appendChild(mb); }
     if (!list.length) box.appendChild(el('p', 'muted', leads.counts().total ? 'No leads match.' : 'No leads yet. Leads from car QR pages appear here.')); }
   function badge() { var n = leads.counts().new; $('newcount').textContent = n ? String(n) : ''; }
   function li(time, text) { var x = el('li'); var tm = el('time', '', when(time)); tm.setAttribute('datetime', new Date(time).toISOString()); x.appendChild(tm); x.appendChild(document.createTextNode(text)); return x; }
@@ -75,15 +77,20 @@
     $('ld-follow').value = l.followUpAt ? isoDay(l.followUpAt) : ''; $('ld-overdue').textContent = ''; if (leads.isOverdue(l)) $('ld-overdue').appendChild(el('span', 'od', 'Overdue'));
     var nl = $('ld-notes'); nl.textContent = ''; l.notesLog.slice().reverse().forEach(function (n) { nl.appendChild(li(n.at, (n.by ? n.by + ': ' : '') + n.text)); }); if (!l.notesLog.length) nl.appendChild(el('li', 'muted', 'No notes yet.'));
     var tl = $('ld-time'); tl.textContent = ''; l.history.slice().reverse().forEach(function (h) { tl.appendChild(li(h.at, h.from ? h.from + ' \u2192 ' + h.to + (h.by ? ' (' + h.by + ')' : '') : 'Lead received (' + h.to + ')')); }); }
-  function openLead(id) { openId = id; fillLead(); var d = $('ldrawer'); if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
-  function closeLead() { var d = $('ldrawer'); if (d.close) d.close(); else d.removeAttribute('open'); openId = null; drawLeads(); }
+  // drawer: Esc, the close button and the phone Back button all close it the same way (QA: Esc left openId set, Back left the page)
+  var pushed = false;
+  function openLead(id) { openId = id; fillLead(); var d = $('ldrawer'); if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); try { history.pushState({ ddLead: id }, ''); pushed = true; } catch (e) {} } }
+  function onClosed() { if (openId == null) return; openId = null; drawLeads(); if (pushed) { pushed = false; try { history.back(); } catch (e) {} } }
+  function closeLead() { var d = $('ldrawer'); if (d.close && d.open) d.close(); else { d.removeAttribute('open'); onClosed(); } }
+  $('ldrawer').addEventListener('close', onClosed);
+  window.addEventListener('popstate', function () { if (openId == null) return; pushed = false; closeLead(); });
   function me() { return $('ld-assign').value; }
   $('ld-close').addEventListener('click', closeLead);
   $('ld-status').addEventListener('change', function () { leads.setStatus(openId, $('ld-status').value, null, me()); badge(); fillLead(); drawLeads(); });
   $('ld-assign').addEventListener('change', function () { leads.assign(openId, $('ld-assign').value); fillLead(); drawLeads(); });
   $('ld-follow').addEventListener('change', function () { leads.setFollowUp(openId, $('ld-follow').value || null); fillLead(); drawLeads(); });
   $('ld-addnote').addEventListener('click', function () { var r = leads.addNote(openId, $('ld-note').value, me()); if (r.ok) { $('ld-note').value = ''; fillLead(); } });
-  ['l-status', 'l-source', 'l-overdue'].forEach(function (id) { $(id).addEventListener('change', drawLeads); }); $('l-q').addEventListener('input', drawLeads);
+  ['l-status', 'l-source', 'l-overdue'].forEach(function (id) { $(id).addEventListener('change', function () { drawLeads(); }); }); $('l-q').addEventListener('input', function () { drawLeads(); });
   $('csv').addEventListener('click', function () { download('dealerdesk-leads.csv', leads.exportCSV(leads.search(lq())), 'text/csv'); });
   function tab(which) { var isInv = which === 'inv'; $('pane-inv').hidden = !isInv; $('pane-leads').hidden = isInv; $('tab-inv').setAttribute('aria-selected', String(isInv)); $('tab-leads').setAttribute('aria-selected', String(!isInv)); if (!isInv) drawLeads(); }
   $('tab-inv').addEventListener('click', function () { tab('inv'); }); $('tab-leads').addEventListener('click', function () { tab('leads'); });

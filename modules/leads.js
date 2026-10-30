@@ -5,24 +5,25 @@
   var KEY = 'dealerdesk.leads.v1', STAFF_KEY = 'dealerdesk.salespeople.v1';
   var CHANNELS = ['qr', 'web', 'walk_in']; // UI "source" filter: QR code, website, walk-in
   var OPEN = ['new', 'contacted']; // follow-up overdue only applies to these
-  var DAY = 86400000;
+  var DAY = 86400000, MAXT = 8.64e15;
+  function ts(v, d) { v = +v; return isFinite(v) && v > 0 && v <= MAXT ? v : d; } // valid Date range only
   function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
   function channelOf(l) { if (l.via === 'qr') return 'qr'; if (l.source === 'walk_in' || l.channel === 'walk_in') return 'walk_in'; return CHANNELS.indexOf(l.channel) >= 0 ? l.channel : 'web'; }
   /** '2h ago', '3d ago' */
   function ago(ts, now) { var d = Math.max(0, (now == null ? Date.now() : now) - ts), m = Math.floor(d / 60000);
     if (!isFinite(m)) return ''; if (m < 1) return 'just now'; if (m < 60) return m + 'm ago'; var h = Math.floor(m / 60); if (h < 24) return h + 'h ago'; var dd = Math.floor(h / 24); if (dd < 60) return dd + 'd ago'; return Math.floor(dd / 30) + 'mo ago'; }
-  function parseDate(v) { if (v == null || v === '') return null; if (typeof v === 'number') return isFinite(v) && v > 0 ? v : null;
-    var m = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(String(v)); if (!m) return null; var d = new Date(+m[1], m[2] - 1, +m[3], m[4] ? +m[4] : 23, m[5] ? +m[5] : 59);
+  function parseDate(v) { if (v == null || v === '') return null; if (typeof v === 'number') return ts(v, null);
+    var m = /^([1-9]\d{3})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(String(v)); if (!m) return null; var d = new Date(+m[1], m[2] - 1, +m[3], m[4] ? +m[4] : 23, m[5] ? +m[5] : 59);
     return d.getMonth() === m[2] - 1 && d.getDate() === +m[3] ? d.getTime() : null; }
   function isOverdue(l, now) { return !!(l && l.followUpAt && OPEN.indexOf(l.status) >= 0 && l.followUpAt < (now == null ? Date.now() : now)); }
   /** bring old saved leads (v1, before notes/timeline) up to date without losing anything */
   function migrate(l) {
-    var t0 = +l.createdAt || 0, tu = +l.updatedAt || t0;
+    var t0 = ts(l.createdAt, 0), tu = ts(l.updatedAt, t0);
     l.createdAt = t0; l.updatedAt = tu;
     if (!Array.isArray(l.history)) { l.history = [{ to: 'new', at: t0 }]; if (l.status !== 'new') l.history.push({ from: 'new', to: l.status, at: tu }); }
-    l.history = l.history.filter(function (h) { return h && STATUSES.indexOf(h.to) >= 0 && isFinite(+h.at); }).map(function (h) { return { from: STATUSES.indexOf(h.from) >= 0 ? h.from : undefined, to: h.to, at: +h.at, by: S.cleanText(h.by, 60) }; }).slice(-200);
+    l.history = l.history.filter(function (h) { return h && STATUSES.indexOf(h.to) >= 0 && (+h.at === 0 || ts(h.at, -1) >= 0); }).map(function (h) { return { from: STATUSES.indexOf(h.from) >= 0 ? h.from : undefined, to: h.to, at: ts(h.at, 0), by: S.cleanText(h.by, 60) }; }).slice(-200);
     if (!Array.isArray(l.notesLog)) l.notesLog = l.staffNote ? [{ id: 'n0', text: S.cleanText(l.staffNote, 1000), at: tu, by: '' }] : [];
-    l.notesLog = l.notesLog.filter(function (n) { return n && typeof n.text === 'string' && n.text; }).map(function (n, i) { return { id: typeof n.id === 'string' ? n.id.slice(0, 20) : 'n' + i, text: S.cleanText(n.text, 1000), at: +n.at || tu, by: S.cleanText(n.by, 60) }; }).slice(-200);
+    l.notesLog = l.notesLog.filter(function (n) { return n && typeof n.text === 'string' && n.text; }).map(function (n, i) { return { id: typeof n.id === 'string' ? n.id.slice(0, 20) : 'n' + i, text: S.cleanText(n.text, 1000), at: ts(n.at, tu), by: S.cleanText(n.by, 60) }; }).slice(-200);
     l.assignee = S.cleanText(l.assignee, 60); l.followUpAt = parseDate(l.followUpAt); l.channel = channelOf(l);
     ['name', 'email', 'notes', 'staffNote'].forEach(function (k) { l[k] = S.cleanText(l[k], k === 'name' ? 80 : 1000); }); l.phone = cleanPhone(l.phone); l.vin = String(l.vin || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
     return l;
@@ -47,7 +48,7 @@
   }
   function create(opts) {
     opts = opts || {}; var store = opts.storage || S.defaultStorage(), clock = opts.now || Date.now, leads = [], minGapMs = opts.minGapMs == null ? 30000 : opts.minGapMs;
-    try { var raw = JSON.parse(store.getItem(KEY) || '[]'); if (Array.isArray(raw)) leads = raw.filter(function (l) { return l && typeof l.id === 'string' && STATUSES.indexOf(l.status) >= 0; }).map(migrate); } catch (e) { leads = []; }
+    try { var raw = JSON.parse(store.getItem(KEY) || '[]'); if (Array.isArray(raw)) raw.forEach(function (l) { if (!l || typeof l.id !== 'string' || STATUSES.indexOf(l.status) < 0) return; try { leads.push(migrate(l)); } catch (e) { /* skip just this malformed lead, keep the rest */ } }); } catch (e) { leads = []; }
     function save() { try { store.setItem(KEY, JSON.stringify(leads)); } catch (e) {} }
     var staff = []; try { var sp = JSON.parse(store.getItem(STAFF_KEY) || '[]'); if (Array.isArray(sp)) sp.forEach(function (n) { remember(n, true); }); } catch (e) {}
     function remember(name, quiet) { name = S.cleanText(name, 60); if (!name) return ''; var seen = Object.create(null); staff.forEach(function (n) { seen[n.toLowerCase()] = n; });
