@@ -29,3 +29,20 @@ Without a server, online requests only reach staff on the SAME browser/device. S
 
 ## Test
 `node tests/booking.test.js` (UI tests need jsdom; set `DD_DEV_MODULES=/path/to/node_modules`).
+
+# DealerDesk Orders module (reserve / buy requests)
+
+- `order.html?vehicle=STOCK` (+ `modules/order-public.js`): car summary (photo, price, specs, features), Reserve (refundable deposit from settings) or Buy, optional trade-in estimate, payment calculator, request form -> confirmation code `DO-XXXX123`. Unknown/sold cars show a message; "hold" cars show a note.
+- `modules/order.js`: global `DDOrders`. localStorage `dealerdesk_orders`. Cars from `/workspace/dealership` schema via `DDOrders.setInventory(data)` or localStorage `dealerdesk_data`. `modules/order.css` extends `booking.css` (load both).
+- Staff list: `DDOrders.mount(el)` - status tabs (new, contacted, deposit, sold, cancelled), search, status dropdown (history kept), tel/mailto links, "Book test drive" -> `booking.html?vehicle=STOCK`. Demo: `orders-demo.html`.
+- **No payments.** No card/bank fields anywhere (a test checks). The page says a dealer will contact the customer.
+- Limits: 5 requests per phone per hour; name + 10-digit phone required; email required only if "Email" is the contact preference.
+
+Trade-in formula (shown on the page; tune in settings `tradeBase`, `tradeDepreciation`, `tradeMilesPerYear`, `tradeMileAdj`):
+`estimate = tradeBase x (1 - depreciation)^age x clamp(1 - mileAdj x (miles - milesPerYear x age)/10,000, 0.5, 1.15) x condition (1.00/0.90/0.75/0.55)`, min $250, shown as +/-10% range. Rough guide, not an offer.
+
+Payment: tax = taxRate x (price - trade) (trade credit, setting `taxTradeCredit`), financed = price + tax - down - trade, standard amortisation (0% APR = financed/term), term 36-84. Shows monthly, interest, total of payments, total cost.
+
+Settings: `DDOrders.updateSettings({ depositAmount, taxRate, defaultApr, defaultTerm, tradeBase, ..., bookingUrl, photoBase })`. `photoBase` prefixes relative photo paths (e.g. where `/workspace/dealership/assets` is served).
+
+Test: `node tests/order.test.js`

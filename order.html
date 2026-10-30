@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Reserve or buy this car</title>
+<link rel="stylesheet" href="modules/booking.css"><link rel="stylesheet" href="modules/order.css">
+</head><body style="margin:0">
+<div class="ddp" id="ddo">
+  <div class="ddp-hero"><h1 id="ddo-title">Your next car</h1><p id="ddo-sub">Reserve it or start buying, no payment online.</p></div>
+  <main class="ddp-main">
+    <section class="ddb-card ddo-car" id="ddo-car"></section>
+    <div class="ddb-msg ddb-bad" id="ddo-missing" hidden role="alert"></div>
+    <div id="ddo-flow">
+      <section class="ddb-card"><h3>What would you like to do?</h3>
+        <div class="ddp-choice"><button type="button" data-kind="reserve">Reserve<small id="ddo-dep"></small></button><button type="button" data-kind="buy">Buy<small>Start the paperwork</small></button></div>
+      </section>
+      <details class="ddb-card ddo-sec" id="ddo-trade"><summary>Trade-in estimate <small>optional</small></summary>
+        <div class="ddb-grid">
+          <label>Year<input name="tyear" inputmode="numeric"></label><label>Make<input name="tmake"></label><label>Model<input name="tmodel"></label>
+          <label>Mileage<input name="tmiles" inputmode="numeric"></label>
+          <label>Condition<select name="tcond"><option value="excellent">Excellent</option><option value="good" selected>Good</option><option value="fair">Fair</option><option value="poor">Poor</option></select></label>
+        </div>
+        <div class="ddo-out" id="ddo-tradeout" aria-live="polite"></div>
+        <p class="ddo-formula" id="ddo-formula"></p>
+      </details>
+      <section class="ddb-card ddo-sec" id="ddo-calc"><h3>Payment calculator</h3>
+        <div class="ddb-grid">
+          <label>Price<input name="price" inputmode="decimal"></label><label>Down payment<input name="down" inputmode="decimal" value="0"></label>
+          <label>Trade-in value<input name="trade" inputmode="decimal" value="0"></label><label>APR %<input name="apr" inputmode="decimal"></label>
+          <label>Term<select name="term"><option>36</option><option>48</option><option>60</option><option>72</option><option>84</option></select></label>
+        </div>
+        <div class="ddo-out ddo-big" id="ddo-calcout" aria-live="polite"></div>
+        <p class="ddo-formula">Estimate only. Tax <span id="ddo-tax"></span>% from the dealer's settings. Real rates depend on credit approval.</p>
+      </section>
+      <form class="ddb-card ddo-sec" id="ddo-form" novalidate><h3>Your details</h3>
+        <div style="display:grid;gap:10px">
+          <label>Name<input name="name" autocomplete="name" required></label>
+          <label>Phone<input name="phone" type="tel" autocomplete="tel" required></label>
+          <label>Email (optional)<input name="email" type="email" autocomplete="email"></label>
+          <label>Best way to reach you<select name="contact"><option value="phone">Phone call</option><option value="text">Text message</option><option value="email">Email</option></select></label>
+          <label>Notes<textarea name="notes" rows="3" placeholder="Questions, best time to call..."></textarea></label>
+        </div>
+        <p class="ddo-note"><b>No payment is taken here.</b> A dealer will contact you to confirm the car and any deposit.</p>
+        <div class="ddb-msg ddb-bad" id="ddo-err" hidden role="alert"></div>
+        <button class="ddb-btn ddb-primary" style="width:100%" id="ddo-submit">Send request</button>
+      </form>
+    </div>
+    <div class="ddb-card ddp-done" id="ddo-done" hidden><h2>Request sent</h2><p>Confirmation code</p><b id="ddo-code"></b>
+      <p>A dealer will contact you soon. No payment has been taken.</p><a class="ddb-btn ddb-primary" id="ddo-book" href="booking.html">Book a test drive</a></div>
+  </main>
+</div>
+<script src="modules/order.js"></script>
+<script src="modules/order-public.js"></script>
+</body></html>
