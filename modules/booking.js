@@ -27,7 +27,7 @@
     emailSubject: 'Reminder: your {what} on {date} at {time}',
     emailBody: 'Hi {first},\n\nThis is a friendly reminder of your {what} for the {car} on {date} at {time}.\n\nConfirmation code: {code}\n\nIf you need to change the time, just reply to this email or give us a call.\n\nSee you soon,\n{dealer}' }; }
   var TPL_MAX = { sms: 480, emailSubject: 140, emailBody: 2000 };
-  var UNSAFE = /(javascript|vbscript|data|file|blob)\s*:/i;
+  var UNSAFE = /\b(javascript|vbscript|data|file|blob)\s*:/i;
   function checkTemplate(k, v) {
     v = String(v == null ? '' : v).replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim();
     var name = { sms: 'Text message', emailSubject: 'Email subject', emailBody: 'Email message' }[k];
@@ -45,13 +45,15 @@
 
   // ---------- helpers ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function clean(s, max) { return String(s == null ? '' : s).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max || 80); }
+  // drop lone UTF-16 surrogates (e.g. an emoji cut in half by slice) so encodeURIComponent never throws
+  function wf(s) { return String(s == null ? '' : s).replace(/[\ud800-\udbff](?![\udc00-\udfff])|(^|[^\ud800-\udbff])[\udc00-\udfff]/g, '$1'); }
+  function clean(s, max) { return wf(String(s == null ? '' : s).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max || 80)); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function toMin(hhmm) { var m = /^(\d{1,2}):(\d{2})$/.exec(hhmm || ''); return m ? +m[1] * 60 + +m[2] : NaN; }
   function fromMin(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
   function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
   function parseDate(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
-  function stamp(date, time) { var d = parseDate(date); return d ? d.getTime() + toMin(time) * 60000 : NaN; }
+  function stamp(date, time) { var d = parseDate(date), m = toMin(time); if (!d || !(m >= 0)) return NaN; d.setHours(Math.floor(m / 60), m % 60, 0, 0); return d.getTime(); } // wall-clock time, correct across DST
   function overlap(a1, a2, b1, b2) { return a1 < b2 && b1 < a2; }
   function normVin(v) { return clean(v, 17).toUpperCase().replace(/[IOQ\s]/g, function (c) { return c === ' ' ? '' : c; }); }
   function validVin(v) { return /^[A-HJ-NPR-Z0-9]{17}$/.test(v); }
@@ -65,7 +67,12 @@
   function load() {
     state = fresh(); saveError = '';
     var s = store(); if (!s) { saveError = 'Storage is not available - bookings will not be saved.'; return; }
-    try { var raw = s.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && p.v === 1) { state = Object.assign(fresh(), p); state.settings = Object.assign(defaults(), p.settings || {}); } } }
+    try { var raw = s.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && p.v === 1) { state = Object.assign(fresh(), p); state.settings = Object.assign(defaults(), p.settings && typeof p.settings === 'object' ? p.settings : {});
+      ['testDrives', 'services', 'requests', 'salespeople', 'advisors'].forEach(function (k) { if (!Array.isArray(state[k])) state[k] = []; });
+      ['testDrives', 'services', 'requests'].forEach(function (k) { state[k] = state[k].filter(function (x) { return x && typeof x === 'object' && typeof x.id === 'string'; }); });
+      var st = state.settings, dt = defaultTemplates(); if (st.reminderHours !== 24 && st.reminderHours !== 48) st.reminderHours = 24;
+      if (!st.templates || typeof st.templates !== 'object') st.templates = dt; else Object.keys(dt).forEach(function (k) { if (typeof st.templates[k] !== 'string' || !st.templates[k].trim()) st.templates[k] = dt[k]; });
+      if (!st.hours || typeof st.hours !== 'object') st.hours = defaults().hours; } } }
     catch (e) { saveError = 'Saved bookings were unreadable and were reset.'; }
   }
   function save() {
@@ -312,7 +319,7 @@
   function niceTime(t) { var m = toMin(t); if (!(m >= 0)) return t; var h = Math.floor(m / 60), mm = m % 60; return ((h + 11) % 12 + 1) + ':' + pad(mm) + (h < 12 ? ' AM' : ' PM'); }
   function fill(tpl, kind, b) {
     var v = { dealer: dealerName(), customer: b.customer, first: String(b.customer || '').split(/\s+/)[0] || 'there', what: whatOf(kind, b), car: carOf(kind, b), date: niceDate(b.date), time: niceTime(b.time), code: codeOf(b) };
-    return String(tpl).replace(/\{(\w+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(v, k) ? String(v[k]) : m; });
+    return wf(String(tpl).replace(/\{(\w+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(v, k) ? String(v[k]) : m; }));
   }
   function validEmailAddr(e) { return /^[^\s@?&#/\\:;,<>"'()]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(String(e || '')); }
   // Only ever returns sms:, mailto: or data:text/calendar hrefs built here.
@@ -323,7 +330,7 @@
     var text = fill(t.sms, kind, b), subject = fill(t.emailSubject, kind, b), body = fill(t.emailBody, kind, b);
     return { text: text, subject: subject, body: body,
       sms: smsTo ? safeHref('sms:' + smsTo + '?&body=' + encodeURIComponent(text)) : '',
-      mailto: validEmailAddr(b.email) ? safeHref('mailto:' + b.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body)) : '' };
+      mailto: validEmailAddr(b.email) ? safeHref('mailto:' + b.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body).replace(/%0A/g, '%0D%0A')) : '' };
   }
   function reminders(hours) {
     var h = hours || state.settings.reminderHours || 24, now = clock(), end = now + h * 3600000, out = [];
@@ -335,16 +342,16 @@
   function unmarkReminded(kind, id) { var b = findBooking(kind, id); delete b.remindedAt; delete b.remindedVia; save(); return b; }
 
   // ---------- calendar (.ics, RFC 5545; floating local time) ----------
-  function icsEsc(v) { return String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n').replace(/[\u0000-\u001f]/g, ''); }
-  function fold(line) { var out = '', cur = ''; for (var i = 0; i < line.length; i++) { var c = line[i], add = unescape(encodeURIComponent(c)).length; if (unescape(encodeURIComponent(cur)).length + add > 74) { out += cur + '\r\n '; cur = ''; } cur += c; } return out + cur; }
+  function icsEsc(v) { return wf(v).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n').replace(/[\u0000-\u001f]/g, ''); }
+  function u8len(c) { var n = c.codePointAt(0); return n < 0x80 ? 1 : n < 0x800 ? 2 : n < 0x10000 ? 3 : 4; }
+  function fold(line) { var out = '', cur = '', curLen = 0, chars = Array.from(String(line).replace(/[\ud800-\udbff](?![\udc00-\udfff])|(^|[^\ud800-\udbff])[\udc00-\udfff]/g, '$1\ufffd')); for (var i = 0; i < chars.length; i++) { var c = chars[i], add = u8len(c); if (curLen + add > 74) { out += cur + '\r\n '; cur = ''; curLen = 0; } cur += c; curLen += add; } return out + cur; }
   function icsStamp(ms) { var d = new Date(ms); return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z'; }
-  function icsLocal(date, min) { var d = parseDate(date); d.setMinutes(min); return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00'; }
   function ics(kind, id) {
     var b = findBooking(kind, id), start = toMin(b.time), dur = b.durationMin || 30, what = whatOf(kind, b);
     var title = what.charAt(0).toUpperCase() + what.slice(1) + ' - ' + carOf(kind, b) + ' (' + dealerName() + ')';
     var desc = 'Confirmation code: ' + codeOf(b) + (kind === 'service' && b.notes ? '\nNotes: ' + b.notes : '') + '\nNeed to change it? Contact ' + dealerName() + '.';
     var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//DealerDesk//Booking//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
-      'UID:' + icsEsc(b.id + '-' + codeOf(b)) + '@dealerdesk', 'DTSTAMP:' + icsStamp(clock()), 'DTSTART:' + icsLocal(b.date, start), 'DTEND:' + icsLocal(b.date, start + dur),
+      'UID:' + icsEsc(b.id + '-' + codeOf(b)) + '@dealerdesk', 'DTSTAMP:' + icsStamp(clock()), 'DTSTART:' + icsStamp(stamp(b.date, b.time)), 'DTEND:' + icsStamp(stamp(b.date, b.time) + dur * 60000),
       'SUMMARY:' + icsEsc(title), 'DESCRIPTION:' + icsEsc(desc), 'LOCATION:' + icsEsc(dealerName()), 'STATUS:CONFIRMED',
       'BEGIN:VALARM', 'TRIGGER:-PT1H', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc(title), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'];
     return lines.map(fold).join('\r\n') + '\r\n';

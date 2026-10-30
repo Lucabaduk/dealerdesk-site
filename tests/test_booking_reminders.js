@@ -1,4 +1,5 @@
 // Booking reminders: due list, sms:/mailto: links, mark reminded, .ics, settings (window + templates), staff + public UI.
+process.env.TZ = process.env.TZ || "America/Detroit"; // .ics now uses UTC; expected values assume a Detroit dealer
 const assert = require('assert'), path = require('path'), fs = require('fs');
 let pass = 0, fail = 0;
 function t(n, f) { try { f(); pass++; } catch (e) { fail++; console.log('FAIL ' + n + ' - ' + e.message); } }
@@ -45,10 +46,10 @@ t('customer text with <script> stays inert in links and HTML', () => { const h =
   B._ui.tab = 'reminders'; const html = B.renderHTML(); assert.ok(!html.includes('<img src=x')); assert.ok(html.includes('&lt;img src=x'));
   for (const m of html.match(/href="[^"]*"/g)) assert.ok(/^href="(sms:|mailto:|data:text\/calendar)/.test(m), m); });
 t('.ics: valid VCALENDAR, local times, escaped text, CRLF, folded <=75', () => { const s = B.ics('test-drive', a.id); const L = s.split('\r\n');
-  assert.strictEqual(L[0], 'BEGIN:VCALENDAR'); assert.ok(L.includes('DTSTART:20261104T150000') && L.includes('DTEND:20261104T153000')); assert.ok(L.some(l => l.startsWith('UID:') && l.endsWith('@dealerdesk')));
+  assert.strictEqual(L[0], 'BEGIN:VCALENDAR'); assert.ok(L.includes('DTSTART:20261104T200000Z') && L.includes('DTEND:20261104T203000Z')); assert.ok(L.some(l => l.startsWith('UID:') && l.endsWith('@dealerdesk')));
   assert.ok(L.some(l => /^SUMMARY:Test drive - 2022 Honda Accord \(Motor City Auto\)$/.test(l))); assert.ok(s.includes('BEGIN:VALARM'));
   for (const l of L) assert.ok(Buffer.byteLength(l) <= 75, l); assert.ok(!/[^\r]\n/.test(s));
-  B.setDealerName('A, B; C\\D'); const e = B.ics('service', b.id); assert.ok(e.includes('LOCATION:A\\, B\\; C\\\\D')); assert.ok(e.includes('DTSTART:20261104T170000') && e.includes('DTEND:20261104T174500')); B.setDealerName('Motor City Auto');
+  B.setDealerName('A, B; C\\D'); const e = B.ics('service', b.id); assert.ok(e.includes('LOCATION:A\\, B\\; C\\\\D')); assert.ok(e.includes('DTSTART:20261104T220000Z') && e.includes('DTEND:20261104T224500Z')); B.setDealerName('Motor City Auto');
   assert.ok(B.icsHref('test-drive', a.id).startsWith('data:text/calendar;charset=utf-8,BEGIN%3AVCALENDAR')); assert.match(B.icsFileName('test-drive', a.id), /^dealerdesk-dd-[0-9a-z]+\.ics$/); });
 t('safeHref only allows the three built schemes', () => { for (const h of ['javascript:alert(1)', 'data:text/html,x', 'https://x', 'sms:abc', 'mailto:x']) assert.strictEqual(B.safeHref(h), '', h); });
 
@@ -88,7 +89,7 @@ if (!jsdom) console.log('  (jsdom not found, UI tests skipped)'); else {
     d.querySelector('[data-t="11:00"]').click(); const f = d.getElementById('ddp-form'); f.elements.customer.value = 'Eve'; f.elements.phone.value = '313 555 0123';
     f.dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
     const ic = d.getElementById('ddp-ics'); assert.ok(!ic.hidden, d.getElementById('ddp-err').textContent); const ics = decodeURIComponent(ic.getAttribute('href').split(',').slice(1).join(','));
-    assert.ok(ics.includes('DTSTART:20261105T110000') && ics.includes('Motor City') && ics.includes(d.getElementById('ddp-code').textContent)); assert.match(ic.getAttribute('download'), /\.ics$/);
+    assert.ok(ics.includes('DTSTART:20261105T160000Z') && ics.includes('Motor City') && ics.includes(d.getElementById('ddp-code').textContent)); assert.match(ic.getAttribute('download'), /\.ics$/);
     assert.deepStrictEqual(dom.window.__errors, []); });
 }
 console.log('booking reminders: ' + pass + ' passed, ' + fail + ' failed'); process.exit(fail ? 1 : 0);

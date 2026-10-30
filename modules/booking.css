@@ -74,3 +74,4 @@ a.ddb-btn,.ddb-link{display:inline-flex;align-items:center;justify-content:cente
 .ddb-detbody{display:grid;gap:4px;font-size:14px;overflow-wrap:anywhere}
 .ddb-tabs{flex-wrap:wrap;max-width:100%}
 .ddp-done .ddb-btn{margin-top:12px}
+.ddb-datebar button[data-shift]{min-width:44px;min-height:44px}
