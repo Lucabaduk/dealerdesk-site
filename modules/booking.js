@@ -52,7 +52,7 @@
   function toMin(hhmm) { var m = /^(\d{1,2}):(\d{2})$/.exec(hhmm || ''); return m ? +m[1] * 60 + +m[2] : NaN; }
   function fromMin(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
   function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-  function parseDate(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
+  function parseDate(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); if (!m) return null; var d = new Date(+m[1], +m[2] - 1, +m[3]); return d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3] ? d : null; } // rejects Feb 31 etc. instead of rolling over
   function stamp(date, time) { var d = parseDate(date), m = toMin(time); if (!d || !(m >= 0)) return NaN; d.setHours(Math.floor(m / 60), m % 60, 0, 0); return d.getTime(); } // wall-clock time, correct across DST
   function overlap(a1, a2, b1, b2) { return a1 < b2 && b1 < a2; }
   function normVin(v) { return clean(v, 17).toUpperCase().replace(/[IOQ\s]/g, function (c) { return c === ' ' ? '' : c; }); }
@@ -530,7 +530,7 @@
     openSlots: openSlots, submitRequest: submitRequest, newRequests: newRequests, markSeen: markSeen,
     all: function () { return JSON.parse(JSON.stringify(state)); }, lastSaveError: function () { return saveError; },
     onChange: function (f) { listeners.push(f); }, mount: mount, renderHTML: renderHTML,
-    _setClock: function (f) { clock = f || function () { return Date.now(); }; }, _ui: ui
+    _parseDate: parseDate, _setClock: function (f) { clock = f || function () { return Date.now(); }; }, _ui: ui
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.DDBooking = api;

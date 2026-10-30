@@ -128,6 +128,12 @@
     function tryReq() { try { return require('../src/schema.js'); } catch (e) { return null; } }
     return api;
   }
-  var mod = { create: create, normalize: normalize, cleanVin: cleanVin, isValidVin: function (v) { return VIN_RE.test(cleanVin(v)); }, safeUrl: safeUrl, KEY: KEY, STATUSES: STATUSES };
+  // Stock model photos are shared by every car of that model. Say so honestly, and flag years the photo's generation does not cover.
+  var PHOTO_GEN = { 'assets/cars/ford-explorer.webp': [2020, 2024] };
+  function photoCaption(car) { if (!car || !car.photos || !/^assets\/cars\//.test(car.photos[0] || '')) return '';
+    var g = PHOTO_GEN[car.photos[0]], y = +car.year, s = 'Representative photo of the ' + car.make + ' ' + car.model + ', not this exact car.';
+    if (g && y && (y < g[0] || y > g[1])) s += ' Photo shows the ' + g[0] + '\u2013' + g[1] + ' model; a ' + y + ' looks different.';
+    return s; }
+  var mod = { create: create, normalize: normalize, cleanVin: cleanVin, isValidVin: function (v) { return VIN_RE.test(cleanVin(v)); }, safeUrl: safeUrl, photoCaption: photoCaption, PHOTO_GEN: PHOTO_GEN, KEY: KEY, STATUSES: STATUSES };
   if (typeof module !== 'undefined' && module.exports) module.exports = mod; else root.DDInventory = mod;
 })(typeof self !== 'undefined' ? self : this);

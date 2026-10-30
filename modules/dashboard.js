@@ -14,7 +14,7 @@
     if (typeof v === 'number' && Number.isFinite(v)) return new Date(v);
     if (typeof v === 'string' && v.trim()) {
       var m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?$/.exec(v.trim()); // local date or local date-time
-      if (m) return new Date(+m[1], m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+      if (m) { var d0 = new Date(+m[1], m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0)); return d0.getMonth() === m[2] - 1 && d0.getDate() === +m[3] && +(m[4] || 0) < 24 && +(m[5] || 0) < 60 ? d0 : null; } // no Feb 31 -> Mar 3 rollover
       var d = new Date(v); return isNaN(d) ? null : d;
     }
     return null;
@@ -168,7 +168,7 @@
     };
   }
 
-  var api = { summary: summary, inventoryStats: inventoryStats, leadStats: leadStats, testDriveStats: testDriveStats, serviceStats: serviceStats,
+  var api = { _toDate: toDate, summary: summary, inventoryStats: inventoryStats, leadStats: leadStats, testDriveStats: testDriveStats, serviceStats: serviceStats,
     pipeline: pipeline, salesTotals: salesTotals, needsAttention: needsAttention, fromStorage: fromStorage, _createdTime: createdTime };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.DealerDeskDashboard = api;
 })(typeof self !== 'undefined' ? self : this);

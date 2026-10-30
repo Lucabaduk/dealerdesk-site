@@ -13,7 +13,7 @@
     if (!car) { box.appendChild(el('h1', '', 'Vehicle not found')); box.appendChild(el('p', 'meta', 'Please ask a salesperson for help.')); return; }
     var NOPHOTO = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240"><rect width="400" height="240" fill="#d9dee6"/><text x="200" y="128" font-family="sans-serif" font-size="22" fill="#5b6577" text-anchor="middle">Photo coming soon</text></svg>');
     if (!car.photos.length) car.photos = [NOPHOTO];
-    { var g = el('div', 'gallery'); car.photos.forEach(function (p) { var i = el('img'); i.src = p; i.alt = car.year + ' ' + car.make + ' ' + car.model; i.loading = 'lazy'; i.onerror = function () { this.onerror = null; this.src = NOPHOTO; }; g.appendChild(i); }); box.appendChild(g); }
+    { var g = el('div', 'gallery'); car.photos.forEach(function (p) { var i = el('img'); i.src = p; i.alt = /^assets\/cars\//.test(p) ? car.make + ' ' + car.model + ' (representative photo)' : car.year + ' ' + car.make + ' ' + car.model; i.loading = 'lazy'; i.onerror = function () { this.onerror = null; this.src = NOPHOTO; }; g.appendChild(i); }); box.appendChild(g); var cap = DDInventory.photoCaption(car); if (cap) box.appendChild(el('p', 'photo-cap', cap)); }
     box.appendChild(el('span', 'badge ' + car.status, car.status === 'available' ? 'Available' : car.status === 'hold' ? 'On hold' : 'Sold'));
     box.appendChild(el('h1', '', [car.year, car.make, car.model, car.trim].filter(Boolean).join(' ')));
     box.appendChild(el('div', 'price', money(car.price)));
