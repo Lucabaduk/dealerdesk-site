@@ -25,7 +25,7 @@
   function store() { try { return root.localStorage || null; } catch (e) { return null; } }
   function load() {
     state = fresh(); saveError = ''; var s = store(); if (!s) { saveError = 'Storage is not available.'; return; }
-    try { var raw = s.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && p.v === 1) { state = Object.assign(fresh(), p); state.settings = Object.assign(defaults(), p.settings || {}); } } }
+    try { var raw = s.getItem(KEY); if (raw) { var p = JSON.parse(raw); if (p && p.v === 1) { state = Object.assign(fresh(), p); state.settings = sanitizeSettings(p.settings); } } }
     catch (e) { saveError = 'Saved orders were unreadable and were reset.'; }
   }
   function save() { var s = store(); if (!s) return false; try { s.setItem(KEY, JSON.stringify(state)); saveError = ''; } catch (e) { saveError = 'Could not save: ' + e.message; return false; } listeners.forEach(function (f) { try { f(); } catch (e) {} }); return true; }
@@ -48,6 +48,16 @@
   function carLabel(c) { return c ? [c.year, c.make, c.model, c.trim].filter(Boolean).join(' ') : ''; }
 
   // ---------- settings ----------
+  var LIMITS = { depositAmount: [0, 100000], taxRate: [0, 25], defaultApr: [0, 40], defaultTerm: [36, 84], tradeBase: [1000, 500000], tradeDepreciation: [0, 0.5], tradeMilesPerYear: [1000, 50000], tradeMileAdj: [0, 0.5] };
+  // Saved settings are untrusted: any out-of-range / non-numeric value falls back to its default.
+  function sanitizeSettings(raw) {
+    var d = defaults(), s = Object.assign(defaults(), raw && typeof raw === 'object' ? raw : {});
+    Object.keys(LIMITS).forEach(function (k) { var x = typeof s[k] === 'number' ? s[k] : NaN; s[k] = (x >= LIMITS[k][0] && x <= LIMITS[k][1]) ? x : d[k]; });
+    s.defaultTerm = Math.round(s.defaultTerm); s.taxTradeCredit = s.taxTradeCredit !== false;
+    ['bookingUrl', 'photoBase'].forEach(function (k) { var u = typeof s[k] === 'string' ? clean(s[k], 200) : ''; s[k] = (!u || /^(https:\/\/|[\w./-]+$)/.test(u)) ? u : d[k]; });
+    if (!s.bookingUrl) s.bookingUrl = d.bookingUrl;
+    return s;
+  }
   function settings() { return JSON.parse(JSON.stringify(state.settings)); }
   var SETTING_LABELS = { depositAmount: 'Deposit amount', taxRate: 'Tax rate', defaultApr: 'Default APR', tradeBase: 'Trade-in base value', tradeDepreciation: 'Trade-in depreciation per year', tradeMilesPerYear: 'Trade-in miles per year', tradeMileAdj: 'Trade-in mileage adjustment' };
   // Validates every field on a copy first; applies + saves only when all are valid (reverts if the save fails).
@@ -88,8 +98,9 @@
   function payment(p) {
     var s = state.settings, price = n(p.price), down = Math.max(0, n(p.down)), trade = Math.max(0, n(p.trade)), owed = Math.max(0, n(p.tradeOwed));
     var apr = p.apr === undefined || p.apr === '' ? s.defaultApr : n(p.apr, NaN), term = Math.round(p.term === undefined || p.term === '' ? s.defaultTerm : n(p.term, NaN));
-    var taxRate = p.taxRate === undefined ? s.taxRate : n(p.taxRate);
+    var taxRate = p.taxRate === undefined ? s.taxRate : n(p.taxRate, NaN);
     if (!(price > 0)) throw err('bad_price', 'Price is required.');
+    if (!(taxRate >= 0 && taxRate <= 25)) throw err('bad_tax', 'Tax rate must be 0-25%.');
     if (!(apr >= 0 && apr <= 40)) throw err('bad_apr', 'APR must be 0-40%.');
     if (!(term >= 36 && term <= 84)) throw err('bad_term', 'Term must be 36 to 84 months.');
     var taxable = Math.max(0, s.taxTradeCredit ? price - trade : price), tax = Math.round(taxable * taxRate) / 100;
@@ -123,7 +134,7 @@
     var now = clock(), pd = digits(o.phone);
     if (state.orders.filter(function (x) { return x.phoneDigits === pd && now - x.createdAt < RATE.windowMs; }).length >= RATE.max) throw err('rate_limited', 'Too many requests from this number. Please call us.');
     var trade = null; if (p.trade && (p.trade.make || p.trade.year)) { var est = tradeIn(p.trade); trade = { year: Math.round(n(p.trade.year)), make: clean(p.trade.make, 40), model: clean(p.trade.model, 60), mileage: Math.round(n(p.trade.mileage)), condition: p.trade.condition, estimate: est.estimate }; }
-    var calc = null; if (p.calc) { try { calc = payment(Object.assign({ trade: trade ? trade.estimate : 0 }, p.calc, { price: c.price })); } catch (e) { calc = null; } }
+    var calc = null; if (p.calc) { try { calc = payment(Object.assign({ trade: trade ? trade.estimate : 0 }, p.calc, { price: c.price, taxRate: state.settings.taxRate })); } catch (e) { calc = null; } }
     state.seq += 1; var id = 'or' + state.seq;
     var rec = Object.assign(o, { id: id, code: code(id), kind: kind, deposit: kind === 'reserve' ? state.settings.depositAmount : 0, carId: c.id, stock: c.stock, vin: c.vin, carLabel: carLabel(c), price: c.price, trade: trade, calc: calc, status: 'new', phoneDigits: pd, createdAt: now, history: [{ at: now, status: 'new' }] });
     state.orders.push(rec); save(); return { ok: true, code: rec.code, id: id };
