@@ -13,6 +13,13 @@
     var m = /^https:\/\/([a-z0-9.-]+)(:443)?(\/[A-Za-z0-9_\/.%~-]*)?$/i.exec(String(url || '').trim()); if (!m) return '';
     var h = m[1].toLowerCase(); return (hosts || []).map(function (x) { return String(x).toLowerCase(); }).indexOf(h) >= 0 ? m[0] : '';
   }
-  var api = { NOPHOTO: NOPHOTO, setImg: setImg, allowedEndpoint: allowedEndpoint, memoryStorage: memoryStorage, defaultStorage: defaultStorage, cleanText: cleanText, esc: esc };
+  // who is using this staff device (credited on lead notes / status changes). Asked once, remembered here.
+  var ME_KEY = 'dealerdesk.me.v1';
+  function getStaffName(store) { try { return cleanText((store || defaultStorage()).getItem(ME_KEY), 60); } catch (e) { return ''; } }
+  function setStaffName(name, store) { var n = cleanText(name, 60); try { var st = store || defaultStorage(); if (n) st.setItem(ME_KEY, n); else st.removeItem(ME_KEY); } catch (e) {} return n; }
+  /** staff names known to the main app (dealerdesk.v2 -> staff[].name), deduped, proto-safe */
+  function appStaffNames(store) { var out = [], seen = Object.create(null); try { var st = JSON.parse((store || defaultStorage()).getItem('dealerdesk.v2') || 'null');
+    (st && Array.isArray(st.staff) ? st.staff : []).forEach(function (x) { var n = cleanText(x && x.name, 60); if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = 1; out.push(n); } }); } catch (e) {} return out.slice(0, 100); }
+  var api = { ME_KEY: ME_KEY, getStaffName: getStaffName, setStaffName: setStaffName, appStaffNames: appStaffNames, NOPHOTO: NOPHOTO, setImg: setImg, allowedEndpoint: allowedEndpoint, memoryStorage: memoryStorage, defaultStorage: defaultStorage, cleanText: cleanText, esc: esc };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.DDStore = api;
 })(typeof self !== 'undefined' ? self : this);

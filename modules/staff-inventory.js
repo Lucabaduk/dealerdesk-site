@@ -83,7 +83,7 @@
   function curUrl() { return location.pathname + location.search + location.hash; }
   function setUrl(id) { try { var u = DDLeads.withLead(curUrl(), id); if (u !== curUrl()) history.replaceState(history.state, '', u); } catch (e) {} }
   function notice(text) { var n = $('l-notice'); n.textContent = text || ''; n.hidden = !text; }
-  function openLead(id, fromLink) { if (!leads.get(id)) { notice('Lead not found'); setUrl(null); return false; } notice(''); openId = id; fillLead(); var d = $('ldrawer');
+  function openLead(id, fromLink) { meUi(); if (!DDStore.getStaffName()) { try { $('l-me').focus(); } catch (e) {} } if (!leads.get(id)) { notice('Lead not found'); setUrl(null); return false; } notice(''); openId = id; fillLead(); var d = $('ldrawer');
     if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
     if (fromLink) setUrl(id); else { try { var u = DDLeads.withLead(curUrl(), id); if (pushed) history.replaceState({ ddLead: id }, '', u); else { history.pushState({ ddLead: id }, '', u); pushed = true; } } catch (e) { setUrl(id); } }
     return true; }
@@ -95,7 +95,11 @@
     if (!p.present) { if (openId != null) { if (pop) pushed = false; closeLead(pop); } return; }
     tab('leads'); if (!p.id) { notice('Lead not found'); setUrl(null); return; } if (p.id !== openId) openLead(p.id, true); }
   root.addEventListener('popstate', fromUrl); root.addEventListener('hashchange', fromUrl);
-  function me() { return $('ld-assign').value; }
+  // author for notes/timeline = the staff member using this device (not the lead's salesperson)
+  function me() { return DDStore.getStaffName() || 'Staff'; }
+  function meUi() { var v = DDStore.getStaffName(), inp = $('l-me'); if (document.activeElement !== inp) inp.value = v; $('l-me-hint').textContent = v ? '' : 'Enter your name once so notes show who wrote them.';
+    var dl = $('l-me-list'); dl.textContent = ''; var seen = Object.create(null); DDStore.appStaffNames().concat(leads.salespeople()).forEach(function (n) { if (seen[n.toLowerCase()]) return; seen[n.toLowerCase()] = 1; var o = el('option'); o.value = n; dl.appendChild(o); }); }
+  $('l-me').addEventListener('change', function () { DDStore.setStaffName($('l-me').value); meUi(); });
   $('ld-close').addEventListener('click', function () { closeLead(false); });
   $('ld-status').addEventListener('change', function () { leads.setStatus(openId, $('ld-status').value, null, me()); badge(); fillLead(); drawLeads(); });
   $('ld-assign').addEventListener('change', function () { leads.assign(openId, $('ld-assign').value); fillLead(); drawLeads(); });
@@ -105,6 +109,6 @@
   $('csv').addEventListener('click', function () { download('dealerdesk-leads.csv', leads.exportCSV(leads.search(lq())), 'text/csv'); });
   function tab(which) { var isInv = which === 'inv'; $('pane-inv').hidden = !isInv; $('pane-leads').hidden = isInv; $('tab-inv').setAttribute('aria-selected', String(isInv)); $('tab-leads').setAttribute('aria-selected', String(!isInv)); if (!isInv) drawLeads(); }
   $('tab-inv').addEventListener('click', function () { tab('inv'); }); $('tab-leads').addEventListener('click', function () { tab('leads'); });
-  function start() { fillMakes(); draw(); badge(); fromUrl(); }
+  function start() { fillMakes(); draw(); badge(); meUi(); fromUrl(); }
   if (inv.size()) start(); else fetch('data/cars.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { inv.load(d); }).catch(function () {}).then(start);
 })(typeof self !== 'undefined' ? self : this);
