@@ -21,6 +21,17 @@ dialog{border:0;border-radius:14px;background:var(--card);color:var(--ink);width
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid label{display:flex;flex-direction:column;font-size:13px;color:var(--muted);gap:4px}.grid .full{grid-column:1/-1}
 .err{color:#c0392b;min-height:1.2em}.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;background:#e3f4ec;color:#0a5c43}
 .pill.hold{background:#fff1d6;color:#7a4b00}.pill.sold{background:#fde2e2;color:#8a1c1c}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px}.chk input{width:22px;height:22px;min-height:0}
+.lcards{display:grid;gap:8px;padding:0 12px 16px}.lcard{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;min-height:64px;color:inherit;font-size:15px}
+.lcard .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.lcard b{font-size:16px;margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.od{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:700;background:#c0392b;color:#fff}.src{font-size:12px;color:var(--muted)}
+dialog.drawer{margin:0 0 0 auto;height:100%;max-height:100%;width:min(480px,100vw);border-radius:0;overflow-y:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.ld-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.ld-head h2{margin:0;font-size:1.2rem;word-break:break-word}#ld-close{width:44px;padding:0}
+.ld-contact{display:flex;gap:8px;flex-wrap:wrap}.ld-contact a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:10px;color:inherit;text-decoration:none}
+.ld-msg{white-space:pre-wrap;word-break:break-word;background:var(--bg);padding:10px;border-radius:10px}.ld-car{display:flex;gap:10px;align-items:center}.ld-car img{width:96px;height:72px;object-fit:cover;border-radius:8px}
+.ld-list{list-style:none;padding:0;margin:0}.ld-list li{padding:8px 0;border-bottom:1px solid var(--line);word-break:break-word}.ld-list time{display:block;font-size:12px;color:var(--muted)}
+.ld-add{display:flex;flex-direction:column;gap:8px;margin-top:8px}.ld-od{justify-content:flex-end}
+@media (max-width:420px){.bar>*{flex:1 1 100%}.bar .chk{flex:1 1 auto}}
 @media (max-width:640px){.hide-sm{display:none}.grid{grid-template-columns:1fr}}
 /* QR label sheet: 3 x 4 per Letter/A4 page */
 #print{display:none}
@@ -43,9 +54,25 @@ dialog{border:0;border-radius:14px;background:var(--card);color:var(--ink);width
   <div class="pager"><button id="prev">‹ Prev</button><span id="pageinfo"></span><button id="next">Next ›</button></div>
 </section>
 <section id="pane-leads" hidden>
-  <div class="bar"><select id="l-status" aria-label="Lead status"><option value="">All leads</option><option>new</option><option>contacted</option><option>qualified</option><option>won</option><option>lost</option></select><button id="csv">Export CSV</button></div>
-  <div class="wrap"><table><thead><tr><th>When</th><th>Name</th><th>Contact</th><th>Wants</th><th class="hide-sm">Car</th><th>Status</th><th>Notes</th></tr></thead><tbody id="lrows"></tbody></table></div>
+  <div class="bar"><input type="search" id="l-q" placeholder="Search name, phone, email, VIN" aria-label="Search leads">
+    <select id="l-status" aria-label="Lead status"><option value="">All statuses</option><option>new</option><option>contacted</option><option>qualified</option><option>won</option><option>lost</option></select>
+    <select id="l-source" aria-label="Lead source"><option value="">All sources</option><option value="qr">QR code</option><option value="web">Website</option><option value="walk_in">Walk-in</option></select>
+    <label class="chk"><input type="checkbox" id="l-overdue"> Overdue only</label><button id="csv">Export CSV</button></div>
+  <p class="muted" id="l-count" style="padding:0 16px"></p>
+  <div id="lrows" class="lcards"></div>
 </section>
+<dialog id="ldrawer" class="drawer" aria-labelledby="ld-name"><div class="ld-head"><h2 id="ld-name"></h2><button type="button" id="ld-close" aria-label="Close">✕</button></div>
+  <p id="ld-meta" class="muted"></p><div id="ld-contact" class="ld-contact"></div>
+  <h3>Message</h3><p id="ld-msg" class="ld-msg"></p>
+  <h3>Car</h3><div id="ld-car" class="ld-car"></div>
+  <div class="grid"><label>Status<select id="ld-status"></select></label>
+    <label>Salesperson<input id="ld-assign" list="ld-staff" maxlength="60" placeholder="Name" autocomplete="off"></label>
+    <label>Follow-up date<input id="ld-follow" type="date"></label><label class="ld-od"><span id="ld-overdue"></span></label></div>
+  <datalist id="ld-staff"></datalist>
+  <h3>Notes</h3><ul id="ld-notes" class="ld-list"></ul>
+  <div class="ld-add"><textarea id="ld-note" rows="2" maxlength="1000" placeholder="Add a note"></textarea><button type="button" class="primary" id="ld-addnote">Add note</button></div>
+  <h3>Timeline</h3><ul id="ld-time" class="ld-list"></ul>
+</dialog>
 <dialog id="dlg"><form id="carform" method="dialog" novalidate><h2 id="dlg-title" style="margin-top:0">Car</h2><div class="grid">
   <label>VIN<input name="vin" maxlength="17" required autocapitalize="characters"></label><label>Stock #<input name="stock_no" maxlength="20"></label>
   <label>Year<input name="year" type="number" inputmode="numeric"></label><label>Make<input name="make" maxlength="40"></label>

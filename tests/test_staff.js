@@ -15,7 +15,7 @@ t('formToCar + errorText + buildQuery', () => { const c = SI.formToCar({ vin: 'v
 t('no HTML injection sinks in UI code', () => { ['modules/staff-inventory.js', 'modules/qr-label.js', 'modules/car-page.js', 'modules/compare-page.js', 'modules/favorites.js'].forEach(f => ok(!/innerHTML|outerHTML|insertAdjacentHTML|document\.write/.test(R(f).replace(/\/\*[\s\S]*?\*\//g, '')), f)); });
 t('print layout present', () => { const h = R('staff-inventory.html'); ok(/@media print/.test(h) && /\.dd-page\{display:grid;grid-template-columns:repeat\(3,1fr\);grid-template-rows:repeat\(4,63mm\)/.test(h) && /break-inside:avoid/.test(h)); ok(/prefers-color-scheme:dark/.test(h)); });
 // DOM run with jsdom if available
-let JSDOM = null; for (const p of ['/tmp/devmods/node_modules/jsdom', '/tmp/qrdev/node_modules/jsdom', 'jsdom']) { try { JSDOM = require(p).JSDOM; break; } catch (e) {} }
+let JSDOM = null; for (const p of ['/workspace/ddtools/node_modules/jsdom', '/tmp/devmods/node_modules/jsdom', '/tmp/qrdev/node_modules/jsdom', 'jsdom']) { try { JSDOM = require(p).JSDOM; break; } catch (e) {} }
 async function dom() {
   if (!JSDOM) { console.log('  (jsdom not found, DOM tests skipped)'); return; }
   const cars = genCars(60); cars[0].make = '<img src=x onerror=alert(1)>'; cars[0].photos = [];
@@ -47,8 +47,8 @@ async function dom() {
     const inject = '<script>localStorage.setItem("dealerdesk.leads.v1", ' + JSON.stringify(leadsJson) + ');<\/script>';
     const full = html.replace('<script src="modules/store.js">', inject + '<script src="modules/store.js">').replace(/<script src="([^"]+)"><\/script>/g, (m, s) => '<script>' + fs.readFileSync(path.join(dir, s), 'utf8') + '<\/script>');
     const x = new JSDOM(full, { url: 'https://y.io/dd/staff-inventory.html', runScripts: 'dangerously', beforeParse(win) { win.fetch = () => Promise.resolve({ ok: true, json: () => Promise.resolve({ cars }) }); } }).window; await new Promise(r => setTimeout(r, 80)); return x; })();
-  t('DOM leads tab: badge, row, status, escaped', () => { const D = W.document; eq(D.getElementById('newcount').textContent, '1'); D.getElementById('tab-leads').click(); ok(!D.getElementById('pane-leads').hidden); const rows = D.querySelectorAll('#lrows tr'); eq(rows.length, 1);
-    ok(rows[0].textContent.includes('Ana b')); ok(rows[0].querySelector('a[href^="tel:"]')); const sel = rows[0].querySelector('select'); sel.value = 'contacted'; sel.dispatchEvent(new W.Event('change')); eq(D.getElementById('newcount').textContent, ''); });
+  t('DOM leads tab: badge, row, status, escaped', () => { const D = W.document; eq(D.getElementById('newcount').textContent, '1'); D.getElementById('tab-leads').click(); ok(!D.getElementById('pane-leads').hidden); const rows = D.querySelectorAll('#lrows .lcard'); eq(rows.length, 1);
+    ok(rows[0].textContent.includes('Ana b')); rows[0].click(); ok(D.querySelector('#ld-contact a[href^="tel:"]')); const sel = D.getElementById('ld-status'); sel.value = 'contacted'; sel.dispatchEvent(new W.Event('change')); eq(D.getElementById('newcount').textContent, ''); });
   const cmp = await mk('compare.html', 'https://x.io/dd/compare.html?vins=' + cars[0].vin + ',' + cars[2].vin);
   t('DOM compare: 2 cars, escaped, fallback img', () => { const D = cmp.document; eq(D.querySelectorAll('thead td').length, 2); ok(!D.querySelector('img[src=x]')); ok(D.querySelector('thead img').src.startsWith('data:image/svg+xml')); });
 }

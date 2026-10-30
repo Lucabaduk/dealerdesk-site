@@ -49,15 +49,42 @@
   $('import').addEventListener('change', function (e) { var file = e.target.files[0]; if (!file) return; if (file.size > 20e6) { alert('File too large'); return; }
     file.text().then(function (t) { var r = inv.importJSON(t, 'merge'); alert(r.ok ? 'Imported: ' + r.added + ' added, ' + r.updated + ' updated, ' + r.skipped + ' skipped' + (r.duplicateStock && r.duplicateStock.length ? '\nDuplicate stock # skipped: ' + r.duplicateStock.slice(0, 10).map(function (d) { return d.stock_no + ' (' + d.vin + ')'; }).join(', ') + (r.duplicateStock.length > 10 ? ' +' + (r.duplicateStock.length - 10) + ' more' : '') : '') : 'Import failed: ' + r.errors.join(', ')); fillMakes(); draw(); e.target.value = ''; }); });
   // leads tab
-  function drawLeads() { var tb = $('lrows'); tb.textContent = ''; var list = leads.list({ status: $('l-status').value });
-    list.forEach(function (l) { var tr = el('tr'); tr.appendChild(el('td', 'muted', fmtWhen(l.createdAt))); tr.appendChild(el('td', '', l.name));
-      var ct = el('td'); if (l.phone) { var a = el('a', '', l.phone); a.href = 'tel:' + l.phone; ct.appendChild(a); } if (l.email) { if (l.phone) ct.appendChild(el('br')); var m = el('a', '', l.email); m.href = 'mailto:' + encodeURIComponent(l.email).replace('%40', '@'); ct.appendChild(m); } tr.appendChild(ct);
-      tr.appendChild(el('td', '', String(l.interest).replace('_', ' ') + (l.notes ? ' — ' + l.notes : ''))); var car = inv.get(l.vin); tr.appendChild(el('td', 'hide-sm muted', car ? car.year + ' ' + car.make + ' ' + car.model : l.vin));
-      var st = el('td'), sel = el('select'); leads.STATUSES.forEach(function (s) { var o = el('option', '', s); o.value = s; sel.appendChild(o); }); sel.value = l.status; sel.addEventListener('change', function () { leads.setStatus(l.id, sel.value); badge(); }); st.appendChild(sel); tr.appendChild(st);
-      var nt = el('td'), ta = el('input'); ta.value = l.staffNote || ''; ta.maxLength = 1000; ta.placeholder = 'Note'; ta.addEventListener('change', function () { leads.setStatus(l.id, sel.value, ta.value); }); nt.appendChild(ta); tr.appendChild(nt); tb.appendChild(tr); });
-    if (!list.length) { var tr = el('tr'), td = el('td', 'muted', 'No leads yet. Leads from car QR pages appear here.'); td.colSpan = 7; tr.appendChild(td); tb.appendChild(tr); } }
+  var SRC = Object.assign(Object.create(null), { qr: 'QR code', web: 'Website', walk_in: 'Walk-in' }), openId = null;
+  function lq() { return { text: $('l-q').value, status: $('l-status').value, channel: $('l-source').value, overdue: $('l-overdue').checked }; }
+  function when(t) { return fmtWhen(t); }
+  function drawLeads() { var box = $('lrows'); box.textContent = ''; var list = leads.search(lq());
+    $('l-count').textContent = list.length === 1 ? '1 lead' : list.length + ' leads';
+    list.forEach(function (l) { var b = el('button', 'lcard'); b.type = 'button'; var top = el('div', 'top');
+      top.appendChild(el('b', '', l.name)); if (leads.isOverdue(l)) top.appendChild(el('span', 'od', 'Overdue')); top.appendChild(el('span', 'pill ' + l.status, l.status)); b.appendChild(top);
+      var car = inv.get(l.vin); b.appendChild(el('div', '', String(l.interest).replace('_', ' ') + ' \u00b7 ' + (car ? car.year + ' ' + car.make + ' ' + car.model : l.vin)));
+      b.appendChild(el('div', 'src', leads.ago(l.createdAt) + ' \u00b7 ' + (SRC[l.channel] || 'Website') + (l.assignee ? ' \u00b7 ' + l.assignee : '')));
+      b.addEventListener('click', function () { openLead(l.id); }); box.appendChild(b); });
+    if (!list.length) box.appendChild(el('p', 'muted', leads.counts().total ? 'No leads match.' : 'No leads yet. Leads from car QR pages appear here.')); }
   function badge() { var n = leads.counts().new; $('newcount').textContent = n ? String(n) : ''; }
-  $('l-status').addEventListener('change', drawLeads); $('csv').addEventListener('click', function () { download('dealerdesk-leads.csv', leads.exportCSV(), 'text/csv'); });
+  function li(time, text) { var x = el('li'); var tm = el('time', '', when(time)); tm.setAttribute('datetime', new Date(time).toISOString()); x.appendChild(tm); x.appendChild(document.createTextNode(text)); return x; }
+  function isoDay(t) { var d = new Date(t); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function fillLead() { var l = leads.get(openId); if (!l) return; $('ld-name').textContent = l.name;
+    $('ld-meta').textContent = (SRC[l.channel] || 'Website') + ' \u00b7 ' + leads.ago(l.createdAt) + ' \u00b7 ' + when(l.createdAt);
+    var ct = $('ld-contact'); ct.textContent = ''; if (l.phone) { var a = el('a', '', 'Call ' + l.phone); a.href = 'tel:' + l.phone; ct.appendChild(a); } if (l.email) { var m = el('a', '', 'Email ' + l.email); m.href = 'mailto:' + encodeURIComponent(l.email).replace('%40', '@'); ct.appendChild(m); }
+    $('ld-msg').textContent = String(l.interest).replace('_', ' ') + (l.preferredTime ? ' \u00b7 ' + l.preferredTime : '') + (l.notes ? '\n\n' + l.notes : '');
+    var cb = $('ld-car'); cb.textContent = ''; var car = inv.get(l.vin) || (l.interest_car_id ? inv.get(l.interest_car_id) : null);
+    if (car) { var img = el('img'); img.alt = ''; DDStore.setImg(img, car.photos[0]); cb.appendChild(img); var tx = el('div'); tx.appendChild(el('div', '', [car.year, car.make, car.model, car.trim].filter(Boolean).join(' '))); tx.appendChild(el('b', '', money(car.price))); tx.appendChild(el('div', 'muted', 'VIN ' + car.vin + ' \u00b7 ' + car.status)); cb.appendChild(tx); }
+    else cb.appendChild(el('p', 'muted', 'VIN ' + (l.vin || 'unknown') + ' (not in inventory)'));
+    var ss = $('ld-status'); ss.textContent = ''; leads.STATUSES.forEach(function (s) { var o = el('option', '', s); o.value = s; ss.appendChild(o); }); ss.value = l.status;
+    $('ld-assign').value = l.assignee || ''; var dl = $('ld-staff'); dl.textContent = ''; leads.salespeople().forEach(function (n) { var o = el('option'); o.value = n; dl.appendChild(o); });
+    $('ld-follow').value = l.followUpAt ? isoDay(l.followUpAt) : ''; $('ld-overdue').textContent = ''; if (leads.isOverdue(l)) $('ld-overdue').appendChild(el('span', 'od', 'Overdue'));
+    var nl = $('ld-notes'); nl.textContent = ''; l.notesLog.slice().reverse().forEach(function (n) { nl.appendChild(li(n.at, (n.by ? n.by + ': ' : '') + n.text)); }); if (!l.notesLog.length) nl.appendChild(el('li', 'muted', 'No notes yet.'));
+    var tl = $('ld-time'); tl.textContent = ''; l.history.slice().reverse().forEach(function (h) { tl.appendChild(li(h.at, h.from ? h.from + ' \u2192 ' + h.to + (h.by ? ' (' + h.by + ')' : '') : 'Lead received (' + h.to + ')')); }); }
+  function openLead(id) { openId = id; fillLead(); var d = $('ldrawer'); if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
+  function closeLead() { var d = $('ldrawer'); if (d.close) d.close(); else d.removeAttribute('open'); openId = null; drawLeads(); }
+  function me() { return $('ld-assign').value; }
+  $('ld-close').addEventListener('click', closeLead);
+  $('ld-status').addEventListener('change', function () { leads.setStatus(openId, $('ld-status').value, null, me()); badge(); fillLead(); drawLeads(); });
+  $('ld-assign').addEventListener('change', function () { leads.assign(openId, $('ld-assign').value); fillLead(); drawLeads(); });
+  $('ld-follow').addEventListener('change', function () { leads.setFollowUp(openId, $('ld-follow').value || null); fillLead(); drawLeads(); });
+  $('ld-addnote').addEventListener('click', function () { var r = leads.addNote(openId, $('ld-note').value, me()); if (r.ok) { $('ld-note').value = ''; fillLead(); } });
+  ['l-status', 'l-source', 'l-overdue'].forEach(function (id) { $(id).addEventListener('change', drawLeads); }); $('l-q').addEventListener('input', drawLeads);
+  $('csv').addEventListener('click', function () { download('dealerdesk-leads.csv', leads.exportCSV(leads.search(lq())), 'text/csv'); });
   function tab(which) { var isInv = which === 'inv'; $('pane-inv').hidden = !isInv; $('pane-leads').hidden = isInv; $('tab-inv').setAttribute('aria-selected', String(isInv)); $('tab-leads').setAttribute('aria-selected', String(!isInv)); if (!isInv) drawLeads(); }
   $('tab-inv').addEventListener('click', function () { tab('inv'); }); $('tab-leads').addEventListener('click', function () { tab('leads'); });
   function start() { fillMakes(); draw(); badge(); }
