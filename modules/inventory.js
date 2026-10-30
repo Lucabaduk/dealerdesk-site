@@ -7,7 +7,8 @@
   var KEY = 'dealerdesk.inventory.v2';
   var STATUSES = ['available', 'hold', 'sold'], CONDITIONS = ['new', 'used'];
   var VIN_RE = /^[A-HJ-NPR-Z0-9]{17}$/, ID_RE = /^[A-Za-z0-9_-]{1,40}$/;
-  var INDEXED = ['make', 'model', 'color', 'status', 'condition', 'year'];
+  var INDEXED = ['make', 'model', 'color', 'status', 'condition', 'year', 'body_type', 'fuel_type', 'drivetrain'];
+  var BODY = ['sedan', 'coupe', 'hatchback', 'wagon', 'convertible', 'suv', 'pickup', 'minivan', 'van'], FUEL = ['gasoline', 'hybrid', 'plug-in hybrid', 'electric', 'diesel'];
   function cleanVin(v) { return String(v == null ? '' : v).toUpperCase().replace(/[^A-Z0-9]/g, ''); }
   function num(v, min, max, int) { if (v === '' || v == null) return null; var n = Number(String(v).replace(/[$,\s]/g, '')); if (!isFinite(n) || n < min || n > max) return null; return int ? Math.round(n) : Math.round(n * 100) / 100; }
   // Same rules as schema.js safeUrl: https URLs or relative image paths only.
@@ -36,8 +37,13 @@
       color: S.cleanText(input.color, 30), condition: condition, status: status,
       photos: (Array.isArray(input.photos) ? input.photos : []).map(safeUrl).filter(Boolean).slice(0, 30), features: list(input.features, 40, 60) };
     // optional spec fields (kept only when present & valid) for detail/compare pages
-    var car = r0; ['body', 'engine', 'transmission', 'drivetrain'].forEach(function (k) { var t = S.cleanText(input[k] != null ? input[k] : (k === 'body' ? input.body_type : null), 60); if (t) car[k] = t; });
-    [['hp', 1, 2500], ['seats', 1, 15], ['mpg_city', 1, 200], ['mpg_hwy', 1, 200], ['range_mi', 1, 1500]].forEach(function (d) { if (input[d[0]] != null && input[d[0]] !== '') { var n = num(input[d[0]], d[1], d[2], true); if (n != null) car[d[0]] = n; } });
+    // optional spec fields, schema names (SCHEMA.md); old aliases accepted on input
+    var car = r0, ALIAS = { body_type: ['body'], horsepower: ['hp'], mpg_highway: ['mpg_hwy'], range_miles: ['range_mi', 'range'] };
+    function pick(k) { if (input[k] != null && input[k] !== '') return input[k]; var al = ALIAS[k] || []; for (var i = 0; i < al.length; i++) if (input[al[i]] != null && input[al[i]] !== '') return input[al[i]]; return null; }
+    [['description', 600], ['engine', 60], ['transmission', 40], ['drivetrain', 10], ['interior_color', 30]].forEach(function (d) { var t = S.cleanText(pick(d[0]), d[1]); if (t) car[d[0]] = d[0] === 'drivetrain' ? t.toUpperCase() : t; });
+    [['body_type', BODY], ['fuel_type', FUEL]].forEach(function (d) { var t = String(pick(d[0]) || '').toLowerCase().trim(); if (d[1].indexOf(t) >= 0) car[d[0]] = t; });
+    [['horsepower', 40, 2000], ['mpg_city', 5, 150], ['mpg_highway', 5, 150], ['mpg_combined', 5, 150], ['mpge', 20, 200], ['range_miles', 30, 700], ['doors', 2, 5], ['seats', 1, 15]].forEach(function (d) { var v = pick(d[0]); if (v != null) { var n = num(v, d[1], d[2], true); if (n != null) car[d[0]] = n; } });
+    if (car.fuel_type === 'electric') { delete car.mpg_city; delete car.mpg_highway; }
     return { ok: true, car: car };
   }
   function create(opts) {
@@ -48,7 +54,7 @@
       INDEXED.forEach(function (f) { idx[f] = {}; });
       for (var i = 0; i < cars.length; i++) { var c = cars[i]; byVin[c.vin] = i; byId[c.id] = i;
         INDEXED.forEach(function (f) { var k = String(c[f]).toLowerCase(); (idx[f][k] || (idx[f][k] = [])).push(i); });
-        hay[i] = [c.vin, c.stock_no, c.year, c.make, c.model, c.trim, c.color, c.features.join(' ')].join(' ').toLowerCase(); }
+        hay[i] = [c.vin, c.stock_no, c.year, c.make, c.model, c.trim, c.color, c.body_type || '', c.fuel_type || '', c.features.join(' ')].join(' ').toLowerCase(); }
     }
     function save() { if (!persist) return true; if (cars.length > 1000) { try { store.removeItem(KEY); } catch (e0) {} return false; } /* big static lists (data/cars.json) are never copied into localStorage */ try { store.setItem(KEY, JSON.stringify(cars)); return true; } catch (e) { /* quota: keep in memory, drop stale copy so a reload doesn't show old data */ try { store.removeItem(KEY); } catch (e2) {} return false; } }
     function ingest(listIn) { var out = [], seen = {}, skipped = 0; (listIn || []).slice(0, 20000).forEach(function (c) { var r = normalize(c, clock()); if (!r.ok || seen[r.car.vin] || seen['#' + r.car.id]) { skipped++; return; } seen[r.car.vin] = seen['#' + r.car.id] = 1; out.push(r.car); }); return { cars: out, skipped: skipped }; }

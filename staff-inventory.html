@@ -34,7 +34,7 @@ dialog{border:0;border-radius:14px;background:var(--card);color:var(--ink);width
 <div class="tabs" role="tablist"><button id="tab-inv" role="tab" aria-selected="true">Inventory</button> <button id="tab-leads" role="tab" aria-selected="false">Leads <span id="newcount" class="pill"></span></button></div></header>
 <section id="pane-inv">
   <div class="bar"><input type="search" id="q" placeholder="Search make, model, VIN, stock #" aria-label="Search">
-    <select id="f-make" aria-label="Make"><option value="">All makes</option></select><select id="f-status" aria-label="Status"><option value="">Any status</option><option>available</option><option>hold</option><option>sold</option></select>
+    <select id="f-make" aria-label="Make"><option value="">All makes</option></select><select id="f-body" aria-label="Body type"><option value="">All body types</option></select><select id="f-status" aria-label="Status"><option value="">Any status</option><option>available</option><option>hold</option><option>sold</option></select>
     <input type="number" id="f-max" placeholder="Max $" aria-label="Max price" inputmode="numeric"><select id="sort" aria-label="Sort"><option value="">Newest added</option><option value="price">Price ↑</option><option value="price:desc">Price ↓</option><option value="year:desc">Year ↓</option><option value="mileage">Mileage ↑</option><option value="stock">Stock #</option></select>
     <button class="primary" id="add">+ Add car</button><button id="print-page">Print QR (this page)</button>
     <button id="export">Export JSON</button><label class="muted" style="display:flex;align-items:center;gap:6px"><input type="file" id="import" accept="application/json" style="min-height:44px;border:0;padding:0;max-width:200px"></label></div>
@@ -52,7 +52,7 @@ dialog{border:0;border-radius:14px;background:var(--card);color:var(--ink);width
   <label>Model<input name="model" maxlength="60"></label><label>Trim<input name="trim" maxlength="60"></label>
   <label>Price ($)<input name="price" inputmode="decimal"></label><label>Mileage<input name="mileage" inputmode="numeric"></label>
   <label>Color<input name="color" maxlength="30"></label><label>Condition<select name="condition"><option>used</option><option>new</option></select></label>
-  <label>Status<select name="status"><option>available</option><option>hold</option><option>sold</option></select></label><label>Body<input name="body" maxlength="60"></label>
+  <label>Status<select name="status"><option>available</option><option>hold</option><option>sold</option></select></label><label>Body type<select name="body_type"><option value="">—</option><option>sedan</option><option>coupe</option><option>hatchback</option><option>wagon</option><option>convertible</option><option>suv</option><option>pickup</option><option>minivan</option><option>van</option></select></label>
   <label class="full">Photo URLs (one per line)<textarea name="photos" rows="2"></textarea></label><label class="full">Features (comma separated)<textarea name="features" rows="2"></textarea></label>
   </div><p class="err" id="formerr" role="alert"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" id="cancel">Cancel</button><button class="primary" type="submit" id="save">Save</button></div></form></dialog>
 <div id="print"></div>
