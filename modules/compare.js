@@ -13,10 +13,10 @@
   function price(c) { return c.price != null ? +c.price : c.price_cents != null ? c.price_cents / 100 : null; }
   function first(c, keys) { for (var i = 0; i < keys.length; i++) { var v = c[keys[i]]; if (v != null && v !== '') return v; } return null; }
   function economy(c) {
-    var r = first(c, ['range_miles', 'range_mi']); if (r != null) return { text: int(r) + ' mi range (EV)', n: null };
+    var r = first(c, ['range_miles', 'range_mi']); if (r != null) return { text: int(r) + ' mi range (EV)', n: +r, unit: 'range' };
     var city = first(c, ['mpg_city']), hwy = first(c, ['mpg_highway', 'mpg_hwy']), comb = first(c, ['mpg_combined', 'mpg']), e = first(c, ['mpge']);
-    if (city != null && hwy != null) return { text: city + ' city / ' + hwy + ' hwy MPG', n: (+city + +hwy) / 2 };
-    if (comb != null || e != null) return { text: [comb != null ? comb + ' MPG' : '', e != null ? e + ' MPGe' : ''].filter(Boolean).join(' · '), n: comb != null ? +comb : null };
+    if (city != null && hwy != null) return { text: city + ' city / ' + hwy + ' hwy MPG', n: (+city + +hwy) / 2, unit: 'mpg' };
+    if (comb != null || e != null) return { text: [comb != null ? comb + ' MPG' : '', e != null ? e + ' MPGe' : ''].filter(Boolean).join(' · '), n: e != null ? +e : +comb, unit: e != null ? 'mpge' : 'mpg' };
     if (c.fuel_type) return { text: 'Not EPA-rated (' + c.fuel_type + ')', n: null };
     return { text: '', n: null };
   }
@@ -41,10 +41,13 @@
     cars = (cars || []).filter(Boolean).slice(0, MAX);
     if (cars.length < MIN) return { ok: false, error: 'need_' + MIN, cars: cars };
     var rows = ROWS.map(function (r) {
-      var cells = cars.map(function (c) { var v = r[1](c); return { text: v.text || '\u2014', n: v.n == null || !isFinite(v.n) ? null : +v.n, missing: !v.text }; });
+      var cells = cars.map(function (c) { var v = r[1](c); return { text: v.text || '\u2014', n: v.n == null || !isFinite(v.n) ? null : +v.n, unit: v.unit || null, missing: !v.text }; });
       var known = cells.filter(function (x) { return !x.missing; }).map(function (x) { return x.text; });
       var differs = known.length > 1 && known.some(function (t) { return t !== known[0]; });
       var better = r[2] || cells[0].better || null;
+      // unit-aware rows (MPG / MPGe / EV range): only mark a best value when every car uses the same unit
+      var units = cells.map(function (x) { return x.unit; }), unitRow = units.some(function (u) { return u; });
+      if (unitRow && !units.every(function (u) { return u && u === units[0]; })) better = null;
       if (differs && better) { var ns = cells.map(function (x) { return x.n; }).filter(function (n) { return n != null; });
         if (ns.length > 1) { var best = better === 'low' ? Math.min.apply(null, ns) : Math.max.apply(null, ns); cells.forEach(function (x) { x.best = x.n === best; }); } }
       return { label: r[0], cells: cells, differs: differs };
