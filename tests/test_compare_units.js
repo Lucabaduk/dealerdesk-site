@@ -1,0 +1,16 @@
+const { t, eq, ok, done } = require('./_h.js');
+const C = require('../modules/compare.js');
+const V = ['1HGCM82633A004352', '2T1BURHE0JC012345', '5YJ3E1EA7KF123456', 'JM1BL1SF3A1234567'];
+const car = (i, x) => Object.assign({ vin: V[i], year: 2022, make: 'M', model: 'X' + i, price: 30000 + i, mileage: 1000, features: [] }, x);
+const gas = (i, c, h) => car(i, { fuel_type: 'gasoline', mpg_city: c, mpg_highway: h }), ev = (i, r) => car(i, { fuel_type: 'electric', range_miles: r }), phev = (i, m, e) => car(i, { fuel_type: 'plug-in hybrid', mpg_combined: m, mpge: e });
+const marks = cars => C.build(cars).rows.find(r => r.label === 'MPG / range').cells.map(c => !!c.best);
+t('all MPG: best marked', () => eq(marks([gas(0, 28, 39), gas(1, 22, 30), gas(2, 30, 40)]), [false, false, true]));
+t('all EV range: best marked', () => eq(marks([ev(0, 272), ev(1, 330)]), [false, true]));
+t('all MPGe: best marked', () => eq(marks([phev(0, 30, 82), phev(1, 41, 76)]), [true, false]));
+t('mixed MPG + EV: no mark', () => eq(marks([gas(0, 28, 39), ev(1, 330)]), [false, false]));
+t('mixed MPG + MPGe: no mark', () => eq(marks([gas(0, 50, 52), phev(1, 30, 82)]), [false, false]));
+t('mixed MPGe + EV + MPG: no mark', () => eq(marks([phev(0, 30, 82), ev(1, 300), gas(2, 20, 25)]), [false, false, false]));
+t('unrated car in the set: no mark', () => eq(marks([gas(0, 28, 39), car(1, { fuel_type: 'diesel' })]), [false, false]));
+t('texts unchanged', () => eq(C.build([gas(0, 28, 39), ev(1, 330), phev(2, 30, 82)]).rows.find(r => r.label === 'MPG / range').cells.map(c => c.text), ['28 city / 39 hwy MPG', '330 mi range (EV)', '30 MPG · 82 MPGe']));
+t('other rows still marked when units mixed', () => eq(C.build([gas(0, 28, 39), ev(1, 330)]).rows.find(r => r.label === 'Price').cells.map(c => !!c.best), [true, false]));
+done('compare units');
