@@ -19,7 +19,7 @@
   function err(code, m) { var e = new Error(m); e.code = code; return e; }
   function money(n) { return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   function money2(n) { var s = (Math.round(n * 100) / 100).toFixed(2).split('.'); return '$' + s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + s[1]; }
-  function n(v, d) { var x = parseFloat(String(v == null ? '' : v).replace(/[$,\s]/g, '')); return isFinite(x) ? x : (d || 0); }
+  function n(v, d) { var x = parseFloat(String(v == null ? '' : v).replace(/[$,\s]/g, '')); return isFinite(x) ? x : (d === undefined ? 0 : d); }
 
   var state = fresh(), saveError = '', listeners = [], clock = function () { return Date.now(); };
   function store() { try { return root.localStorage || null; } catch (e) { return null; } }
@@ -83,7 +83,7 @@
   // ---------- payment calculator ----------
   function payment(p) {
     var s = state.settings, price = n(p.price), down = Math.max(0, n(p.down)), trade = Math.max(0, n(p.trade)), owed = Math.max(0, n(p.tradeOwed));
-    var apr = p.apr === undefined || p.apr === '' ? s.defaultApr : n(p.apr), term = Math.round(p.term === undefined || p.term === '' ? s.defaultTerm : n(p.term));
+    var apr = p.apr === undefined || p.apr === '' ? s.defaultApr : n(p.apr, NaN), term = Math.round(p.term === undefined || p.term === '' ? s.defaultTerm : n(p.term, NaN));
     var taxRate = p.taxRate === undefined ? s.taxRate : n(p.taxRate);
     if (!(price > 0)) throw err('bad_price', 'Price is required.');
     if (!(apr >= 0 && apr <= 40)) throw err('bad_apr', 'APR must be 0-40%.');
@@ -112,7 +112,7 @@
     var now = clock(), pd = digits(o.phone);
     if (state.orders.filter(function (x) { return x.phoneDigits === pd && now - x.createdAt < RATE.windowMs; }).length >= RATE.max) throw err('rate_limited', 'Too many requests from this number. Please call us.');
     var trade = null; if (p.trade && (p.trade.make || p.trade.year)) { var est = tradeIn(p.trade); trade = { year: Math.round(n(p.trade.year)), make: clean(p.trade.make, 40), model: clean(p.trade.model, 60), mileage: Math.round(n(p.trade.mileage)), condition: p.trade.condition, estimate: est.estimate }; }
-    var calc = null; if (p.calc) { try { calc = payment(Object.assign({ price: c.price, trade: trade ? trade.estimate : 0 }, p.calc)); } catch (e) { calc = null; } }
+    var calc = null; if (p.calc) { try { calc = payment(Object.assign({ trade: trade ? trade.estimate : 0 }, p.calc, { price: c.price })); } catch (e) { calc = null; } }
     state.seq += 1; var id = 'or' + state.seq;
     var rec = Object.assign(o, { id: id, code: code(id), kind: kind, deposit: kind === 'reserve' ? state.settings.depositAmount : 0, carId: c.id, stock: c.stock, vin: c.vin, carLabel: carLabel(c), price: c.price, trade: trade, calc: calc, status: 'new', phoneDigits: pd, createdAt: now, history: [{ at: now, status: 'new' }] });
     state.orders.push(rec); save(); return { ok: true, code: rec.code, id: id };

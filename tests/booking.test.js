@@ -120,4 +120,5 @@ if (!jsdom) skipped.push('UI tests (jsdom not found)'); else {
     assert.ok(!d.getElementById('ddp-done').hidden, d.getElementById('ddp-err').textContent); assert.match(d.getElementById('ddp-code').textContent, /^DD-/);
     const saved = JSON.parse(st.getItem('dealerdesk_booking')); assert.strictEqual(saved.requests.length, 1); assert.strictEqual(saved.testDrives[0].source, 'web'); });
 }
+t('QA: open slots for a picked car hide times already at capacity', () => { const Q = load(); Q.addTestDrive(td({ vehicle: 'A100', salesperson: '', date: '2026-11-05', time: '10:00' })); assert.ok(!Q.openSlots('test-drive', '2026-11-05', { stock: 'XYZ9' }).includes('10:00')); });
 console.log('\n' + pass + ' passed' + (skipped.length ? ', skipped: ' + skipped.join('; ') : ''));

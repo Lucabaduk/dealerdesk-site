@@ -249,7 +249,7 @@
       if (kind === 'service') { var busy = bayLoad(date, m, dur); if (Object.keys(busy).length >= state.settings.bays) continue; }
       else {
         var probe = { date: date, time: time, durationMin: dur, vin: o.vin || '', stock: o.stock || '', salesperson: o.salesperson || '' };
-        if (o.vin || o.stock) { if (tdConflicts(probe).some(function (c) { return c.type === 'vehicle'; })) continue; }
+        if (o.vin || o.stock) { if (tdConflicts(probe).length) continue; }
         else { var active = state.testDrives.filter(function (t) { return ACTIVE_TD[t.status] && t.date === date && overlap(m, m + dur, toMin(t.time), toMin(t.time) + t.durationMin); }).length; if (active >= (state.salespeople.length || 1)) continue; }
       }
       out.push(time);
