@@ -1,0 +1,27 @@
+// QA: service history merges, dates, ids, caps, hostile input, render cap.
+const {JSDOM}=require('jsdom'),path=require('path'),R=path.join(__dirname,'..');
+let pass=0,fail=0;const ok=(c,m)=>{c?pass++:(fail++,console.log('FAIL',m))};
+const H=require(R+'/modules/service-history.js');
+const C=(state,ls={})=>H.collect({state,cars:[],getItem:k=>ls[k]||null});
+const sb=(name,phone,email,at)=>({customer:{name,phone,email},at:at||'2026-10-01',service_type:'oil',cost_cents:100});
+ok(C({service_bookings:[sb('A','+1 (313) 555-0100'),sb('B','313-555-0100'),sb('C','313 555 0100')]}).length===1,'phone formats merge');
+ok(C({service_bookings:[sb('A','','X@Y.com '),sb('B','',' x@y.COM')]}).length===1,'email case/space merge');
+ok(C({service_bookings:[sb('John Smith','3135550100'),sb('John Smith','2485550199')]}).length===2,'same name, different phones: no false merge');
+ok(C({service_bookings:[sb('John Smith','3135550100'),sb('john  smith',''),sb('John Smith','2485550199')]}).length===3,'ambiguous name-only record not bridged');
+ok(C({service_bookings:[sb('Ann Lee','3135550100'),sb('ann lee','')]}).length===1,'unique name-only record still attaches');
+ok(C({service_bookings:[sb('A','3135550100','a@x.com'),sb('B','','a@x.com'),sb('B','2485550199','a@x.com')]}).length===1,'transitive merge');
+['__proto__','constructor','toString'].forEach(n=>{let r;try{r=C({service_bookings:[sb(n,''),sb(n,'',n+'@x.co')]})}catch(e){}ok(r&&r.length>=1&&r[0].name===n,'proto name '+n)});
+const d=C({service_bookings:[sb('D','3135550100',null,1e20),sb('D','3135550100',null,'2026-02-31'),sb('D','3135550100',null,-1e20),sb('D','3135550100',null,'2026-03-01')]})[0];
+ok(d.events.filter(e=>!isNaN(e.t)).length===1&&d.events[0].t===Date.parse('2026-03-01T12:00'),'1e20 and Feb 31 rejected, valid date first');
+ok(C({service_bookings:[sb('a b',''),sb('a-b','')]}).map(g=>g.id).filter((v,i,a)=>a.indexOf(v)===i).length===2,'unique ids');
+ok(C({},{dealerdesk_orders:JSON.stringify({orders:[{name:'O',phone:'3135550100',price:1e306,createdAt:'2026-01-01'}]})})[0].events[0].cost===null,'absurd price ignored');
+const big=[];for(let i=0;i<5000;i++)big.push(sb('Cust '+i,'313'+(1000000+i)));
+let t=Date.now();const list=C({service_bookings:big});ok(list.length===5000&&Date.now()-t<2000,'5000 customers fast');
+const dom=new JSDOM('<div id=h></div>');global.window=dom.window;global.document=dom.window.document;
+H.open({toString(){throw 1}});ok(H.ui.q==='','hostile open() ignored');H.open('<img src=x onerror=alert(1)>');
+const el=document.getElementById('h');H.open('');H.mount(el,{state:{service_bookings:big},cars:[],getItem:()=>null});
+ok(el.querySelectorAll('[data-sh]').length===200&&el.querySelector('[data-sh-more]'),'list capped at 200 with Show more');
+el.querySelector('[data-sh-more]').click();ok(el.querySelectorAll('[data-sh]').length===400,'Show more adds 200');
+H.open('"><img src=x onerror=window.__x=1>');H.mount(el,{state:{service_bookings:big},cars:[],getItem:()=>null});ok(!el.querySelector('img')&&el.querySelector('[data-sh-q]').value.indexOf('<img')>0,'query escaped');
+H.open('');H.mount(el,{state:{service_bookings:big},cars:[],getItem:()=>null});ok(el.querySelector('style').textContent.indexOf('.sh-links a{display:inline-flex;align-items:center;min-height:44px')>=0&&el.querySelector('.sh-links'),'contact links 44px');
+console.log('service-history-qa: '+pass+' passed, '+fail+' failed');process.exit(fail?1:0);
