@@ -51,7 +51,8 @@
    2015,
    2027
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/toyota-corolla.webp",
+  "photo_year": 2023
  },
  {
   "make": "Toyota",
@@ -79,7 +80,8 @@
    2015,
    2027
   ],
-  "photo": "assets/cars/toyota-rav4.webp"
+  "photo": "assets/cars/toyota-rav4.webp",
+  "photo_year": 2021
  },
  {
   "make": "Toyota",
@@ -350,7 +352,8 @@
    2015,
    2027
   ],
-  "photo": "assets/cars/honda-accord.webp"
+  "photo": "assets/cars/honda-accord.webp",
+  "photo_year": 2019
  },
  {
   "make": "Honda",
@@ -486,7 +489,8 @@
    2015,
    2027
   ],
-  "photo": "assets/cars/honda-odyssey.webp"
+  "photo": "assets/cars/honda-odyssey.webp",
+  "photo_year": 2018
  },
  {
   "make": "Honda",
@@ -543,7 +547,8 @@
    2015,
    2027
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/ford-f-150.webp",
+  "photo_year": 2025
  },
  {
   "make": "Ford",
@@ -703,7 +708,8 @@
    2015,
    2027
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/ford-explorer.webp",
+  "photo_year": 2020
  },
  {
   "make": "Ford",
@@ -1169,7 +1175,8 @@
    2015,
    2027
   ],
-  "photo": "assets/cars/chevrolet-corvette.webp"
+  "photo": "assets/cars/chevrolet-corvette.webp",
+  "photo_year": 2021
  },
  {
   "make": "Chevrolet",
@@ -1220,7 +1227,8 @@
    2015,
    2027
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/nissan-altima.webp",
+  "photo_year": 2019
  },
  {
   "make": "Nissan",
@@ -2144,7 +2152,8 @@
    2015,
    2027
   ],
-  "photo": "assets/cars/subaru-wrx.webp"
+  "photo": "assets/cars/subaru-wrx.webp",
+  "photo_year": 2023
  },
  {
   "make": "Subaru",
@@ -2472,7 +2481,8 @@
    2015,
    2023
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/jeep-cherokee.webp",
+  "photo_year": 2022
  },
  {
   "make": "Jeep",
@@ -2710,7 +2720,8 @@
    2015,
    2023
   ],
-  "photo": "assets/cars/dodge-challenger.webp"
+  "photo": "assets/cars/dodge-challenger.webp",
+  "photo_year": 2015
  },
  {
   "make": "Dodge",
@@ -2765,7 +2776,8 @@
    2023,
    2027
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/dodge-hornet.webp",
+  "photo_year": 2023
  },
  {
   "make": "Dodge",
@@ -3555,7 +3567,8 @@
    2015,
    2027
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/mercedes-benz-glc.webp",
+  "photo_year": 2018
  },
  {
   "make": "Mercedes-Benz",
@@ -3658,7 +3671,8 @@
    2015,
    2027
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/audi-a4.webp",
+  "photo_year": 2018
  },
  {
   "make": "Audi",
@@ -3684,7 +3698,8 @@
    2015,
    2027
   ],
-  "photo": "assets/cars/audi-a6.webp"
+  "photo": "assets/cars/audi-a6.webp",
+  "photo_year": 2023
  },
  {
   "make": "Audi",
@@ -3893,7 +3908,8 @@
    2015,
    2027
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/lexus-nx.webp",
+  "photo_year": 2022
  },
  {
   "make": "Lexus",
@@ -4078,7 +4094,8 @@
    2024,
    2027
   ],
-  "photo": "assets/cars/acura-zdx.webp"
+  "photo": "assets/cars/acura-zdx.webp",
+  "photo_year": 2025
  },
  {
   "make": "Buick",
@@ -4598,7 +4615,8 @@
    2015,
    2023
   ],
-  "photo": "assets/site/no-photo.webp"
+  "photo": "assets/cars/chrysler-300.webp",
+  "photo_year": 2023
  },
  {
   "make": "Chrysler",

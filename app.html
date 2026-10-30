@@ -219,12 +219,15 @@ function normalizeLead(l, cars) {
   return out;
 }
 
+const MAX_CARS = 20000;
 // Whole dealership dataset. Unique ids per collection, cross-references checked.
 function normalizeDealership(d) {
   obj(d, 'dealership');
   const arr = (v, name) => { if (v == null) return []; if (!Array.isArray(v)) throw new SchemaError(name, 'must be a list'); return v; };
   const uniq = (arr, name) => { const s = new Set(); for (const x of arr) { if (s.has(x.id)) throw new SchemaError(name, 'duplicate id ' + x.id); s.add(x.id); } return arr; };
-  const cars = uniq(arr(d.cars, 'cars').slice(0, 20000).map(normalizeCar), 'cars');
+  const rawCars = arr(d.cars, 'cars');
+  if (rawCars.length > MAX_CARS) throw new SchemaError('cars', 'too many cars: ' + rawCars.length + ' (limit ' + MAX_CARS + '). Split the inventory or raise MAX_CARS.');
+  const cars = uniq(rawCars.map(normalizeCar), 'cars');
   const stock = new Set(); for (const c of cars) { if (stock.has(c.stock_no)) throw new SchemaError('cars', 'duplicate stock_no ' + c.stock_no); stock.add(c.stock_no); }
   return {
     dealer_name: text(d.dealer_name, 80) || 'Our dealership',
@@ -235,7 +238,7 @@ function normalizeDealership(d) {
   };
 }
 
-const api = { SchemaError, ENUMS, safeUrl, normalizeCar, normalizeTestDrive, normalizeServiceBooking, normalizeLead, normalizeDealership };
+const api = { MAX_CARS, SchemaError, ENUMS, safeUrl, normalizeCar, normalizeTestDrive, normalizeServiceBooking, normalizeLead, normalizeDealership };
 if (typeof module !== 'undefined' && module.exports) module.exports = api;
 else if (typeof window !== 'undefined') window.DealerDeskSchema = api;
 </script>

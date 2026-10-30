@@ -8,7 +8,7 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Model | File (source) | Author | License |
 |---|---|---|---|
 | Toyota Camry | [Toyota Camry (XV70) IMG 9081.jpg](https://commons.wikimedia.org/wiki/File:Toyota_Camry_(XV70)_IMG_9081.jpg) | Alexander-93 | CC BY-SA 4.0 |
-| Toyota RAV4 | [Toyota RAV4 (XA10) IMG 1260.jpg](https://commons.wikimedia.org/wiki/File:Toyota_RAV4_(XA10)_IMG_1260.jpg) | Alexander-93 | CC BY-SA 4.0 |
+| Toyota RAV4 | [2021 Toyota RAV4 PHV.jpg](https://commons.wikimedia.org/wiki/File:2021_Toyota_RAV4_PHV.jpg) | TTTNIS | CC0 |
 | Toyota RAV4 Hybrid | [Toyota RAV4 Plug-in Hybrid GR Sport IMG 9896.jpg](https://commons.wikimedia.org/wiki/File:Toyota_RAV4_Plug-in_Hybrid_GR_Sport_IMG_9896.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Toyota Highlander | [2011 Toyota Highlander (XU40) IMG 9722.jpg](https://commons.wikimedia.org/wiki/File:2011_Toyota_Highlander_(XU40)_IMG_9722.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Toyota Tacoma | [Toyota Tacoma (N300) TRD IMG 6050.jpg](https://commons.wikimedia.org/wiki/File:Toyota_Tacoma_(N300)_TRD_IMG_6050.jpg) | Alexander Migl | CC BY-SA 4.0 |
@@ -18,12 +18,12 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Toyota Sienna | [Toyota Sienna -- 07-09-2009.jpg](https://commons.wikimedia.org/wiki/File:Toyota_Sienna_--_07-09-2009.jpg) | IFCAR | Public domain |
 | Toyota bZ4X | [Toyota bZ4X Automesse Ludwigsburg 2022 1X7A5895.jpg](https://commons.wikimedia.org/wiki/File:Toyota_bZ4X_Automesse_Ludwigsburg_2022_1X7A5895.jpg) | Alexander Migl | CC BY-SA 4.0 |
 | Honda Civic | [Honda Civic (1Y7A1724).jpg](https://commons.wikimedia.org/wiki/File:Honda_Civic_(1Y7A1724).jpg) | MB-one | CC BY-SA 4.0 |
-| Honda Accord | [Honda Accord 1993 Finland.JPG](https://commons.wikimedia.org/wiki/File:Honda_Accord_1993_Finland.JPG) | MattiPaavola | CC BY-SA 3.0 |
+| Honda Accord | [2019 Honda Accord Hybrid Tech.jpg](https://commons.wikimedia.org/wiki/File:2019_Honda_Accord_Hybrid_Tech.jpg) | Chanokchon | CC BY-SA 4.0 |
 | Honda CR-V | [2018 Honda CR-V (RW MY18) +Sport 2WD wagon (2018-10-22) 01.jpg](https://commons.wikimedia.org/wiki/File:2018_Honda_CR-V_(RW_MY18)_%2BSport_2WD_wagon_(2018-10-22)_01.jpg) | EurovisionNim | CC BY-SA 4.0 |
 | Honda HR-V | [Honda HR-V Hybrid 1X7A1882.jpg](https://commons.wikimedia.org/wiki/File:Honda_HR-V_Hybrid_1X7A1882.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Honda Pilot | [Honda Pilot (second generation) IMG 4032.jpg](https://commons.wikimedia.org/wiki/File:Honda_Pilot_(second_generation)_IMG_4032.jpg) | Alexander Migl | CC BY-SA 4.0 |
 | Honda Passport | [Honda Passport (YF7-8) Washington DC Metro Area, USA.jpg](https://commons.wikimedia.org/wiki/File:Honda_Passport_(YF7-8)_Washington_DC_Metro_Area,_USA.jpg) | OWS Photography | CC BY 4.0 |
-| Honda Odyssey | [1996 Honda Odyssey RA1.jpg](https://commons.wikimedia.org/wiki/File:1996_Honda_Odyssey_RA1.jpg) | TTTNIS | CC0 |
+| Honda Odyssey | [2018 Honda Odyssey front 6.9.18.jpg](https://commons.wikimedia.org/wiki/File:2018_Honda_Odyssey_front_6.9.18.jpg) | Kevauto | CC BY-SA 4.0 |
 | Honda Ridgeline | [Honda Ridgeline P4220684.jpg](https://commons.wikimedia.org/wiki/File:Honda_Ridgeline_P4220684.jpg) | Alexander Migl | CC BY-SA 4.0 |
 | Ford F-150 Lightning | [Ford F-150 Lightning IAA 2023 1X7A0596.jpg](https://commons.wikimedia.org/wiki/File:Ford_F-150_Lightning_IAA_2023_1X7A0596.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Ford Ranger | [Ford Ranger (T6, P703) Wildtrak IMG 7320.jpg](https://commons.wikimedia.org/wiki/File:Ford_Ranger_(T6,_P703)_Wildtrak_IMG_7320.jpg) | Alexander-93 | CC BY-SA 4.0 |
@@ -45,7 +45,7 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Chevrolet Tahoe | [Chevrolet Tahoe (GMTT1XX) Washington DC Metro Area, USA.jpg](https://commons.wikimedia.org/wiki/File:Chevrolet_Tahoe_(GMTT1XX)_Washington_DC_Metro_Area,_USA.jpg) | OWS Photography | CC BY 4.0 |
 | Chevrolet Suburban | [Chevrolet Suburban (GMT900) Washington DC Metro Area, USA (1).jpg](https://commons.wikimedia.org/wiki/File:Chevrolet_Suburban_(GMT900)_Washington_DC_Metro_Area,_USA_(1).jpg) | OWS Photography | CC BY 4.0 |
 | Chevrolet Camaro | [Chevrolet Camaro Z28 Hirschaid-20220709-RM-115030.jpg](https://commons.wikimedia.org/wiki/File:Chevrolet_Camaro_Z28_Hirschaid-20220709-RM-115030.jpg) | Ermell | CC BY-SA 4.0 |
-| Chevrolet Corvette | [Chevrolet Corvette, BAS 24, Brussels (P1170425-RR).jpg](https://commons.wikimedia.org/wiki/File:Chevrolet_Corvette,_BAS_24,_Brussels_(P1170425-RR).jpg) | Matti Blume | CC BY-SA 4.0 |
+| Chevrolet Corvette | [Chevrolet Corvette C8 Bahrain 2021.jpg](https://commons.wikimedia.org/wiki/File:Chevrolet_Corvette_C8_Bahrain_2021.jpg) | Mohammed Hamad | CC BY-SA 4.0 |
 | Chevrolet Bolt EUV | [2022 Chevrolet Bolt EUV (Canada) front view.png](https://commons.wikimedia.org/wiki/File:2022_Chevrolet_Bolt_EUV_(Canada)_front_view.png) | ChevroletCanada | CC BY 3.0 |
 | Nissan Sentra | [Nissan Sentra (B17) 1X7A1698.jpg](https://commons.wikimedia.org/wiki/File:Nissan_Sentra_(B17)_1X7A1698.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Nissan Versa | [2023 Nissan Versa (N18) DSC 2669.jpg](https://commons.wikimedia.org/wiki/File:2023_Nissan_Versa_(N18)_DSC_2669.jpg) | Alexander Migl | CC BY-SA 4.0 |
@@ -80,7 +80,7 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Subaru Forester | [Subaru Forester (SL) e-BOXER DSC 8811.jpg](https://commons.wikimedia.org/wiki/File:Subaru_Forester_(SL)_e-BOXER_DSC_8811.jpg) | Alexander Migl | CC BY-SA 4.0 |
 | Subaru Outback | [Subaru Outback (BT) DSC 8814.jpg](https://commons.wikimedia.org/wiki/File:Subaru_Outback_(BT)_DSC_8814.jpg) | Alexander Migl | CC BY-SA 4.0 |
 | Subaru Ascent | [2019 Subaru Ascent front 7.7.18.jpg](https://commons.wikimedia.org/wiki/File:2019_Subaru_Ascent_front_7.7.18.jpg) | Kevauto | CC BY-SA 4.0 |
-| Subaru WRX | [1994 Subaru Impreza WRX STi.jpg](https://commons.wikimedia.org/wiki/File:1994_Subaru_Impreza_WRX_STi.jpg) | TTTNIS | CC0 |
+| Subaru WRX | [Subaru WRX 2.4 CVT 'EyeSight' 2023.jpg](https://commons.wikimedia.org/wiki/File:Subaru_WRX_2.4_CVT_%27EyeSight%27_2023.jpg) | Ethan Llamas | CC BY-SA 4.0 |
 | Subaru BRZ | [Subaru BRZ , Toronto.jpg](https://commons.wikimedia.org/wiki/File:Subaru_BRZ_,_Toronto.jpg) | Fabian Roudra Baroi | CC BY-SA 4.0 |
 | Volkswagen Jetta | [Volkswagen Jetta VI GLI IMG 8936.jpg](https://commons.wikimedia.org/wiki/File:Volkswagen_Jetta_VI_GLI_IMG_8936.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Volkswagen Golf GTI | [Volkswagen Golf VIII GTI Clubsport 45 IMG 4884.jpg](https://commons.wikimedia.org/wiki/File:Volkswagen_Golf_VIII_GTI_Clubsport_45_IMG_4884.jpg) | Alexander Migl | CC BY-SA 4.0 |
@@ -99,7 +99,7 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Ram 3500 | [2016 Ram 3500 Auto.jpg](https://commons.wikimedia.org/wiki/File:2016_Ram_3500_Auto.jpg) | Calreyn88 | CC BY-SA 4.0 |
 | Ram ProMaster | [2014 Ram 1500 ProMaster Tradesman SWB std roof front.jpg](https://commons.wikimedia.org/wiki/File:2014_Ram_1500_ProMaster_Tradesman_SWB_std_roof_front.jpg) | Mr.choppers | CC BY-SA 3.0 |
 | Ram ProMaster City | [2015 Ram ProMaster City Tradesman Cargo Van, front left.jpg](https://commons.wikimedia.org/wiki/File:2015_Ram_ProMaster_City_Tradesman_Cargo_Van,_front_left.jpg) | Mr.choppers | CC BY-SA 3.0 |
-| Dodge Challenger | [Dodge Challenger Eté2016.jpg](https://commons.wikimedia.org/wiki/File:Dodge_Challenger_Et%C3%A92016.jpg) | Pierre André Leclercq | CC BY-SA 4.0 |
+| Dodge Challenger | [Dodge Challenger SRT Hellcat 2015-20180909-RM-171851.jpg](https://commons.wikimedia.org/wiki/File:Dodge_Challenger_SRT_Hellcat_2015-20180909-RM-171851.jpg) | Ermell | CC BY-SA 4.0 |
 | Dodge Durango | [Dodge Durango SRT Hellcat MYLE Festival 2025 DSC 9644.jpg](https://commons.wikimedia.org/wiki/File:Dodge_Durango_SRT_Hellcat_MYLE_Festival_2025_DSC_9644.jpg) | Alexander Migl | CC BY-SA 4.0 |
 | Dodge Journey | [2014 Dodge Journey SE, Front Left, 01-07-2021.jpg](https://commons.wikimedia.org/wiki/File:2014_Dodge_Journey_SE,_Front_Left,_01-07-2021.jpg) | SsmIntrigue | CC BY-SA 4.0 |
 | Dodge Grand Caravan | [SPVM Dodge Grand Caravan section metro.jpg](https://commons.wikimedia.org/wiki/File:SPVM_Dodge_Grand_Caravan_section_metro.jpg) | Tyanroon-chan | CC BY-SA 4.0 |
@@ -132,7 +132,7 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Mercedes-Benz GLE | [Mercedes-Benz GLE AMG Line (V 167, Facelift) – f 14042024.jpg](https://commons.wikimedia.org/wiki/File:Mercedes-Benz_GLE_AMG_Line_(V_167,_Facelift)_%E2%80%93_f_14042024.jpg) | © M 93 | CC BY-SA 3.0 de |
 | Mercedes-Benz EQE | [Mercedes-Benz EQE 350+ AMG Line (V 295) – f 12022023.jpg](https://commons.wikimedia.org/wiki/File:Mercedes-Benz_EQE_350%2B_AMG_Line_(V_295)_%E2%80%93_f_12022023.jpg) | © M 93 | CC BY-SA 3.0 de |
 | Audi A3 | [Audi A3 Cabriolet, Baujahr 2008 (2008-10-21).jpg](https://commons.wikimedia.org/wiki/File:Audi_A3_Cabriolet,_Baujahr_2008_(2008-10-21).jpg) | Spurzem - Lothar Spurzem | CC BY-SA 2.0 de |
-| Audi A6 | [Audi A6 (C5).jpg](https://commons.wikimedia.org/wiki/File:Audi_A6_(C5).jpg) | ARO243ARO | CC BY-SA 4.0 |
+| Audi A6 | [DSC06194 Audi A6, Bundespolizei Österreich, Front Left, 2023-10.jpg](https://commons.wikimedia.org/wiki/File:DSC06194_Audi_A6,_Bundespolizei_%C3%96sterreich,_Front_Left,_2023-10.jpg) | Aciarium | CC BY 4.0 |
 | Audi Q3 | [Audi Q3 FJ IAA 2025 DSC 2505.jpg](https://commons.wikimedia.org/wiki/File:Audi_Q3_FJ_IAA_2025_DSC_2505.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Audi Q5 | [Audi Q5 Sportback GU DSC 9268.jpg](https://commons.wikimedia.org/wiki/File:Audi_Q5_Sportback_GU_DSC_9268.jpg) | Alexander Migl | CC BY-SA 4.0 |
 | Audi Q7 | [Audi q7 front white.jpg](https://commons.wikimedia.org/wiki/File:Audi_q7_front_white.jpg) | Alofok | CC BY-SA 3.0 |
@@ -146,7 +146,7 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Acura TLX | [2015 Acura TLX (front left).jpg](https://commons.wikimedia.org/wiki/File:2015_Acura_TLX_(front_left).jpg) | Mr.choppers | CC BY-SA 3.0 |
 | Acura RDX | [Acura RDX (TC1, TC2) IMG 8360.jpg](https://commons.wikimedia.org/wiki/File:Acura_RDX_(TC1,_TC2)_IMG_8360.jpg) | Alexander-93 | CC BY-SA 4.0 |
 | Acura MDX | [ACURA MDX (YD2) China (13).jpg](https://commons.wikimedia.org/wiki/File:ACURA_MDX_(YD2)_China_(13).jpg) | Dinkun Chen | CC BY-SA 4.0 |
-| Acura ZDX | [2011 Acura ZDX -- NHTSA.jpg](https://commons.wikimedia.org/wiki/File:2011_Acura_ZDX_--_NHTSA.jpg) | U.S. National Highway Traffic Safety Administration | Public domain |
+| Acura ZDX | [Moscow, Acura ZDX Sept 2025 03.jpg](https://commons.wikimedia.org/wiki/File:Moscow,_Acura_ZDX_Sept_2025_03.jpg) | Retired electrician | CC0 |
 | Buick Envista | [Buick Envista GS 01 -- 2022-12-16.jpg](https://commons.wikimedia.org/wiki/File:Buick_Envista_GS_01_--_2022-12-16.jpg) | Rtu718629 | CC BY-SA 4.0 |
 | Buick Encore GX | [Buick Encore GX 001.jpg](https://commons.wikimedia.org/wiki/File:Buick_Encore_GX_001.jpg) | Jengtingchen | CC BY-SA 4.0 |
 | Buick Envision | [BUICK ENVISION PLUS China.jpg](https://commons.wikimedia.org/wiki/File:BUICK_ENVISION_PLUS_China.jpg) | Dinkun Chen | CC BY-SA 4.0 |
@@ -167,6 +167,16 @@ Models without a usable free photo use `assets/site/no-photo.webp`.
 | Chrysler Pacifica Hybrid | [Chrysler Pacifica Hybrid with Mob Museum Livery.jpg](https://commons.wikimedia.org/wiki/File:Chrysler_Pacifica_Hybrid_with_Mob_Museum_Livery.jpg) | Noah Wulf | CC BY-SA 3.0 |
 | Chrysler Voyager | [2020 Chrysler Voyager (crop).jpg](https://commons.wikimedia.org/wiki/File:2020_Chrysler_Voyager_(crop).jpg) | NNXST | CC BY 4.0 |
 | Chrysler 200 | [2015 Chrysler 200 Limited.jpg](https://commons.wikimedia.org/wiki/File:2015_Chrysler_200_Limited.jpg) | Greg Gjerdingen | CC BY 2.0 |
+| Toyota Corolla | [2023 Toyota Corolla Touring Sports Hybrid (E210) IMG 7679.jpg](https://commons.wikimedia.org/wiki/File:2023_Toyota_Corolla_Touring_Sports_Hybrid_(E210)_IMG_7679.jpg) | Alexander-93 | CC BY-SA 4.0 |
+| Ford F-150 | [Ford F-150 (fourteenth generation) Rutesheimer Autoschau 2025 DSC 9230.jpg](https://commons.wikimedia.org/wiki/File:Ford_F-150_(fourteenth_generation)_Rutesheimer_Autoschau_2025_DSC_9230.jpg) | Alexander Migl | CC BY-SA 4.0 |
+| Ford Explorer | [2020 Ford Explorer ST, 12.5.19.jpg](https://commons.wikimedia.org/wiki/File:2020_Ford_Explorer_ST,_12.5.19.jpg) | Ghostofakina | CC BY-SA 4.0 |
+| Jeep Cherokee | [Jeep Cherokee KL Shishi 01 2022-10-15.jpg](https://commons.wikimedia.org/wiki/File:Jeep_Cherokee_KL_Shishi_01_2022-10-15.jpg) | JamesYoung8167 | CC BY-SA 4.0 |
+| Dodge Hornet | [2023 Dodge Hornet GT in Blu Bayou, Front Left, 05-14-2023.jpg](https://commons.wikimedia.org/wiki/File:2023_Dodge_Hornet_GT_in_Blu_Bayou,_Front_Left,_05-14-2023.jpg) | Elise240SX | CC BY-SA 4.0 |
+| Lexus NX | [Lexus NX AZ10 Facelift Shishi 02 2022-06-18.jpg](https://commons.wikimedia.org/wiki/File:Lexus_NX_AZ10_Facelift_Shishi_02_2022-06-18.jpg) | JamesYoung8167 | CC BY-SA 4.0 |
+| Mercedes-Benz GLC | [2018 Mercedes-Benz GLC 250 Urban Edition 4MATIC 2.0 Front.jpg](https://commons.wikimedia.org/wiki/File:2018_Mercedes-Benz_GLC_250_Urban_Edition_4MATIC_2.0_Front.jpg) | Vauxford | CC BY-SA 4.0 |
+| Audi A4 | [2018 Audi A4 Sport TDi Quattro S-A 2.0.jpg](https://commons.wikimedia.org/wiki/File:2018_Audi_A4_Sport_TDi_Quattro_S-A_2.0.jpg) | Vauxford | CC BY-SA 4.0 |
+| Chrysler 300 | [Chrysler 300C Sanming 02 2023-02-08.jpg](https://commons.wikimedia.org/wiki/File:Chrysler_300C_Sanming_02_2023-02-08.jpg) | JamesYoung8167 | CC BY-SA 4.0 |
+| Nissan Altima | [2019 Nissan Altima SL 2.5L front 3.22.19.jpg](https://commons.wikimedia.org/wiki/File:2019_Nissan_Altima_SL_2.5L_front_3.22.19.jpg) | Kevauto | CC BY-SA 4.0 |
 
 ## Site images (`assets/site/`)
 `hero.webp` and `no-photo.webp` are AI-generated (October 2026). They show made-up cars with no real brands, and are free to use in this project.

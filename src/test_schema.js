@@ -26,4 +26,5 @@ t('lead bad email', () => throwsField(() => S.normalizeLead({ ...data.leads[0], 
 t('lead defaults', () => { const l = S.normalizeLead({ id: 'x', name: 'A', phone: '5551234567' }); assert.strictEqual(l.source, 'website'); assert.strictEqual(l.status, 'new'); });
 t('duplicate ids', () => throwsField(() => S.normalizeDealership({ cars: [base, base] }), 'cars'));
 t('duplicate stock_no', () => throwsField(() => S.normalizeDealership({ cars: [base, { ...base, id: 'z' }] }), 'cars'));
+t('over car limit throws, never truncates', () => { const many = Array.from({ length: S.MAX_CARS + 1 }, (_, i) => ({ ...base, id: 'c' + i, stock_no: 'S' + i })); assert.throws(() => S.normalizeDealership({ cars: many }), e => e instanceof S.SchemaError && e.field === 'cars' && /too many cars/.test(e.message)); });
 console.log('schema tests passed: ' + n);
