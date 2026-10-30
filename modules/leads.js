@@ -41,7 +41,7 @@
       setStatus: function (id, status, note) { var l = find(id); if (!l || STATUSES.indexOf(status) < 0) return { ok: false, errors: [l ? 'status' : 'not_found'] };
         l.status = status; if (note != null) l.staffNote = S.cleanText(note, 1000); l.updatedAt = clock(); save(); return { ok: true, lead: copy(l) }; },
       remove: function (id) { var n = leads.length; leads = leads.filter(function (l) { return l.id !== id; }); if (leads.length !== n) { save(); return true; } return false; },
-      counts: function () { var c = { new: 0, contacted: 0, qualified: 0, won: 0, lost: 0, total: leads.length }; leads.forEach(function (l) { c[l.status]++; }); return c; },
+      counts: function () { var c = { new: 0, contacted: 0, qualified: 0, won: 0, lost: 0, total: leads.length }; leads.forEach(function (l) { if (Object.prototype.hasOwnProperty.call(c, l.status) && l.status !== 'total') c[l.status]++; }); return c; },
       exportJSON: function () { return JSON.stringify({ type: 'dealerdesk-leads', version: 1, leads: leads }, null, 2); },
       exportCSV: function () { var cols = ['id', 'createdAt', 'status', 'vin', 'interest_car_id', 'name', 'phone', 'email', 'interest', 'notes', 'staffNote'];
         function cell(v, k) { v = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(v) && !(k === 'phone' && isPhone(v))) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }

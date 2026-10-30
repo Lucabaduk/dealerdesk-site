@@ -19,7 +19,7 @@
     if (/^(\.\/)?[A-Za-z0-9_-][A-Za-z0-9_\/.-]*\.(webp|jpe?g|png|avif)$/i.test(u)) return u;
     return '';
   }
-  function list(v, max, itemMax) { var out = [], seen = {}; (Array.isArray(v) ? v : []).forEach(function (x) { var t = S.cleanText(x, itemMax); if (t && !seen[t.toLowerCase()] && out.length < max) { seen[t.toLowerCase()] = 1; out.push(t); } }); return out; }
+  function list(v, max, itemMax) { var out = [], seen = Object.create(null); (Array.isArray(v) ? v : []).forEach(function (x) { var t = S.cleanText(x, itemMax); if (t && !seen[t.toLowerCase()] && out.length < max) { seen[t.toLowerCase()] = 1; out.push(t); } }); return out; }
   function normalize(input, now) {
     input = input || {}; var errors = [];
     var vin = cleanVin(input.vin); if (!VIN_RE.test(vin)) errors.push('vin');
@@ -48,16 +48,16 @@
   }
   function create(opts) {
     opts = opts || {}; var store = opts.storage || S.defaultStorage(), clock = opts.now || Date.now, persist = opts.persist !== false;
-    var cars = [], byVin = {}, byId = {}, idx = {}, hay = [], sortCache = {};
+    var cars = [], byVin = Object.create(null), byId = Object.create(null), idx = Object.create(null), hay = [], sortCache = Object.create(null);
     function rebuild() {
-      byVin = {}; byId = {}; idx = {}; hay = new Array(cars.length); sortCache = {};
-      INDEXED.forEach(function (f) { idx[f] = {}; });
+      byVin = Object.create(null); byId = Object.create(null); idx = Object.create(null); hay = new Array(cars.length); sortCache = Object.create(null);
+      INDEXED.forEach(function (f) { idx[f] = Object.create(null); });
       for (var i = 0; i < cars.length; i++) { var c = cars[i]; byVin[c.vin] = i; byId[c.id] = i;
         INDEXED.forEach(function (f) { var k = String(c[f]).toLowerCase(); (idx[f][k] || (idx[f][k] = [])).push(i); });
         hay[i] = [c.vin, c.stock_no, c.year, c.make, c.model, c.trim, c.color, c.body_type || '', c.fuel_type || '', c.features.join(' ')].join(' ').toLowerCase(); }
     }
     function save() { if (!persist) return true; if (cars.length > 1000) { try { store.removeItem(KEY); } catch (e0) {} return false; } /* big static lists (data/cars.json) are never copied into localStorage */ try { store.setItem(KEY, JSON.stringify(cars)); return true; } catch (e) { /* quota: keep in memory, drop stale copy so a reload doesn't show old data */ try { store.removeItem(KEY); } catch (e2) {} return false; } }
-    function ingest(listIn) { var out = [], seen = {}, skipped = 0, dupStock = []; (listIn || []).slice(0, 20000).forEach(function (c) { var r = normalize(c, clock()); if (!r.ok || seen[r.car.vin] || seen['#' + r.car.id]) { skipped++; return; }
+    function ingest(listIn) { var out = [], seen = Object.create(null), skipped = 0, dupStock = []; (listIn || []).slice(0, 20000).forEach(function (c) { var r = normalize(c, clock()); if (!r.ok || seen[r.car.vin] || seen['#' + r.car.id]) { skipped++; return; }
       var sk = '$' + r.car.stock_no.toLowerCase(); if (seen[sk]) { skipped++; dupStock.push({ stock_no: r.car.stock_no, vin: r.car.vin }); return; }
       seen[r.car.vin] = seen['#' + r.car.id] = seen[sk] = 1; out.push(r.car); }); return { cars: out, skipped: skipped, duplicateStock: dupStock }; }
     try { var raw = JSON.parse(store.getItem(KEY) || 'null'); if (Array.isArray(raw)) cars = ingest(raw).cars; } catch (e) { cars = []; }
@@ -87,7 +87,7 @@
       setStatus: function (v, s) { return api.update(v, { status: s }); },
       remove: function (vinOrId) { var i = at(vinOrId); if (i < 0) return false; cars.splice(i, 1); rebuild(); save(); return true; },
       /** values for filter dropdowns, e.g. facets('make') or facets('model', {make:'Velora'}) */
-      facets: function (field, within) { if (INDEXED.indexOf(field) < 0) return []; var res = {};
+      facets: function (field, within) { if (INDEXED.indexOf(field) < 0) return []; var res = Object.create(null);
         (within ? api.query(Object.assign({}, within, { pageSize: 1e9 })).items : cars).forEach(function (c) { res[c[field]] = (res[c[field]] || 0) + 1; });
         return Object.keys(res).sort().map(function (k) { return { value: field === 'year' ? +k : k, count: res[k] }; }); },
       /** q: {text, make, model, color, status, condition, year, minYear, maxYear, minPrice, maxPrice, maxMileage, minMileage, sort, dir, page (1-based), pageSize (24)} */
@@ -95,13 +95,13 @@
         q = q || {}; var cand = null;
         INDEXED.forEach(function (f) { if (q[f] == null || q[f] === '') return; var vals = Array.isArray(q[f]) ? q[f] : [q[f]], set = [];
           vals.forEach(function (v) { set = set.concat(idx[f][String(v).toLowerCase()] || []); });
-          var m = {}; set.forEach(function (i) { m[i] = 1; }); cand = cand ? cand.filter(function (i) { return m[i]; }) : set; });
+          var m = Object.create(null); set.forEach(function (i) { m[i] = 1; }); cand = cand ? cand.filter(function (i) { return m[i]; }) : set; });
         var words = S.cleanText(q.text, 100).toLowerCase().split(' ').filter(Boolean);
         var lo = { year: q.minYear, price: q.minPrice, mileage: q.minMileage }, hi = { year: q.maxYear, price: q.maxPrice, mileage: q.maxMileage };
         function pass(i) { var c = cars[i];
           for (var f in lo) { if (lo[f] != null && lo[f] !== '' && c[f] < +lo[f]) return false; if (hi[f] != null && hi[f] !== '' && c[f] > +hi[f]) return false; }
           for (var w = 0; w < words.length; w++) if (hay[i].indexOf(words[w]) < 0) return false; return true; }
-        var sorts = { price: 'price', year: 'year', mileage: 'mileage', make: 'make', model: 'model', stock: 'stock_no' };
+        var sorts = Object.assign(Object.create(null), { price: 'price', year: 'year', mileage: 'mileage', make: 'make', model: 'model', stock: 'stock_no' });
         var ids;
         if (sorts[q.sort]) { var keep = null; if (cand) { keep = new Uint8Array(cars.length); cand.forEach(function (i) { keep[i] = 1; }); }
           ids = order(sorts[q.sort], q.dir).filter(function (i) { return (!keep || keep[i]) && pass(i); }); }
@@ -114,7 +114,7 @@
         var data; try { data = JSON.parse(text); } catch (e) { return { ok: false, errors: ['bad_json'] }; }
         var l = Array.isArray(data) ? data : (data && Array.isArray(data.cars) ? data.cars : null); if (!l) return { ok: false, errors: ['bad_format'] };
         if (mode === 'replace') return api.load(l);
-        var added = 0, updated = 0, skipped = 0, dupStock = [], stockOwner = {};
+        var added = 0, updated = 0, skipped = 0, dupStock = [], stockOwner = Object.create(null);
         cars.forEach(function (c) { stockOwner[c.stock_no.toLowerCase()] = c.vin; });
         l.slice(0, 20000).forEach(function (c) { var r = normalize(c, clock()); if (!r.ok) { skipped++; return; } var i = byVin[r.car.vin], sk = r.car.stock_no.toLowerCase();
           if (stockOwner[sk] && stockOwner[sk] !== r.car.vin) { skipped++; dupStock.push({ stock_no: r.car.stock_no, vin: r.car.vin, usedBy: stockOwner[sk] }); return; }
