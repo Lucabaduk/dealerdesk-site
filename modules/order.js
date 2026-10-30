@@ -49,15 +49,19 @@
 
   // ---------- settings ----------
   function settings() { return JSON.parse(JSON.stringify(state.settings)); }
+  var SETTING_LABELS = { depositAmount: 'Deposit amount', taxRate: 'Tax rate', defaultApr: 'Default APR', tradeBase: 'Trade-in base value', tradeDepreciation: 'Trade-in depreciation per year', tradeMilesPerYear: 'Trade-in miles per year', tradeMileAdj: 'Trade-in mileage adjustment' };
+  // Validates every field on a copy first; applies + saves only when all are valid (reverts if the save fails).
   function updateSettings(p) {
-    var s = state.settings;
-    function num(k, lo, hi) { if (p[k] === undefined) return; var x = n(p[k], NaN); if (!(x >= lo && x <= hi)) throw err('bad_' + k, k + ' must be between ' + lo + ' and ' + hi + '.'); s[k] = x; }
+    p = p || {}; var prev = state.settings, s = JSON.parse(JSON.stringify(prev));
+    function num(k, lo, hi) { if (p[k] === undefined) return; var x = String(p[k]).trim() === '' ? NaN : n(p[k], NaN); if (!(x >= lo && x <= hi)) throw err('bad_' + k, SETTING_LABELS[k] + ' must be between ' + lo + ' and ' + hi + '.'); s[k] = x; }
     num('depositAmount', 0, 100000); num('taxRate', 0, 25); num('defaultApr', 0, 40); num('tradeBase', 1000, 500000); num('tradeDepreciation', 0, 0.5); num('tradeMilesPerYear', 1000, 50000); num('tradeMileAdj', 0, 0.5);
-    if (p.defaultTerm !== undefined) { var t = Math.round(n(p.defaultTerm)); if (t < 36 || t > 84) throw err('bad_term', 'Term must be 36 to 84 months.'); s.defaultTerm = t; }
+    if (p.defaultTerm !== undefined) { var t = Math.round(n(p.defaultTerm, NaN)); if (!(t >= 36 && t <= 84)) throw err('bad_term', 'Default term must be 36 to 84 months.'); s.defaultTerm = t; }
     if (p.taxTradeCredit !== undefined) s.taxTradeCredit = !!p.taxTradeCredit;
     if (p.bookingUrl !== undefined) { var u = clean(p.bookingUrl, 200); if (u && !/^(https:\/\/|[\w./-]+$)/.test(u)) throw err('bad_url', 'Booking link must be https:// or a relative path.'); s.bookingUrl = u || 'booking.html'; }
     if (p.photoBase !== undefined) { var b = clean(p.photoBase, 200); if (b && !/^(https:\/\/|[\w./-]+$)/.test(b)) throw err('bad_url', 'Photo base must be https:// or a relative path.'); s.photoBase = b; }
-    save(); return settings();
+    state.settings = s;
+    if (!save() && store()) { state.settings = prev; throw err('save_failed', saveError || 'Could not save settings.'); }
+    return settings();
   }
 
   // ---------- trade-in estimate ----------
