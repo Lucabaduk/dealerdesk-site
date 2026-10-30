@@ -7,7 +7,7 @@ function boot(o={}){const d=new JSDOM(html,{runScripts:'dangerously',url:'https:
 (async()=>{
 let w=boot();await tick();let doc=w.document,DD=w.DealerDesk;const nav=v=>doc.querySelector('[data-view="'+v+'"]').click();
 function submit(k,vals){const f=doc.querySelector('[data-form="'+k+'"]');for(const n in vals){f.elements[n].value=vals[n]}f.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}))}
-ok(DD.cars().length===carsJson.cars.length,'cars loaded from cars.json');ok(DD.state.leads.length===carsJson.leads.length,'leads seeded');
+ok(DD.cars().length===carsJson.cars.length,'cars loaded from cars.json');ok(DD.state.leads.length===(carsJson.leads||[]).length,'leads seeded');
 ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(html),'no emoji');ok(!w.__f.some(u=>u.startsWith('version')),'no poll without watch');
 nav('inventory');const imgs=[...doc.querySelectorAll('img.thumb')];ok(imgs.length===Math.min(50,carsJson.cars.length)&&imgs.every(i=>i.getAttribute('loading')==='lazy'),'lazy thumbs, paged');
 ok(imgs.every(i=>/^assets\//.test(i.getAttribute('src'))),'photos or no-photo.webp');
@@ -28,8 +28,8 @@ nav('deals');submit('deal',{car_id:c.id,buyer:'Pat',price:14500,staff_id:'st-2'}
 doc.querySelector('[data-act=closedeal][data-id="'+d.id+'"]').click();ok(DD.car(c.id).status==='sold'&&doc.querySelector('.pill.closed'),'close -> sold');
 nav('dashboard');ok(doc.querySelector('[data-kpi="Cars sold"] b').textContent==='1','dashboard sold');
 // leads + bookings through schema
-nav('leads');submit('lead',{name:'Q',phone:'12'});ok(DD.state.leads.length===carsJson.leads.length,'bad phone rejected');
-submit('lead',{name:'Q',phone:'(313) 555-0100'});ok(DD.state.leads.length===carsJson.leads.length+1,'lead added');
+nav('leads');submit('lead',{name:'Q',phone:'12'});ok(DD.state.leads.length===(carsJson.leads||[]).length,'bad phone rejected');
+submit('lead',{name:'Q',phone:'(313) 555-0100'});ok(DD.state.leads.length===(carsJson.leads||[]).length+1,'lead added');
 let ev=0;DD.on('booking',()=>ev++);DD.addServiceBooking({customer:{name:'Z',phone:'3135550100'},vehicle:{year:2018,make:'A',model:'B'},service_type:'tires',at:'2026-11-03T09:00'});ok(ev===1,'booking hook');
 let threw=false;try{DD.addTestDrive({customer:{name:'Z'},car_id:c.id,at:'2026-11-03T09:00'})}catch(e){threw=!!e.field}ok(threw,'testdrive validates');
 nav('staff');submit('staff',{name:'New Rep',role:'Finance'});ok(DD.state.staff.length===4,'staff');
