@@ -94,4 +94,6 @@ if (!jsdom) skipped.push('UI tests (jsdom not found)'); else {
     d.querySelector('[data-filter=""]').click(); const q = d.querySelector('[data-q]'); q.value = 'bob'; q.dispatchEvent(new dom.window.Event('input', { bubbles: true })); assert.strictEqual(d.querySelectorAll('.ddo-row').length, 1);
     assert.match(d.querySelector('.ddo-row a.ddb-btn').getAttribute('href'), /^booking\.html\?vehicle=/); assert.strictEqual(JSON.parse(st.getItem('dealerdesk_orders')).orders.filter(o => o.status === 'contacted').length, 1); });
 }
+t('QA: non-numeric APR/term is an error, not 0%', () => { for (const x of [{ apr: 'abc' }, { term: 'abc' }]) { let c; try { O.payment(Object.assign({ price: 20000 }, x)); } catch (e) { c = e.code; } assert.ok(c === 'bad_apr' || c === 'bad_term', 'got ' + c); } });
+t('QA: stored calc uses the real car price, not a typed one', () => { const P = load(); const car = P.cars().find(c => c.status !== 'sold'); P.submit({ vehicle: car.stock, kind: 'buy', name: 'Q', phone: '3135550111', calc: { price: '1', apr: '5', term: '60' } }); assert.strictEqual(P.all().orders.pop().calc.price, car.price); });
 console.log('\n' + pass + ' passed' + (skipped.length ? ', skipped: ' + skipped.join('; ') : ''));

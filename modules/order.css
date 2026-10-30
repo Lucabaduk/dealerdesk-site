@@ -23,3 +23,5 @@
 .ddo-actions a.ddb-btn{text-decoration:none;display:inline-flex;align-items:center;margin-top:0;min-height:44px}
 .ddb-s-new{border-color:var(--acc)}.ddb-s-contacted{border-color:#2563eb}.ddb-s-deposit{border-color:var(--warn)}.ddb-s-sold{border-color:var(--ok)}
 @media (max-width:600px){.ddo-kind{margin-left:0}.ddo-monthly b{font-size:28px}}
+.ddo-staff .ddb-top{min-width:0}.ddo-staff .ddb-tabs{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}.ddo-staff .ddb-tabs button{flex:0 0 auto}
+.ddo-out .ddb-sm{min-height:44px}
