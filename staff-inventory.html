@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="robots" content="noindex">
+<title>DealerDesk · Staff inventory</title>
+<style>
+:root{color-scheme:light dark;--ink:#14213d;--bg:#f4f6f8;--card:#fff;--muted:#5b6577;--line:#dde2ea;--acc:#0a7d5a;--btn:#0a7d5a}
+@media (prefers-color-scheme:dark){:root{--ink:#e8edf5;--bg:#0e1420;--card:#18202f;--muted:#9aa6ba;--line:#2a3446;--acc:#3fd1a0}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px}h1{font-size:1.2rem;margin:0 auto 0 0}
+.tabs button[aria-selected=true]{background:var(--btn);color:#fff;border-color:var(--btn)}
+button,select,input,textarea{font-size:16px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;padding:0 12px}
+textarea{padding:8px 12px;width:100%}button.primary{background:var(--btn);color:#fff;border-color:var(--btn)}button.small{min-height:36px;font-size:14px;padding:0 10px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px}.bar input[type=search]{flex:1 1 220px}.bar input[type=number]{width:120px}
+.wrap{overflow-x:auto;padding:0 8px}table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}th{color:var(--muted);font-weight:600;font-size:13px}
+td img{width:64px;height:48px;object-fit:cover;border-radius:6px;display:block}td.num{text-align:right}.muted{color:var(--muted)}
+.pager{display:flex;gap:8px;align-items:center;justify-content:center;padding:12px}
+dialog{border:0;border-radius:14px;background:var(--card);color:var(--ink);width:min(560px,96vw);padding:16px}dialog::backdrop{background:#0008}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid label{display:flex;flex-direction:column;font-size:13px;color:var(--muted);gap:4px}.grid .full{grid-column:1/-1}
+.err{color:#c0392b;min-height:1.2em}.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;background:#e3f4ec;color:#0a5c43}
+.pill.hold{background:#fff1d6;color:#7a4b00}.pill.sold{background:#fde2e2;color:#8a1c1c}
+@media (max-width:640px){.hide-sm{display:none}.grid{grid-template-columns:1fr}}
+/* QR label sheet: 3 x 4 per Letter/A4 page */
+#print{display:none}
+.dd-sheet{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.dd-label{display:flex;gap:8px;align-items:center;padding:10px;border:1px dashed #999;break-inside:avoid;page-break-inside:avoid;height:62mm;color:#000;background:#fff}
+.dd-qr{width:30mm;height:30mm;flex:0 0 30mm}.dd-lt{font-family:system-ui,sans-serif;line-height:1.25;min-width:0}
+.dd-l1{font-weight:700;font-size:13px}.dd-l2{font-size:12px}.dd-l3{font-size:18px;font-weight:800;margin:3px 0}.dd-l4{font-size:10px;font-family:ui-monospace,monospace;word-break:break-all}.dd-l5{font-size:9px;margin-top:3px}
+@media print{@page{margin:10mm}body{background:#fff;padding:0}body>*:not(#print){display:none!important}#print{display:block!important}}
+</style></head><body>
+<header><h1>Staff · Inventory</h1>
+<div class="tabs" role="tablist"><button id="tab-inv" role="tab" aria-selected="true">Inventory</button> <button id="tab-leads" role="tab" aria-selected="false">Leads <span id="newcount" class="pill"></span></button></div></header>
+<section id="pane-inv">
+  <div class="bar"><input type="search" id="q" placeholder="Search make, model, VIN, stock #" aria-label="Search">
+    <select id="f-make" aria-label="Make"><option value="">All makes</option></select><select id="f-status" aria-label="Status"><option value="">Any status</option><option>available</option><option>hold</option><option>sold</option></select>
+    <input type="number" id="f-max" placeholder="Max $" aria-label="Max price" inputmode="numeric"><select id="sort" aria-label="Sort"><option value="">Newest added</option><option value="price">Price ↑</option><option value="price:desc">Price ↓</option><option value="year:desc">Year ↓</option><option value="mileage">Mileage ↑</option><option value="stock">Stock #</option></select>
+    <button class="primary" id="add">+ Add car</button><button id="print-page">Print QR (this page)</button>
+    <button id="export">Export JSON</button><label class="muted" style="display:flex;align-items:center;gap:6px"><input type="file" id="import" accept="application/json" style="min-height:0;border:0;padding:0;max-width:200px"></label></div>
+  <p class="muted" id="count" style="padding:0 16px"></p>
+  <div class="wrap"><table><thead><tr><th></th><th>Car</th><th class="hide-sm">Stock #</th><th class="hide-sm">VIN</th><th class="num">Price</th><th class="num hide-sm">Miles</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="pager"><button id="prev">‹ Prev</button><span id="pageinfo"></span><button id="next">Next ›</button></div>
+</section>
+<section id="pane-leads" hidden>
+  <div class="bar"><select id="l-status" aria-label="Lead status"><option value="">All leads</option><option>new</option><option>contacted</option><option>qualified</option><option>won</option><option>lost</option></select><button id="csv">Export CSV</button></div>
+  <div class="wrap"><table><thead><tr><th>When</th><th>Name</th><th>Contact</th><th>Wants</th><th class="hide-sm">Car</th><th>Status</th><th>Notes</th></tr></thead><tbody id="lrows"></tbody></table></div>
+</section>
+<dialog id="dlg"><form id="carform" method="dialog" novalidate><h2 id="dlg-title" style="margin-top:0">Car</h2><div class="grid">
+  <label>VIN<input name="vin" maxlength="17" required autocapitalize="characters"></label><label>Stock #<input name="stock_no" maxlength="20"></label>
+  <label>Year<input name="year" type="number" inputmode="numeric"></label><label>Make<input name="make" maxlength="40"></label>
+  <label>Model<input name="model" maxlength="60"></label><label>Trim<input name="trim" maxlength="60"></label>
+  <label>Price ($)<input name="price" inputmode="decimal"></label><label>Mileage<input name="mileage" inputmode="numeric"></label>
+  <label>Color<input name="color" maxlength="30"></label><label>Condition<select name="condition"><option>used</option><option>new</option></select></label>
+  <label>Status<select name="status"><option>available</option><option>hold</option><option>sold</option></select></label><label>Body<input name="body" maxlength="60"></label>
+  <label class="full">Photo URLs (one per line)<textarea name="photos" rows="2"></textarea></label><label class="full">Features (comma separated)<textarea name="features" rows="2"></textarea></label>
+  </div><p class="err" id="formerr" role="alert"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" id="cancel">Cancel</button><button class="primary" type="submit" id="save">Save</button></div></form></dialog>
+<div id="print"></div>
+<script src="modules/store.js"></script><script src="modules/qr.js"></script><script src="modules/inventory.js"></script><script src="modules/leads.js"></script><script src="modules/qr-label.js"></script><script src="modules/staff-inventory.js"></script>
+</body></html>

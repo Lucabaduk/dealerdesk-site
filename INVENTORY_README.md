@@ -47,3 +47,9 @@ Tests: `node tests/test_inventory.js && node tests/test_leads.js`
 - `compare.html?vins=A,B,C` (+ `modules/compare-page.js`): side-by-side table, sticky labels, horizontal scroll on phones, dark mode, differences highlighted, best value ✓, "Differences only" toggle, Share (native share / copy). With no `vins` it uses the last 4 favorites. Reads `data/cars.json`, falls back to local inventory.
 - Rows: price, year, mileage, body, engine, hp, MPG (city/hwy) or EV range, seats, drivetrain, transmission, color, condition, status, features.
   Spec fields are optional on cars (`body|body_type, engine, transmission, drivetrain, hp, seats, mpg_city, mpg_hwy, range_mi`); inventory keeps them when valid. Helper's cars.json doesn't have them yet → those rows show "—".
+
+## Staff screen, QR labels, leads endpoint
+- `staff-inventory.html` + `modules/staff-inventory.js`: paged table (24/page), search, make/status/max-price filters, sort, add/edit (dialog) /remove, inline status, per-car QR and "Print QR (this page)", JSON export/import; Leads tab with new-count badge, status, staff notes, CSV export. Loads `data/cars.json` on first run. Not linked/auth-protected — it's a static page; real staff auth needs a server.
+- `DDQRLabel.labelData(car, base)` / `label(car, base)` / `sheet(container, cars, base)`: label shows year make model, trim, price, VIN, stock #; print CSS in staff-inventory.html puts 3×4 labels per page (`@media print`).
+- Leads endpoint: car-page.js honours `<meta name="dd-leads-endpoint">` only if `DDStore.allowedEndpoint(url, LEAD_ENDPOINT_HOSTS)` passes (https, exact host in the constant). The list is empty, so nothing is sent until Coder adds the server host there.
+- Photos: `DDStore.setImg(img, src)` falls back to an inline "Photo coming soon" SVG if `assets/site/no-photo.webp` (or any photo) is missing.
