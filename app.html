@@ -7,7 +7,7 @@
 nav{width:210px;background:var(--ink);color:#fff;padding:18px 0;flex-shrink:0}nav h1{font-size:18px;margin:0 20px 18px;letter-spacing:.5px}
 nav button{display:flex;justify-content:space-between;width:100%;background:none;border:0;color:#cdd3e0;text-align:left;padding:10px 20px;font:inherit;cursor:pointer}
 nav button.on,nav button:hover{background:#22325a;color:#fff}.badge{background:var(--acc);color:#fff;border-radius:10px;padding:0 7px;font-size:12px}
-main{flex:1;padding:24px;overflow:auto}h2{margin:0 0 16px;font-weight:600}
+td.empty{text-align:center;color:var(--muted);padding:18px}main{flex:1;padding:24px;overflow:auto}h2{margin:0 0 16px;font-weight:600}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
 .kpi,.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}.kpi b{display:block;font-size:24px}.kpi span{color:var(--muted);font-size:13px}
 table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -42,8 +42,8 @@ function load(){try{var r=localStorage.getItem(KEY);if(r)return schema.normalize
 var db=load();function save(){localStorage.setItem(KEY,JSON.stringify(db))}save();
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return'&#'+c.charCodeAt(0)+';'})}
 function money(n){try{return new Intl.NumberFormat('en-US',{style:'currency',currency:db.settings.currency,maximumFractionDigits:0}).format(+n||0)}catch(e){return'$'+(+n||0)}}
-function car(id){return db.cars.find(function(c){return c.id===id})}function carName(id){var c=car(id);return c?c.year+' '+c.make+' '+c.model:'—'}
-function staff(id){var s=db.staff.find(function(x){return x.id===id});return s?s.name:'—'}
+function car(id){return db.cars.find(function(c){return c.id===id})}function carName(id){var c=car(id);return c?c.year+' '+c.make+' '+c.model:(id?'Removed car':'—')}
+function staff(id){var s=db.staff.find(function(x){return x.id===id});return s?s.name:(id?'Removed staff':'—')}
 function opts(list,lab,sel,blank){return(blank?'<option value="">'+blank+'</option>':'')+list.map(function(x){return'<option value="'+esc(x.id)+'"'+(x.id===sel?' selected':'')+'>'+esc(lab(x))+'</option>'}).join('')}
 var actx;function chime(){if(!db.settings.sound)return;try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();var o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=660;g.gain.setValueAtTime(0.0001,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.12,actx.currentTime+0.03);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+0.6);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+0.65)}catch(e){}}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},1800)}
@@ -57,7 +57,7 @@ inventory:{label:'Inventory',count:function(){return db.cars.filter(function(c){
  return'<h2>Inventory</h2><form class="row" data-form="car"><input name="vin" placeholder="VIN" required maxlength="17"><input name="make" placeholder="Make" required><input name="model" placeholder="Model" required><input name="year" type="number" placeholder="Year" required><input name="price" type="number" placeholder="Price"><input name="mileage" type="number" placeholder="Mileage"><input name="photo" type="url" placeholder="Photo URL (optional)"><button class="btn">Add car</button></form>'+
  '<table><tr><th></th><th>Vehicle</th><th>VIN</th><th>Price</th><th>Mileage</th><th>Status</th><th></th></tr>'+db.cars.map(function(c){return'<tr data-car="'+esc(c.id)+'"><td>'+photo(c)+'</td><td>'+esc(c.year+' '+c.make+' '+c.model)+'</td><td>'+esc(c.vin)+'</td><td>'+money(c.price)+'</td><td>'+(+c.mileage||0).toLocaleString()+' mi</td><td><select data-act="carstatus" data-id="'+esc(c.id)+'">'+['Available','Pending','Sold'].map(function(s){return'<option'+(s===c.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td><td><button class="btn ghost" data-act="delcar" data-id="'+esc(c.id)+'">Remove</button></td></tr>'}).join('')+'</table>'}},
 leads:{label:'Leads',count:function(){return db.leads.filter(function(l){return l.status==='New'}).length},render:function(){
- return'<h2>Leads</h2><form class="row" data-form="lead"><input name="name" placeholder="Name" required><input name="phone" placeholder="Phone"><select name="carId">'+opts(db.cars,function(c){return carName(c.id)},'','Vehicle of interest')+'</select><select name="source"><option>Walk-in</option><option>Phone</option><option>Website</option><option>QR</option></select><button class="btn">Add lead</button></form>'+
+ return'<h2>Leads</h2><form class="row" data-form="lead"><input name="name" placeholder="Name" required><input name="phone" type="tel" placeholder="Phone" pattern="[+0-9 ().\-]{7,20}" title="7–15 digits, may use + ( ) - . and spaces"><select name="carId">'+opts(db.cars,function(c){return carName(c.id)},'','Vehicle of interest')+'</select><select name="source"><option>Walk-in</option><option>Phone</option><option>Website</option><option>QR</option></select><button class="btn">Add lead</button></form>'+
  '<table><tr><th>Name</th><th>Phone</th><th>Vehicle</th><th>Source</th><th>Status</th></tr>'+db.leads.map(function(l){return'<tr><td>'+esc(l.name)+'</td><td>'+esc(l.phone)+'</td><td>'+esc(carName(l.carId))+'</td><td>'+esc(l.source)+'</td><td><select data-act="leadstatus" data-id="'+esc(l.id)+'">'+['New','Contacted','Qualified','Closed','Lost'].map(function(s){return'<option'+(s===l.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select></td></tr>'}).join('')+'</table>'}},
 bookings:{label:'Bookings',count:function(){return db.bookings.length},render:function(){
  return'<h2>Test drives &amp; service</h2><form class="row" data-form="booking"><select name="type"><option>Test drive</option><option>Service</option></select><input name="name" placeholder="Customer" required><select name="carId">'+opts(db.cars,function(c){return carName(c.id)},'','Vehicle')+'</select><input name="when" type="datetime-local" required><select name="staffId">'+opts(db.staff,function(s){return s.name},'')+'</select><button class="btn">Book</button></form>'+
@@ -70,14 +70,17 @@ staff:{label:'Staff',render:function(){return'<h2>Staff</h2><form class="row" da
 settings:{label:'Settings',render:function(){var s=db.settings;return'<h2>Settings</h2><form class="card" data-form="settings" style="max-width:460px;display:grid;gap:10px"><label>Dealership name<br><input name="dealer" value="'+esc(s.dealer)+'" style="width:100%"></label><label>Currency<br><select name="currency">'+['USD','CAD','EUR','GBP','BRL'].map(function(c){return'<option'+(c===s.currency?' selected':'')+'>'+c+'</option>'}).join('')+'</select></label><label>Sales tax %<br><input name="taxRate" type="number" step="0.01" value="'+esc(s.taxRate)+'"></label><label><input type="checkbox" name="sound"'+(s.sound?' checked':'')+'> Soft alert chime</label><div><button class="btn">Save settings</button> <button type="button" class="btn ghost" data-act="export">Export data</button> <button type="button" class="btn ghost" data-act="reset">Reset to sample data</button></div></form>'}}
 };
 var cur='dashboard';
-function render(){document.getElementById('nav').innerHTML='<h1>'+esc(db.settings.dealer||'DealerDesk')+'</h1>'+Object.keys(views).map(function(k){var v=views[k],n=v.count?v.count():0;return'<button data-view="'+k+'"'+(k===cur?' class="on"':'')+'><span>'+v.label+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</button>'}).join('');document.getElementById('main').innerHTML=views[cur].render();DD.emit('render',cur)}
+function render(){document.getElementById('nav').innerHTML='<h1>'+esc(db.settings.dealer||'DealerDesk')+'</h1>'+Object.keys(views).map(function(k){var v=views[k],n=v.count?v.count():0;return'<button data-view="'+k+'"'+(k===cur?' class="on"':'')+'><span>'+v.label+'</span>'+(n?'<span class="badge">'+n+'</span>':'')+'</button>'}).join('');document.getElementById('main').innerHTML=views[cur].render();[].forEach.call(document.querySelectorAll('#main table'),function(t){if(t.rows.length<2){var r=t.insertRow(),c=r.insertCell();c.colSpan=t.rows[0].cells.length;c.className='empty';c.textContent='Nothing here yet.'}});
+ if(cur==='leads'&&preCar){var sel=document.querySelector('[data-form=lead] [name=carId]');if(sel&&car(preCar))sel.value=preCar;var so=document.querySelector('[data-form=lead] [name=source]');if(so)so.value='QR';preCar=''}
+ DD.emit('render',cur)}
 function fd(f){var o={};new FormData(f).forEach(function(v,k){o[k]=typeof v==='string'?v.trim():v});return o}
+var preCar='';
 var add={car:function(o){db.cars.push({id:uid('c'),vin:o.vin.toUpperCase(),make:o.make,model:o.model,year:+o.year,price:+o.price||0,mileage:+o.mileage||0,status:'Available',photo:/^https:\/\//.test(o.photo)?o.photo:''})},
- lead:function(o){DD.addLead(o)},booking:function(o){DD.addBooking(o)},
+ lead:function(o){var dg=(o.phone||'').replace(/\D/g,'');if(o.phone&&(dg.length<7||dg.length>15||!/^[+0-9 ().-]+$/.test(o.phone))){toast('Enter a valid phone number');return false}DD.addLead(o)},booking:function(o){DD.addBooking(o)},
  deal:function(o){db.deals.push({id:uid('d'),carId:o.carId,buyer:o.buyer,price:+o.price,staffId:o.staffId,status:'Pending',date:new Date().toISOString().slice(0,10)});var c=car(o.carId);if(c)c.status='Pending'},
  staff:function(o){db.staff.push({id:uid('s'),name:o.name,role:o.role})},
  settings:function(o,f){db.settings.dealer=o.dealer||'DealerDesk';db.settings.currency=o.currency;db.settings.taxRate=Math.max(0,+o.taxRate||0);db.settings.sound=f.elements.sound.checked}};
-document.addEventListener('submit',function(e){var f=e.target,k=f.getAttribute('data-form');if(!add[k])return;e.preventDefault();add[k](fd(f),f);save();render();toast('Saved')});
+document.addEventListener('submit',function(e){var f=e.target,k=f.getAttribute('data-form');if(!add[k])return;e.preventDefault();if(add[k](fd(f),f)===false)return;save();render();toast('Saved')});
 document.addEventListener('change',function(e){var a=e.target.getAttribute('data-act'),id=e.target.getAttribute('data-id');if(a==='carstatus'){car(id).status=e.target.value}else if(a==='leadstatus'){db.leads.find(function(l){return l.id===id}).status=e.target.value}else return;save();render()});
 document.addEventListener('click',function(e){var b=e.target.closest('[data-view],[data-act]');if(!b||b.tagName==='SELECT')return;var v=b.getAttribute('data-view');if(v){cur=v;render();return}
  var a=b.getAttribute('data-act'),id=b.getAttribute('data-id'),d;
@@ -95,7 +98,7 @@ var DD=window.DealerDesk={get db(){return db},schema:schema,save:save,render:ren
  addLead:function(o){var l={id:uid('l'),name:o.name,phone:o.phone||'',carId:o.carId||'',source:o.source||'Walk-in',status:'New',created:new Date().toISOString().slice(0,10)};db.leads.push(l);save();chime();DD.emit('lead',l);render();return l},
  addBooking:function(o){var b={id:uid('b'),type:o.type==='Service'?'Service':'Test drive',name:o.name,carId:o.carId||'',when:o.when,staffId:o.staffId||''};db.bookings.push(b);save();chime();DD.emit('booking',b);render();return b}};
 // QR lead deep link: app.html#lead?car=<id>
-if(/^#lead/.test(location.hash)){cur='leads'}
+if(/^#lead/.test(location.hash)){cur='leads';var m=/[?&]car=([^&]+)/.exec(location.hash);if(m)preCar=decodeURIComponent(m[1])}
 render();if(db.firstRun){delete db.firstRun;save();toast('Sample data loaded. Reset anytime in Settings.')}
 })();
 </script><script>(function(){var v=null,pend=false;function typing(){var a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)}
