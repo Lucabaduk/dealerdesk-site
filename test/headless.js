@@ -1,5 +1,5 @@
 const {JSDOM}=require('jsdom'),fs=require('fs'),path=require('path');
-const R=path.join(__dirname,'..'),html=fs.readFileSync(R+'/app.html','utf8'),carsJson=JSON.parse(fs.readFileSync(R+'/cars.json','utf8'));
+const R=path.join(__dirname,'..'),html=fs.readFileSync(R+'/app.html','utf8'),carsJson=JSON.parse(fs.readFileSync(R+'/src/sample-data.json','utf8'));
 let pass=0,fail=0;const ok=(c,m)=>{c?pass++:(fail++,console.log('FAIL',m))};
 const tick=()=>new Promise(r=>setTimeout(r,30));
 function boot(o={}){const d=new JSDOM(html,{runScripts:'dangerously',url:'https://x.test/app.html'+(o.q||'')+(o.hash||''),beforeParse(w){if(o.v2)w.localStorage.setItem('dealerdesk.v2',o.v2);if(o.v1)w.localStorage.setItem('dealerdesk.v1',o.v1);w.confirm=()=>true;

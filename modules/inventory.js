@@ -50,7 +50,7 @@
         INDEXED.forEach(function (f) { var k = String(c[f]).toLowerCase(); (idx[f][k] || (idx[f][k] = [])).push(i); });
         hay[i] = [c.vin, c.stock_no, c.year, c.make, c.model, c.trim, c.color, c.features.join(' ')].join(' ').toLowerCase(); }
     }
-    function save() { if (!persist) return true; try { store.setItem(KEY, JSON.stringify(cars)); return true; } catch (e) { /* quota: keep in memory, drop stale copy so a reload doesn't show old data */ try { store.removeItem(KEY); } catch (e2) {} return false; } }
+    function save() { if (!persist) return true; if (cars.length > 1000) { try { store.removeItem(KEY); } catch (e0) {} return false; } /* big static lists (data/cars.json) are never copied into localStorage */ try { store.setItem(KEY, JSON.stringify(cars)); return true; } catch (e) { /* quota: keep in memory, drop stale copy so a reload doesn't show old data */ try { store.removeItem(KEY); } catch (e2) {} return false; } }
     function ingest(listIn) { var out = [], seen = {}, skipped = 0; (listIn || []).slice(0, 20000).forEach(function (c) { var r = normalize(c, clock()); if (!r.ok || seen[r.car.vin] || seen['#' + r.car.id]) { skipped++; return; } seen[r.car.vin] = seen['#' + r.car.id] = 1; out.push(r.car); }); return { cars: out, skipped: skipped }; }
     try { var raw = JSON.parse(store.getItem(KEY) || 'null'); if (Array.isArray(raw)) cars = ingest(raw).cars; } catch (e) { cars = []; }
     rebuild();

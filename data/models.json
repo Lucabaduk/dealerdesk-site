@@ -1,0 +1,4630 @@
+[
+ {
+  "make": "Toyota",
+  "model": "Camry",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl hybrid",
+  "horsepower": 225,
+  "transmission": "eCVT",
+  "drivetrain": "FWD",
+  "fuel_type": "hybrid",
+  "base_price": 28400,
+  "trims": [
+   "LE",
+   "SE",
+   "XLE",
+   "XSE"
+  ],
+  "slug": "toyota-camry",
+  "mpg_city": 51,
+  "mpg_highway": 49,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-camry.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "Corolla",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 169,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 22500,
+  "trims": [
+   "LE",
+   "SE",
+   "XSE",
+   "Nightshade"
+  ],
+  "slug": "toyota-corolla",
+  "mpg_city": 32,
+  "mpg_highway": 41,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-corolla.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "RAV4",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 203,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 29800,
+  "trims": [
+   "LE",
+   "XLE",
+   "XLE Premium",
+   "Adventure",
+   "Limited"
+  ],
+  "slug": "toyota-rav4",
+  "mpg_city": 27,
+  "mpg_highway": 34,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-rav4.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "RAV4 Hybrid",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl hybrid",
+  "horsepower": 219,
+  "transmission": "eCVT",
+  "drivetrain": "AWD",
+  "fuel_type": "hybrid",
+  "base_price": 32900,
+  "trims": [
+   "LE",
+   "XLE",
+   "SE",
+   "XSE",
+   "Limited"
+  ],
+  "slug": "toyota-rav4-hybrid",
+  "mpg_city": 41,
+  "mpg_highway": 38,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-rav4-hybrid.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "Highlander",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "2.4L turbo 4-cyl",
+  "horsepower": 265,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 40500,
+  "trims": [
+   "LE",
+   "XLE",
+   "Limited",
+   "Platinum"
+  ],
+  "slug": "toyota-highlander",
+  "mpg_city": 22,
+  "mpg_highway": 29,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-highlander.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "Tacoma",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.4L turbo 4-cyl",
+  "horsepower": 278,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 32500,
+  "trims": [
+   "SR",
+   "SR5",
+   "TRD Sport",
+   "TRD Off-Road",
+   "Limited"
+  ],
+  "slug": "toyota-tacoma",
+  "mpg_city": 20,
+  "mpg_highway": 24,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-tacoma.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "Tundra",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.5L twin-turbo V6",
+  "horsepower": 389,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 42000,
+  "trims": [
+   "SR",
+   "SR5",
+   "Limited",
+   "Platinum",
+   "1794 Edition"
+  ],
+  "slug": "toyota-tundra",
+  "mpg_city": 17,
+  "mpg_highway": 22,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-tundra.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "Prius",
+  "body_type": "hatchback",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl hybrid",
+  "horsepower": 194,
+  "transmission": "eCVT",
+  "drivetrain": "FWD",
+  "fuel_type": "hybrid",
+  "base_price": 28500,
+  "trims": [
+   "LE",
+   "XLE",
+   "Limited"
+  ],
+  "slug": "toyota-prius",
+  "mpg_city": 57,
+  "mpg_highway": 56,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-prius.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "4Runner",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.4L turbo 4-cyl",
+  "horsepower": 278,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 41000,
+  "trims": [
+   "SR5",
+   "TRD Sport",
+   "TRD Off-Road",
+   "Limited"
+  ],
+  "slug": "toyota-4runner",
+  "mpg_city": 20,
+  "mpg_highway": 24,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-4runner.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "Sienna",
+  "body_type": "minivan",
+  "doors": 4,
+  "seats": 8,
+  "engine": "2.5L 4-cyl hybrid",
+  "horsepower": 245,
+  "transmission": "eCVT",
+  "drivetrain": "FWD",
+  "fuel_type": "hybrid",
+  "base_price": 39500,
+  "trims": [
+   "LE",
+   "XLE",
+   "XSE",
+   "Limited",
+   "Platinum"
+  ],
+  "slug": "toyota-sienna",
+  "mpg_city": 36,
+  "mpg_highway": 36,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/toyota-sienna.webp"
+ },
+ {
+  "make": "Toyota",
+  "model": "bZ4X",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 221,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "FWD",
+  "fuel_type": "electric",
+  "base_price": 43000,
+  "trims": [
+   "XLE",
+   "Limited"
+  ],
+  "slug": "toyota-bz4x",
+  "range_miles": 252,
+  "years": [
+   2023,
+   2027
+  ],
+  "photo": "assets/cars/toyota-bz4x.webp"
+ },
+ {
+  "make": "Honda",
+  "model": "Civic",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 150,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 24500,
+  "trims": [
+   "LX",
+   "Sport",
+   "EX",
+   "Touring"
+  ],
+  "slug": "honda-civic",
+  "mpg_city": 32,
+  "mpg_highway": 41,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/honda-civic.webp"
+ },
+ {
+  "make": "Honda",
+  "model": "Accord",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 4-cyl",
+  "horsepower": 192,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 28300,
+  "trims": [
+   "LX",
+   "EX",
+   "Sport Hybrid",
+   "EX-L Hybrid",
+   "Touring Hybrid"
+  ],
+  "slug": "honda-accord",
+  "mpg_city": 29,
+  "mpg_highway": 37,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/honda-accord.webp"
+ },
+ {
+  "make": "Honda",
+  "model": "CR-V",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 4-cyl",
+  "horsepower": 190,
+  "transmission": "CVT",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 31000,
+  "trims": [
+   "LX",
+   "EX",
+   "EX-L",
+   "Sport Hybrid",
+   "Sport Touring Hybrid"
+  ],
+  "slug": "honda-cr-v",
+  "mpg_city": 27,
+  "mpg_highway": 32,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/honda-cr-v.webp"
+ },
+ {
+  "make": "Honda",
+  "model": "HR-V",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 158,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 25500,
+  "trims": [
+   "LX",
+   "Sport",
+   "EX-L"
+  ],
+  "slug": "honda-hr-v",
+  "mpg_city": 26,
+  "mpg_highway": 32,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/honda-hr-v.webp"
+ },
+ {
+  "make": "Honda",
+  "model": "Pilot",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.5L V6",
+  "horsepower": 285,
+  "transmission": "10-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Sport",
+   "EX-L",
+   "TrailSport",
+   "Touring",
+   "Elite"
+  ],
+  "slug": "honda-pilot",
+  "mpg_city": 19,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/honda-pilot.webp"
+ },
+ {
+  "make": "Honda",
+  "model": "Passport",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.5L V6",
+  "horsepower": 280,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 42000,
+  "trims": [
+   "EX-L",
+   "TrailSport",
+   "Elite"
+  ],
+  "slug": "honda-passport",
+  "mpg_city": 19,
+  "mpg_highway": 24,
+  "years": [
+   2019,
+   2027
+  ],
+  "photo": "assets/cars/honda-passport.webp"
+ },
+ {
+  "make": "Honda",
+  "model": "Odyssey",
+  "body_type": "minivan",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.5L V6",
+  "horsepower": 280,
+  "transmission": "10-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 39000,
+  "trims": [
+   "EX",
+   "EX-L",
+   "Sport",
+   "Touring",
+   "Elite"
+  ],
+  "slug": "honda-odyssey",
+  "mpg_city": 19,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/honda-odyssey.webp"
+ },
+ {
+  "make": "Honda",
+  "model": "Ridgeline",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.5L V6",
+  "horsepower": 280,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Sport",
+   "RTL",
+   "TrailSport",
+   "Black Edition"
+  ],
+  "slug": "honda-ridgeline",
+  "mpg_city": 18,
+  "mpg_highway": 24,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/honda-ridgeline.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "F-150",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 6,
+  "engine": "2.7L twin-turbo V6",
+  "horsepower": 325,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 39000,
+  "trims": [
+   "XL",
+   "STX",
+   "XLT",
+   "Lariat",
+   "King Ranch",
+   "Platinum",
+   "Raptor"
+  ],
+  "slug": "ford-f-150",
+  "mpg_city": 19,
+  "mpg_highway": 24,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/ford-f-150.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "F-150 Lightning",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Dual electric motors",
+  "horsepower": 452,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "4WD",
+  "fuel_type": "electric",
+  "base_price": 55000,
+  "trims": [
+   "Pro",
+   "XLT",
+   "Flash",
+   "Lariat",
+   "Platinum"
+  ],
+  "slug": "ford-f-150-lightning",
+  "range_miles": 240,
+  "years": [
+   2022,
+   2025
+  ],
+  "photo": "assets/cars/ford-f-150-lightning.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Ranger",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.3L turbo 4-cyl",
+  "horsepower": 270,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 33000,
+  "trims": [
+   "XL",
+   "XLT",
+   "Lariat",
+   "Raptor"
+  ],
+  "slug": "ford-ranger",
+  "mpg_city": 20,
+  "mpg_highway": 24,
+  "years": [
+   2019,
+   2027
+  ],
+  "photo": "assets/cars/ford-ranger.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Maverick",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl hybrid",
+  "horsepower": 191,
+  "transmission": "eCVT",
+  "drivetrain": "FWD",
+  "fuel_type": "hybrid",
+  "base_price": 25000,
+  "trims": [
+   "XL",
+   "XLT",
+   "Lariat"
+  ],
+  "slug": "ford-maverick",
+  "mpg_city": 42,
+  "mpg_highway": 33,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/ford-maverick.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Mustang",
+  "body_type": "coupe",
+  "doors": 2,
+  "seats": 4,
+  "engine": "2.3L turbo 4-cyl",
+  "horsepower": 315,
+  "transmission": "10-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 31000,
+  "trims": [
+   "EcoBoost",
+   "EcoBoost Premium",
+   "GT",
+   "GT Premium",
+   "Dark Horse"
+  ],
+  "slug": "ford-mustang",
+  "mpg_city": 21,
+  "mpg_highway": 32,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/site/no-photo.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Mustang Mach-E",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 264,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 40000,
+  "trims": [
+   "Select",
+   "Premium",
+   "GT"
+  ],
+  "slug": "ford-mustang-mach-e",
+  "range_miles": 260,
+  "years": [
+   2021,
+   2027
+  ],
+  "photo": "assets/cars/ford-mustang-mach-e.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Explorer",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.3L turbo 4-cyl",
+  "horsepower": 300,
+  "transmission": "10-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 38000,
+  "trims": [
+   "Active",
+   "ST-Line",
+   "Platinum",
+   "ST"
+  ],
+  "slug": "ford-explorer",
+  "mpg_city": 21,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/ford-explorer.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Escape",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 3-cyl",
+  "horsepower": 180,
+  "transmission": "8-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 29000,
+  "trims": [
+   "Active",
+   "ST-Line",
+   "Platinum",
+   "PHEV"
+  ],
+  "slug": "ford-escape",
+  "mpg_city": 27,
+  "mpg_highway": 34,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/ford-escape.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Bronco",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.3L turbo 4-cyl",
+  "horsepower": 300,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 39000,
+  "trims": [
+   "Big Bend",
+   "Outer Banks",
+   "Badlands",
+   "Wildtrak",
+   "Raptor"
+  ],
+  "slug": "ford-bronco",
+  "mpg_city": 20,
+  "mpg_highway": 21,
+  "years": [
+   2021,
+   2027
+  ],
+  "photo": "assets/cars/ford-bronco.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Bronco Sport",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 3-cyl",
+  "horsepower": 180,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 31000,
+  "trims": [
+   "Big Bend",
+   "Outer Banks",
+   "Badlands"
+  ],
+  "slug": "ford-bronco-sport",
+  "mpg_city": 25,
+  "mpg_highway": 29,
+  "years": [
+   2021,
+   2027
+  ],
+  "photo": "assets/cars/ford-bronco-sport.webp"
+ },
+ {
+  "make": "Ford",
+  "model": "Expedition",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.5L twin-turbo V6",
+  "horsepower": 400,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 60000,
+  "trims": [
+   "Active",
+   "Platinum",
+   "King Ranch",
+   "Tremor"
+  ],
+  "slug": "ford-expedition",
+  "mpg_city": 17,
+  "mpg_highway": 23,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/ford-expedition.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Silverado 1500",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 6,
+  "engine": "2.7L turbo 4-cyl",
+  "horsepower": 310,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 38000,
+  "trims": [
+   "WT",
+   "Custom",
+   "LT",
+   "RST",
+   "LTZ",
+   "High Country"
+  ],
+  "slug": "chevrolet-silverado-1500",
+  "mpg_city": 19,
+  "mpg_highway": 22,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-silverado-1500.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Silverado EV",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Dual electric motors",
+  "horsepower": 510,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "4WD",
+  "fuel_type": "electric",
+  "base_price": 74000,
+  "trims": [
+   "WT",
+   "RST"
+  ],
+  "slug": "chevrolet-silverado-ev",
+  "range_miles": 440,
+  "years": [
+   2024,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-silverado-ev.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Colorado",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.7L turbo 4-cyl",
+  "horsepower": 237,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 32000,
+  "trims": [
+   "WT",
+   "LT",
+   "Trail Boss",
+   "Z71",
+   "ZR2"
+  ],
+  "slug": "chevrolet-colorado",
+  "mpg_city": 19,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-colorado.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Malibu",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 4-cyl",
+  "horsepower": 163,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 26000,
+  "trims": [
+   "LS",
+   "RS",
+   "LT",
+   "2LT"
+  ],
+  "slug": "chevrolet-malibu",
+  "mpg_city": 28,
+  "mpg_highway": 36,
+  "years": [
+   2015,
+   2025
+  ],
+  "photo": "assets/cars/chevrolet-malibu.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Trax",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.2L turbo 3-cyl",
+  "horsepower": 137,
+  "transmission": "6-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 21500,
+  "trims": [
+   "LS",
+   "1RS",
+   "LT",
+   "2RS",
+   "Activ"
+  ],
+  "slug": "chevrolet-trax",
+  "mpg_city": 28,
+  "mpg_highway": 32,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-trax.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Equinox",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 4-cyl",
+  "horsepower": 175,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 29000,
+  "trims": [
+   "LT",
+   "RS",
+   "Activ"
+  ],
+  "slug": "chevrolet-equinox",
+  "mpg_city": 26,
+  "mpg_highway": 31,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-equinox.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Equinox EV",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 213,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "FWD",
+  "fuel_type": "electric",
+  "base_price": 35000,
+  "trims": [
+   "1LT",
+   "2LT",
+   "2RS",
+   "3LT",
+   "3RS"
+  ],
+  "slug": "chevrolet-equinox-ev",
+  "range_miles": 319,
+  "years": [
+   2024,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-equinox-ev.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Blazer",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 228,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 36000,
+  "trims": [
+   "2LT",
+   "3LT",
+   "RS",
+   "Premier"
+  ],
+  "slug": "chevrolet-blazer",
+  "mpg_city": 21,
+  "mpg_highway": 27,
+  "years": [
+   2019,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-blazer.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Traverse",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "2.5L turbo 4-cyl",
+  "horsepower": 328,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 39000,
+  "trims": [
+   "LS",
+   "LT",
+   "Z71",
+   "RS"
+  ],
+  "slug": "chevrolet-traverse",
+  "mpg_city": 18,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-traverse.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Tahoe",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "5.3L V8",
+  "horsepower": 355,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 58000,
+  "trims": [
+   "LS",
+   "LT",
+   "RST",
+   "Z71",
+   "Premier",
+   "High Country"
+  ],
+  "slug": "chevrolet-tahoe",
+  "mpg_city": 15,
+  "mpg_highway": 20,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-tahoe.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Suburban",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "5.3L V8",
+  "horsepower": 355,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 61000,
+  "trims": [
+   "LS",
+   "LT",
+   "RST",
+   "Z71",
+   "Premier",
+   "High Country"
+  ],
+  "slug": "chevrolet-suburban",
+  "mpg_city": 15,
+  "mpg_highway": 19,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-suburban.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Camaro",
+  "body_type": "coupe",
+  "doors": 2,
+  "seats": 4,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 275,
+  "transmission": "8-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 30000,
+  "trims": [
+   "1LT",
+   "2LT",
+   "3LT",
+   "LT1",
+   "SS",
+   "ZL1"
+  ],
+  "slug": "chevrolet-camaro",
+  "mpg_city": 20,
+  "mpg_highway": 30,
+  "years": [
+   2015,
+   2024
+  ],
+  "photo": "assets/cars/chevrolet-camaro.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Corvette",
+  "body_type": "coupe",
+  "doors": 2,
+  "seats": 2,
+  "engine": "6.2L V8",
+  "horsepower": 490,
+  "transmission": "8-speed dual-clutch",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 68000,
+  "trims": [
+   "1LT",
+   "2LT",
+   "3LT",
+   "Z06",
+   "E-Ray"
+  ],
+  "slug": "chevrolet-corvette",
+  "mpg_city": 16,
+  "mpg_highway": 24,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chevrolet-corvette.webp"
+ },
+ {
+  "make": "Chevrolet",
+  "model": "Bolt EUV",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 200,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "FWD",
+  "fuel_type": "electric",
+  "base_price": 28000,
+  "trims": [
+   "LT",
+   "Premier"
+  ],
+  "slug": "chevrolet-bolt-euv",
+  "range_miles": 247,
+  "years": [
+   2022,
+   2023
+  ],
+  "photo": "assets/cars/chevrolet-bolt-euv.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Altima",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 188,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 27000,
+  "trims": [
+   "S",
+   "SV",
+   "SR",
+   "SL"
+  ],
+  "slug": "nissan-altima",
+  "mpg_city": 27,
+  "mpg_highway": 39,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/nissan-altima.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Sentra",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 149,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 21500,
+  "trims": [
+   "S",
+   "SV",
+   "SR"
+  ],
+  "slug": "nissan-sentra",
+  "mpg_city": 30,
+  "mpg_highway": 40,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/nissan-sentra.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Versa",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.6L 4-cyl",
+  "horsepower": 122,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 18000,
+  "trims": [
+   "S",
+   "SV",
+   "SR"
+  ],
+  "slug": "nissan-versa",
+  "mpg_city": 32,
+  "mpg_highway": 40,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/nissan-versa.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Kicks",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 141,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 22500,
+  "trims": [
+   "S",
+   "SV",
+   "SR"
+  ],
+  "slug": "nissan-kicks",
+  "mpg_city": 28,
+  "mpg_highway": 35,
+  "years": [
+   2018,
+   2027
+  ],
+  "photo": "assets/cars/nissan-kicks.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Rogue",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 3-cyl",
+  "horsepower": 201,
+  "transmission": "CVT",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 30000,
+  "trims": [
+   "S",
+   "SV",
+   "SL",
+   "Platinum",
+   "Rock Creek"
+  ],
+  "slug": "nissan-rogue",
+  "mpg_city": 28,
+  "mpg_highway": 35,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/nissan-rogue.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Murano",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 241,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 39000,
+  "trims": [
+   "SV",
+   "SL",
+   "Platinum"
+  ],
+  "slug": "nissan-murano",
+  "mpg_city": 21,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/nissan-murano.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Pathfinder",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.5L V6",
+  "horsepower": 284,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 37000,
+  "trims": [
+   "S",
+   "SV",
+   "SL",
+   "Rock Creek",
+   "Platinum"
+  ],
+  "slug": "nissan-pathfinder",
+  "mpg_city": 20,
+  "mpg_highway": 27,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/nissan-pathfinder.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Frontier",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.8L V6",
+  "horsepower": 310,
+  "transmission": "9-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 32000,
+  "trims": [
+   "S",
+   "SV",
+   "PRO-4X",
+   "PRO-X"
+  ],
+  "slug": "nissan-frontier",
+  "mpg_city": 18,
+  "mpg_highway": 23,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/nissan-frontier.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Ariya",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 214,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "FWD",
+  "fuel_type": "electric",
+  "base_price": 40000,
+  "trims": [
+   "Engage",
+   "Venture+",
+   "Evolve+",
+   "Platinum+"
+  ],
+  "slug": "nissan-ariya",
+  "range_miles": 289,
+  "years": [
+   2023,
+   2027
+  ],
+  "photo": "assets/cars/nissan-ariya.webp"
+ },
+ {
+  "make": "Nissan",
+  "model": "Leaf",
+  "body_type": "hatchback",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 147,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "FWD",
+  "fuel_type": "electric",
+  "base_price": 29000,
+  "trims": [
+   "S",
+   "SV Plus"
+  ],
+  "slug": "nissan-leaf",
+  "range_miles": 149,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/nissan-leaf.webp"
+ },
+ {
+  "make": "Hyundai",
+  "model": "Elantra",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 147,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 22500,
+  "trims": [
+   "SE",
+   "SEL",
+   "Limited",
+   "N Line",
+   "N"
+  ],
+  "slug": "hyundai-elantra",
+  "mpg_city": 32,
+  "mpg_highway": 41,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/hyundai-elantra.webp"
+ },
+ {
+  "make": "Hyundai",
+  "model": "Sonata",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 191,
+  "transmission": "8-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 27500,
+  "trims": [
+   "SE",
+   "SEL",
+   "SEL Hybrid",
+   "Limited Hybrid",
+   "N Line"
+  ],
+  "slug": "hyundai-sonata",
+  "mpg_city": 25,
+  "mpg_highway": 34,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/hyundai-sonata.webp"
+ },
+ {
+  "make": "Hyundai",
+  "model": "Kona",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 147,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 25000,
+  "trims": [
+   "SE",
+   "SEL",
+   "N Line",
+   "Limited"
+  ],
+  "slug": "hyundai-kona",
+  "mpg_city": 29,
+  "mpg_highway": 34,
+  "years": [
+   2018,
+   2027
+  ],
+  "photo": "assets/cars/hyundai-kona.webp"
+ },
+ {
+  "make": "Hyundai",
+  "model": "Tucson",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 187,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 29500,
+  "trims": [
+   "SE",
+   "SEL",
+   "XRT",
+   "N Line",
+   "Limited"
+  ],
+  "slug": "hyundai-tucson",
+  "mpg_city": 24,
+  "mpg_highway": 29,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/hyundai-tucson.webp"
+ },
+ {
+  "make": "Hyundai",
+  "model": "Santa Fe",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.5L turbo 4-cyl",
+  "horsepower": 277,
+  "transmission": "8-speed dual-clutch",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 35000,
+  "trims": [
+   "SE",
+   "SEL",
+   "XRT",
+   "Limited",
+   "Calligraphy"
+  ],
+  "slug": "hyundai-santa-fe",
+  "mpg_city": 20,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/hyundai-santa-fe.webp"
+ },
+ {
+  "make": "Hyundai",
+  "model": "Palisade",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.8L V6",
+  "horsepower": 291,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 38000,
+  "trims": [
+   "SE",
+   "SEL",
+   "XRT",
+   "Limited",
+   "Calligraphy"
+  ],
+  "slug": "hyundai-palisade",
+  "mpg_city": 19,
+  "mpg_highway": 24,
+  "years": [
+   2020,
+   2027
+  ],
+  "photo": "assets/cars/hyundai-palisade.webp"
+ },
+ {
+  "make": "Hyundai",
+  "model": "Ioniq 5",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 225,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 43000,
+  "trims": [
+   "SE",
+   "SEL",
+   "XRT",
+   "Limited"
+  ],
+  "slug": "hyundai-ioniq-5",
+  "range_miles": 303,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/hyundai-ioniq-5.webp"
+ },
+ {
+  "make": "Hyundai",
+  "model": "Ioniq 6",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 225,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 39000,
+  "trims": [
+   "SE",
+   "SEL",
+   "Limited"
+  ],
+  "slug": "hyundai-ioniq-6",
+  "range_miles": 342,
+  "years": [
+   2023,
+   2027
+  ],
+  "photo": "assets/cars/hyundai-ioniq-6.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "Forte",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 147,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 21000,
+  "trims": [
+   "LX",
+   "LXS",
+   "GT-Line",
+   "GT"
+  ],
+  "slug": "kia-forte",
+  "mpg_city": 30,
+  "mpg_highway": 41,
+  "years": [
+   2015,
+   2024
+  ],
+  "photo": "assets/cars/kia-forte.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "K5",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.6L turbo 4-cyl",
+  "horsepower": 180,
+  "transmission": "8-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 28000,
+  "trims": [
+   "LXS",
+   "GT-Line",
+   "EX",
+   "GT"
+  ],
+  "slug": "kia-k5",
+  "mpg_city": 27,
+  "mpg_highway": 37,
+  "years": [
+   2021,
+   2027
+  ],
+  "photo": "assets/cars/kia-k5.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "Soul",
+  "body_type": "hatchback",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 147,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 21000,
+  "trims": [
+   "LX",
+   "S",
+   "GT-Line",
+   "EX"
+  ],
+  "slug": "kia-soul",
+  "mpg_city": 28,
+  "mpg_highway": 33,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/kia-soul.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "Seltos",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 147,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 25000,
+  "trims": [
+   "LX",
+   "S",
+   "EX",
+   "X-Line",
+   "SX"
+  ],
+  "slug": "kia-seltos",
+  "mpg_city": 27,
+  "mpg_highway": 31,
+  "years": [
+   2021,
+   2027
+  ],
+  "photo": "assets/cars/kia-seltos.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "Sportage",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 187,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 29000,
+  "trims": [
+   "LX",
+   "EX",
+   "X-Line",
+   "SX",
+   "X-Pro"
+  ],
+  "slug": "kia-sportage",
+  "mpg_city": 23,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/kia-sportage.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "Sorento",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 191,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 32000,
+  "trims": [
+   "LX",
+   "S",
+   "EX",
+   "SX",
+   "X-Pro"
+  ],
+  "slug": "kia-sorento",
+  "mpg_city": 22,
+  "mpg_highway": 29,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/kia-sorento.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "Telluride",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.8L V6",
+  "horsepower": 291,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 37500,
+  "trims": [
+   "LX",
+   "S",
+   "EX",
+   "SX",
+   "X-Pro"
+  ],
+  "slug": "kia-telluride",
+  "mpg_city": 20,
+  "mpg_highway": 26,
+  "years": [
+   2020,
+   2027
+  ],
+  "photo": "assets/cars/kia-telluride.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "Carnival",
+  "body_type": "minivan",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.5L V6",
+  "horsepower": 287,
+  "transmission": "8-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 37000,
+  "trims": [
+   "LX",
+   "LXS",
+   "EX",
+   "SX",
+   "SX Prestige"
+  ],
+  "slug": "kia-carnival",
+  "mpg_city": 19,
+  "mpg_highway": 26,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/kia-carnival.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "EV6",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 225,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 43000,
+  "trims": [
+   "Light",
+   "Wind",
+   "GT-Line",
+   "GT"
+  ],
+  "slug": "kia-ev6",
+  "range_miles": 310,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/kia-ev6.webp"
+ },
+ {
+  "make": "Kia",
+  "model": "EV9",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "Dual electric motors",
+  "horsepower": 379,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "AWD",
+  "fuel_type": "electric",
+  "base_price": 56000,
+  "trims": [
+   "Light",
+   "Wind",
+   "Land",
+   "GT-Line"
+  ],
+  "slug": "kia-ev9",
+  "range_miles": 280,
+  "years": [
+   2024,
+   2027
+  ],
+  "photo": "assets/cars/kia-ev9.webp"
+ },
+ {
+  "make": "Subaru",
+  "model": "Impreza",
+  "body_type": "hatchback",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 152,
+  "transmission": "CVT",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 23000,
+  "trims": [
+   "Base",
+   "Sport",
+   "RS"
+  ],
+  "slug": "subaru-impreza",
+  "mpg_city": 27,
+  "mpg_highway": 34,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/subaru-impreza.webp"
+ },
+ {
+  "make": "Subaru",
+  "model": "Legacy",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 180,
+  "transmission": "CVT",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 25000,
+  "trims": [
+   "Base",
+   "Premium",
+   "Sport",
+   "Limited",
+   "Touring XT"
+  ],
+  "slug": "subaru-legacy",
+  "mpg_city": 27,
+  "mpg_highway": 35,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/subaru-legacy.webp"
+ },
+ {
+  "make": "Subaru",
+  "model": "Crosstrek",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 152,
+  "transmission": "CVT",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 26000,
+  "trims": [
+   "Base",
+   "Premium",
+   "Sport",
+   "Limited",
+   "Wilderness"
+  ],
+  "slug": "subaru-crosstrek",
+  "mpg_city": 27,
+  "mpg_highway": 34,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/subaru-crosstrek.webp"
+ },
+ {
+  "make": "Subaru",
+  "model": "Forester",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 180,
+  "transmission": "CVT",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 29000,
+  "trims": [
+   "Base",
+   "Premium",
+   "Sport",
+   "Limited",
+   "Touring",
+   "Wilderness"
+  ],
+  "slug": "subaru-forester",
+  "mpg_city": 26,
+  "mpg_highway": 33,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/subaru-forester.webp"
+ },
+ {
+  "make": "Subaru",
+  "model": "Outback",
+  "body_type": "wagon",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 182,
+  "transmission": "CVT",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 30000,
+  "trims": [
+   "Base",
+   "Premium",
+   "Onyx Edition",
+   "Limited",
+   "Touring",
+   "Wilderness"
+  ],
+  "slug": "subaru-outback",
+  "mpg_city": 26,
+  "mpg_highway": 32,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/subaru-outback.webp"
+ },
+ {
+  "make": "Subaru",
+  "model": "Ascent",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "2.4L turbo 4-cyl",
+  "horsepower": 260,
+  "transmission": "CVT",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 36000,
+  "trims": [
+   "Base",
+   "Premium",
+   "Onyx Edition",
+   "Limited",
+   "Touring"
+  ],
+  "slug": "subaru-ascent",
+  "mpg_city": 20,
+  "mpg_highway": 26,
+  "years": [
+   2019,
+   2027
+  ],
+  "photo": "assets/cars/subaru-ascent.webp"
+ },
+ {
+  "make": "Subaru",
+  "model": "WRX",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.4L turbo 4-cyl",
+  "horsepower": 271,
+  "transmission": "6-speed manual",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 33000,
+  "trims": [
+   "Base",
+   "Premium",
+   "Limited",
+   "GT",
+   "TR"
+  ],
+  "slug": "subaru-wrx",
+  "mpg_city": 19,
+  "mpg_highway": 26,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/subaru-wrx.webp"
+ },
+ {
+  "make": "Subaru",
+  "model": "BRZ",
+  "body_type": "coupe",
+  "doors": 2,
+  "seats": 4,
+  "engine": "2.4L 4-cyl",
+  "horsepower": 228,
+  "transmission": "6-speed manual",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 30000,
+  "trims": [
+   "Premium",
+   "Limited",
+   "tS"
+  ],
+  "slug": "subaru-brz",
+  "mpg_city": 20,
+  "mpg_highway": 27,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/subaru-brz.webp"
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Jetta",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 4-cyl",
+  "horsepower": 158,
+  "transmission": "8-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 22500,
+  "trims": [
+   "S",
+   "Sport",
+   "SE",
+   "SEL",
+   "GLI"
+  ],
+  "slug": "volkswagen-jetta",
+  "mpg_city": 29,
+  "mpg_highway": 40,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/volkswagen-jetta.webp"
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Golf GTI",
+  "body_type": "hatchback",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 241,
+  "transmission": "7-speed dual-clutch",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 32000,
+  "trims": [
+   "S",
+   "SE",
+   "Autobahn",
+   "380"
+  ],
+  "slug": "volkswagen-golf-gti",
+  "mpg_city": 24,
+  "mpg_highway": 32,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/volkswagen-golf-gti.webp"
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Taos",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 4-cyl",
+  "horsepower": 174,
+  "transmission": "8-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 25000,
+  "trims": [
+   "S",
+   "SE",
+   "SEL"
+  ],
+  "slug": "volkswagen-taos",
+  "mpg_city": 28,
+  "mpg_highway": 36,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/volkswagen-taos.webp"
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Tiguan",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 184,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 29500,
+  "trims": [
+   "S",
+   "SE",
+   "SE R-Line Black",
+   "SEL R-Line"
+  ],
+  "slug": "volkswagen-tiguan",
+  "mpg_city": 23,
+  "mpg_highway": 30,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/volkswagen-tiguan.webp"
+ },
+ {
+  "make": "Volkswagen",
+  "model": "Atlas",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 269,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 38500,
+  "trims": [
+   "SE",
+   "SE with Technology",
+   "Peak Edition",
+   "SEL",
+   "SEL Premium R-Line"
+  ],
+  "slug": "volkswagen-atlas",
+  "mpg_city": 20,
+  "mpg_highway": 25,
+  "years": [
+   2018,
+   2027
+  ],
+  "photo": "assets/cars/volkswagen-atlas.webp"
+ },
+ {
+  "make": "Volkswagen",
+  "model": "ID.4",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 282,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 41000,
+  "trims": [
+   "Standard",
+   "Pro",
+   "Pro S",
+   "Pro S Plus"
+  ],
+  "slug": "volkswagen-id-4",
+  "range_miles": 291,
+  "years": [
+   2021,
+   2027
+  ],
+  "photo": "assets/cars/volkswagen-id-4.webp"
+ },
+ {
+  "make": "Jeep",
+  "model": "Wrangler",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 270,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 34000,
+  "trims": [
+   "Sport",
+   "Sport S",
+   "Willys",
+   "Sahara",
+   "Rubicon",
+   "Rubicon 392"
+  ],
+  "slug": "jeep-wrangler",
+  "mpg_city": 20,
+  "mpg_highway": 24,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/jeep-wrangler.webp"
+ },
+ {
+  "make": "Jeep",
+  "model": "Wrangler 4xe",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl plug-in hybrid",
+  "horsepower": 375,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "plug-in hybrid",
+  "base_price": 50000,
+  "trims": [
+   "Willys",
+   "Sahara",
+   "Rubicon",
+   "High Altitude"
+  ],
+  "slug": "jeep-wrangler-4xe",
+  "mpge": 49,
+  "mpg_combined": 20,
+  "years": [
+   2021,
+   2027
+  ],
+  "photo": "assets/cars/jeep-wrangler-4xe.webp"
+ },
+ {
+  "make": "Jeep",
+  "model": "Gladiator",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.6L V6",
+  "horsepower": 285,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Sport",
+   "Sport S",
+   "Willys",
+   "Mojave",
+   "Rubicon"
+  ],
+  "slug": "jeep-gladiator",
+  "mpg_city": 17,
+  "mpg_highway": 22,
+  "years": [
+   2020,
+   2027
+  ],
+  "photo": "assets/cars/jeep-gladiator.webp"
+ },
+ {
+  "make": "Jeep",
+  "model": "Grand Cherokee",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.6L V6",
+  "horsepower": 293,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Laredo",
+   "Altitude",
+   "Limited",
+   "Overland",
+   "Summit",
+   "Trailhawk"
+  ],
+  "slug": "jeep-grand-cherokee",
+  "mpg_city": 19,
+  "mpg_highway": 26,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/jeep-grand-cherokee.webp"
+ },
+ {
+  "make": "Jeep",
+  "model": "Cherokee",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.4L 4-cyl",
+  "horsepower": 180,
+  "transmission": "9-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 30000,
+  "trims": [
+   "Latitude",
+   "Latitude Lux",
+   "Limited",
+   "Trailhawk"
+  ],
+  "slug": "jeep-cherokee",
+  "mpg_city": 21,
+  "mpg_highway": 29,
+  "years": [
+   2015,
+   2023
+  ],
+  "photo": "assets/cars/jeep-cherokee.webp"
+ },
+ {
+  "make": "Jeep",
+  "model": "Compass",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 200,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 27000,
+  "trims": [
+   "Sport",
+   "Latitude",
+   "Limited",
+   "Trailhawk"
+  ],
+  "slug": "jeep-compass",
+  "mpg_city": 23,
+  "mpg_highway": 31,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/jeep-compass.webp"
+ },
+ {
+  "make": "Jeep",
+  "model": "Wagoneer",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.0L twin-turbo 6-cyl",
+  "horsepower": 420,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 63000,
+  "trims": [
+   "Series I",
+   "Series II",
+   "Series III"
+  ],
+  "slug": "jeep-wagoneer",
+  "mpg_city": 17,
+  "mpg_highway": 23,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/jeep-wagoneer.webp"
+ },
+ {
+  "make": "Ram",
+  "model": "1500",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 6,
+  "engine": "3.6L V6 mild hybrid",
+  "horsepower": 305,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Tradesman",
+   "Big Horn",
+   "Laramie",
+   "Rebel",
+   "Limited",
+   "TRX"
+  ],
+  "slug": "ram-1500",
+  "mpg_city": 20,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/ram-1500.webp"
+ },
+ {
+  "make": "Ram",
+  "model": "2500",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 6,
+  "engine": "6.4L V8",
+  "horsepower": 405,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 46000,
+  "trims": [
+   "Tradesman",
+   "Big Horn",
+   "Laramie",
+   "Power Wagon",
+   "Limited"
+  ],
+  "slug": "ram-2500",
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/ram-2500.webp"
+ },
+ {
+  "make": "Ram",
+  "model": "3500",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 6,
+  "engine": "6.7L turbo-diesel 6-cyl",
+  "horsepower": 370,
+  "transmission": "6-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "diesel",
+  "base_price": 48000,
+  "trims": [
+   "Tradesman",
+   "Big Horn",
+   "Laramie",
+   "Limited"
+  ],
+  "slug": "ram-3500",
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/ram-3500.webp"
+ },
+ {
+  "make": "Ram",
+  "model": "ProMaster",
+  "body_type": "van",
+  "doors": 4,
+  "seats": 2,
+  "engine": "3.6L V6",
+  "horsepower": 276,
+  "transmission": "9-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 45000,
+  "trims": [
+   "1500",
+   "2500",
+   "3500"
+  ],
+  "slug": "ram-promaster",
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/ram-promaster.webp"
+ },
+ {
+  "make": "Ram",
+  "model": "ProMaster City",
+  "body_type": "van",
+  "doors": 4,
+  "seats": 2,
+  "engine": "2.4L 4-cyl",
+  "horsepower": 178,
+  "transmission": "9-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 28000,
+  "trims": [
+   "Tradesman",
+   "SLT"
+  ],
+  "slug": "ram-promaster-city",
+  "mpg_city": 21,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2022
+  ],
+  "photo": "assets/cars/ram-promaster-city.webp"
+ },
+ {
+  "make": "Dodge",
+  "model": "Charger",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.6L V6",
+  "horsepower": 292,
+  "transmission": "8-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 34000,
+  "trims": [
+   "SXT",
+   "GT",
+   "R/T",
+   "Scat Pack",
+   "SRT Hellcat"
+  ],
+  "slug": "dodge-charger",
+  "mpg_city": 19,
+  "mpg_highway": 30,
+  "years": [
+   2015,
+   2023
+  ],
+  "photo": "assets/site/no-photo.webp"
+ },
+ {
+  "make": "Dodge",
+  "model": "Challenger",
+  "body_type": "coupe",
+  "doors": 2,
+  "seats": 5,
+  "engine": "3.6L V6",
+  "horsepower": 303,
+  "transmission": "8-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 32000,
+  "trims": [
+   "SXT",
+   "GT",
+   "R/T",
+   "R/T Scat Pack",
+   "SRT Hellcat"
+  ],
+  "slug": "dodge-challenger",
+  "mpg_city": 19,
+  "mpg_highway": 30,
+  "years": [
+   2015,
+   2023
+  ],
+  "photo": "assets/cars/dodge-challenger.webp"
+ },
+ {
+  "make": "Dodge",
+  "model": "Durango",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "3.6L V6",
+  "horsepower": 293,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "SXT",
+   "GT",
+   "R/T",
+   "Citadel",
+   "SRT 392"
+  ],
+  "slug": "dodge-durango",
+  "mpg_city": 19,
+  "mpg_highway": 26,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/dodge-durango.webp"
+ },
+ {
+  "make": "Dodge",
+  "model": "Hornet",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 268,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 31000,
+  "trims": [
+   "GT",
+   "GT Plus",
+   "R/T",
+   "R/T Plus"
+  ],
+  "slug": "dodge-hornet",
+  "mpg_city": 21,
+  "mpg_highway": 29,
+  "years": [
+   2023,
+   2027
+  ],
+  "photo": "assets/cars/dodge-hornet.webp"
+ },
+ {
+  "make": "Dodge",
+  "model": "Journey",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.4L 4-cyl",
+  "horsepower": 173,
+  "transmission": "4-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 25000,
+  "trims": [
+   "SE Value",
+   "Crossroad",
+   "GT"
+  ],
+  "slug": "dodge-journey",
+  "mpg_city": 19,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2020
+  ],
+  "photo": "assets/cars/dodge-journey.webp"
+ },
+ {
+  "make": "Dodge",
+  "model": "Grand Caravan",
+  "body_type": "minivan",
+  "doors": 4,
+  "seats": 7,
+  "engine": "3.6L V6",
+  "horsepower": 283,
+  "transmission": "6-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 28000,
+  "trims": [
+   "SE",
+   "SE Plus",
+   "SXT",
+   "GT"
+  ],
+  "slug": "dodge-grand-caravan",
+  "mpg_city": 17,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2020
+  ],
+  "photo": "assets/cars/dodge-grand-caravan.webp"
+ },
+ {
+  "make": "GMC",
+  "model": "Sierra 1500",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 6,
+  "engine": "2.7L turbo 4-cyl",
+  "horsepower": 310,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Pro",
+   "SLE",
+   "Elevation",
+   "SLT",
+   "AT4",
+   "Denali"
+  ],
+  "slug": "gmc-sierra-1500",
+  "mpg_city": 18,
+  "mpg_highway": 22,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/gmc-sierra-1500.webp"
+ },
+ {
+  "make": "GMC",
+  "model": "Sierra 2500HD",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 6,
+  "engine": "6.6L V8",
+  "horsepower": 401,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 49000,
+  "trims": [
+   "Pro",
+   "SLE",
+   "SLT",
+   "AT4",
+   "Denali"
+  ],
+  "slug": "gmc-sierra-2500hd",
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/gmc-sierra-2500hd.webp"
+ },
+ {
+  "make": "GMC",
+  "model": "Canyon",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.7L turbo 4-cyl",
+  "horsepower": 310,
+  "transmission": "8-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 38000,
+  "trims": [
+   "Elevation",
+   "AT4",
+   "Denali",
+   "AT4X"
+  ],
+  "slug": "gmc-canyon",
+  "mpg_city": 18,
+  "mpg_highway": 22,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/gmc-canyon.webp"
+ },
+ {
+  "make": "GMC",
+  "model": "Terrain",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 4-cyl",
+  "horsepower": 175,
+  "transmission": "9-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 30000,
+  "trims": [
+   "SLE",
+   "SLT",
+   "AT4",
+   "Denali"
+  ],
+  "slug": "gmc-terrain",
+  "mpg_city": 24,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/gmc-terrain.webp"
+ },
+ {
+  "make": "GMC",
+  "model": "Acadia",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.5L turbo 4-cyl",
+  "horsepower": 328,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 43000,
+  "trims": [
+   "Elevation",
+   "AT4",
+   "Denali"
+  ],
+  "slug": "gmc-acadia",
+  "mpg_city": 19,
+  "mpg_highway": 26,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/gmc-acadia.webp"
+ },
+ {
+  "make": "GMC",
+  "model": "Yukon",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "5.3L V8",
+  "horsepower": 355,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 60000,
+  "trims": [
+   "SLE",
+   "SLT",
+   "AT4",
+   "Denali",
+   "Denali Ultimate"
+  ],
+  "slug": "gmc-yukon",
+  "mpg_city": 15,
+  "mpg_highway": 20,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/gmc-yukon.webp"
+ },
+ {
+  "make": "GMC",
+  "model": "Hummer EV",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Triple electric motors",
+  "horsepower": 1000,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "4WD",
+  "fuel_type": "electric",
+  "base_price": 97000,
+  "trims": [
+   "2X",
+   "3X",
+   "Edition 1"
+  ],
+  "slug": "gmc-hummer-ev",
+  "range_miles": 329,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/gmc-hummer-ev.webp"
+ },
+ {
+  "make": "Mazda",
+  "model": "Mazda3",
+  "body_type": "hatchback",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 191,
+  "transmission": "6-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 24500,
+  "trims": [
+   "S",
+   "Select",
+   "Preferred",
+   "Carbon Edition",
+   "Turbo"
+  ],
+  "slug": "mazda-mazda3",
+  "mpg_city": 27,
+  "mpg_highway": 36,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/mazda-mazda3.webp"
+ },
+ {
+  "make": "Mazda",
+  "model": "CX-30",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 191,
+  "transmission": "6-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 25500,
+  "trims": [
+   "S",
+   "Select",
+   "Preferred",
+   "Carbon Edition",
+   "Turbo"
+  ],
+  "slug": "mazda-cx-30",
+  "mpg_city": 26,
+  "mpg_highway": 33,
+  "years": [
+   2020,
+   2027
+  ],
+  "photo": "assets/cars/mazda-cx-30.webp"
+ },
+ {
+  "make": "Mazda",
+  "model": "CX-5",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 187,
+  "transmission": "6-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 29500,
+  "trims": [
+   "S",
+   "Select",
+   "Preferred",
+   "Carbon Edition",
+   "Turbo Signature"
+  ],
+  "slug": "mazda-cx-5",
+  "mpg_city": 26,
+  "mpg_highway": 31,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/mazda-cx-5.webp"
+ },
+ {
+  "make": "Mazda",
+  "model": "CX-50",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 187,
+  "transmission": "6-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 31000,
+  "trims": [
+   "S",
+   "Select",
+   "Preferred",
+   "Meridian Edition",
+   "Turbo"
+  ],
+  "slug": "mazda-cx-50",
+  "mpg_city": 24,
+  "mpg_highway": 30,
+  "years": [
+   2023,
+   2027
+  ],
+  "photo": "assets/cars/mazda-cx-50.webp"
+ },
+ {
+  "make": "Mazda",
+  "model": "CX-90",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 8,
+  "engine": "3.3L turbo 6-cyl mild hybrid",
+  "horsepower": 280,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Select",
+   "Preferred",
+   "Premium",
+   "Premium Plus"
+  ],
+  "slug": "mazda-cx-90",
+  "mpg_city": 24,
+  "mpg_highway": 28,
+  "years": [
+   2024,
+   2027
+  ],
+  "photo": "assets/cars/mazda-cx-90.webp"
+ },
+ {
+  "make": "Mazda",
+  "model": "MX-5 Miata",
+  "body_type": "convertible",
+  "doors": 2,
+  "seats": 2,
+  "engine": "2.0L 4-cyl",
+  "horsepower": 181,
+  "transmission": "6-speed manual",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 30000,
+  "trims": [
+   "Sport",
+   "Club",
+   "Grand Touring"
+  ],
+  "slug": "mazda-mx-5-miata",
+  "mpg_city": 26,
+  "mpg_highway": 34,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/mazda-mx-5-miata.webp"
+ },
+ {
+  "make": "Tesla",
+  "model": "Model 3",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 271,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 40000,
+  "trims": [
+   "Rear-Wheel Drive",
+   "Long Range",
+   "Performance"
+  ],
+  "slug": "tesla-model-3",
+  "range_miles": 272,
+  "years": [
+   2018,
+   2027
+  ],
+  "photo": "assets/cars/tesla-model-3.webp"
+ },
+ {
+  "make": "Tesla",
+  "model": "Model Y",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Dual electric motors",
+  "horsepower": 384,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "AWD",
+  "fuel_type": "electric",
+  "base_price": 45000,
+  "trims": [
+   "Rear-Wheel Drive",
+   "Long Range",
+   "Performance"
+  ],
+  "slug": "tesla-model-y",
+  "range_miles": 310,
+  "years": [
+   2020,
+   2027
+  ],
+  "photo": "assets/cars/tesla-model-y.webp"
+ },
+ {
+  "make": "Tesla",
+  "model": "Model S",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Dual electric motors",
+  "horsepower": 670,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "AWD",
+  "fuel_type": "electric",
+  "base_price": 75000,
+  "trims": [
+   "Long Range",
+   "Plaid"
+  ],
+  "slug": "tesla-model-s",
+  "range_miles": 402,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/tesla-model-s.webp"
+ },
+ {
+  "make": "Tesla",
+  "model": "Model X",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "Dual electric motors",
+  "horsepower": 670,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "AWD",
+  "fuel_type": "electric",
+  "base_price": 80000,
+  "trims": [
+   "Long Range",
+   "Plaid"
+  ],
+  "slug": "tesla-model-x",
+  "range_miles": 335,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/tesla-model-x.webp"
+ },
+ {
+  "make": "Tesla",
+  "model": "Cybertruck",
+  "body_type": "pickup",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Dual electric motors",
+  "horsepower": 600,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "AWD",
+  "fuel_type": "electric",
+  "base_price": 80000,
+  "trims": [
+   "All-Wheel Drive",
+   "Cyberbeast"
+  ],
+  "slug": "tesla-cybertruck",
+  "range_miles": 318,
+  "years": [
+   2024,
+   2027
+  ],
+  "photo": "assets/cars/tesla-cybertruck.webp"
+ },
+ {
+  "make": "BMW",
+  "model": "3 Series",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 255,
+  "transmission": "8-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 45000,
+  "trims": [
+   "330i",
+   "330i xDrive",
+   "M340i",
+   "M3"
+  ],
+  "slug": "bmw-3-series",
+  "mpg_city": 26,
+  "mpg_highway": 36,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/bmw-3-series.webp"
+ },
+ {
+  "make": "BMW",
+  "model": "5 Series",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 255,
+  "transmission": "8-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 58000,
+  "trims": [
+   "530i",
+   "530i xDrive",
+   "540i xDrive",
+   "i5"
+  ],
+  "slug": "bmw-5-series",
+  "mpg_city": 27,
+  "mpg_highway": 37,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/bmw-5-series.webp"
+ },
+ {
+  "make": "BMW",
+  "model": "X1",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 241,
+  "transmission": "7-speed dual-clutch",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 41000,
+  "trims": [
+   "xDrive28i",
+   "M35i"
+  ],
+  "slug": "bmw-x1",
+  "mpg_city": 25,
+  "mpg_highway": 33,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/bmw-x1.webp"
+ },
+ {
+  "make": "BMW",
+  "model": "X3",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 255,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 48000,
+  "trims": [
+   "sDrive30i",
+   "xDrive30i",
+   "M40i"
+  ],
+  "slug": "bmw-x3",
+  "mpg_city": 24,
+  "mpg_highway": 31,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/bmw-x3.webp"
+ },
+ {
+  "make": "BMW",
+  "model": "X5",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.0L turbo 6-cyl mild hybrid",
+  "horsepower": 375,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 66000,
+  "trims": [
+   "sDrive40i",
+   "xDrive40i",
+   "xDrive50e",
+   "M60i"
+  ],
+  "slug": "bmw-x5",
+  "mpg_city": 22,
+  "mpg_highway": 26,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/bmw-x5.webp"
+ },
+ {
+  "make": "BMW",
+  "model": "i4",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 335,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 53000,
+  "trims": [
+   "eDrive35",
+   "eDrive40",
+   "xDrive40",
+   "M50"
+  ],
+  "slug": "bmw-i4",
+  "range_miles": 307,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/bmw-i4.webp"
+ },
+ {
+  "make": "Mercedes-Benz",
+  "model": "C-Class",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 255,
+  "transmission": "9-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 47000,
+  "trims": [
+   "C 300",
+   "C 300 4MATIC",
+   "AMG C 43"
+  ],
+  "slug": "mercedes-benz-c-class",
+  "mpg_city": 25,
+  "mpg_highway": 35,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/mercedes-benz-c-class.webp"
+ },
+ {
+  "make": "Mercedes-Benz",
+  "model": "E-Class",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 255,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 62000,
+  "trims": [
+   "E 350 4MATIC",
+   "E 450 4MATIC",
+   "AMG E 53"
+  ],
+  "slug": "mercedes-benz-e-class",
+  "mpg_city": 24,
+  "mpg_highway": 33,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/site/no-photo.webp"
+ },
+ {
+  "make": "Mercedes-Benz",
+  "model": "GLA",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 221,
+  "transmission": "8-speed dual-clutch",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 43000,
+  "trims": [
+   "GLA 250",
+   "GLA 250 4MATIC",
+   "AMG GLA 35"
+  ],
+  "slug": "mercedes-benz-gla",
+  "mpg_city": 24,
+  "mpg_highway": 33,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/mercedes-benz-gla.webp"
+ },
+ {
+  "make": "Mercedes-Benz",
+  "model": "GLC",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 255,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 49000,
+  "trims": [
+   "GLC 300",
+   "GLC 300 4MATIC",
+   "AMG GLC 43"
+  ],
+  "slug": "mercedes-benz-glc",
+  "mpg_city": 23,
+  "mpg_highway": 31,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/mercedes-benz-glc.webp"
+ },
+ {
+  "make": "Mercedes-Benz",
+  "model": "GLE",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 255,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 63000,
+  "trims": [
+   "GLE 350",
+   "GLE 450",
+   "AMG GLE 53"
+  ],
+  "slug": "mercedes-benz-gle",
+  "mpg_city": 20,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/mercedes-benz-gle.webp"
+ },
+ {
+  "make": "Mercedes-Benz",
+  "model": "EQE",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 288,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 76000,
+  "trims": [
+   "EQE 350+",
+   "EQE 350 4MATIC",
+   "EQE 500 4MATIC"
+  ],
+  "slug": "mercedes-benz-eqe",
+  "range_miles": 305,
+  "years": [
+   2023,
+   2027
+  ],
+  "photo": "assets/cars/mercedes-benz-eqe.webp"
+ },
+ {
+  "make": "Audi",
+  "model": "A3",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 201,
+  "transmission": "7-speed dual-clutch",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 37000,
+  "trims": [
+   "Premium",
+   "Premium Plus",
+   "Prestige"
+  ],
+  "slug": "audi-a3",
+  "mpg_city": 29,
+  "mpg_highway": 38,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/audi-a3.webp"
+ },
+ {
+  "make": "Audi",
+  "model": "A4",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 201,
+  "transmission": "7-speed dual-clutch",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 42000,
+  "trims": [
+   "Premium",
+   "Premium Plus",
+   "Prestige"
+  ],
+  "slug": "audi-a4",
+  "mpg_city": 25,
+  "mpg_highway": 34,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/audi-a4.webp"
+ },
+ {
+  "make": "Audi",
+  "model": "A6",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 261,
+  "transmission": "7-speed dual-clutch",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 57000,
+  "trims": [
+   "Premium",
+   "Premium Plus",
+   "Prestige"
+  ],
+  "slug": "audi-a6",
+  "mpg_city": 23,
+  "mpg_highway": 32,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/audi-a6.webp"
+ },
+ {
+  "make": "Audi",
+  "model": "Q3",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 228,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 38000,
+  "trims": [
+   "Premium",
+   "S line Premium",
+   "S line Premium Plus"
+  ],
+  "slug": "audi-q3",
+  "mpg_city": 22,
+  "mpg_highway": 30,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/audi-q3.webp"
+ },
+ {
+  "make": "Audi",
+  "model": "Q5",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 261,
+  "transmission": "7-speed dual-clutch",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 46000,
+  "trims": [
+   "Premium",
+   "Premium Plus",
+   "Prestige"
+  ],
+  "slug": "audi-q5",
+  "mpg_city": 23,
+  "mpg_highway": 29,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/audi-q5.webp"
+ },
+ {
+  "make": "Audi",
+  "model": "Q7",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 261,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 60000,
+  "trims": [
+   "Premium",
+   "Premium Plus",
+   "Prestige"
+  ],
+  "slug": "audi-q7",
+  "mpg_city": 19,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/audi-q7.webp"
+ },
+ {
+  "make": "Audi",
+  "model": "Q4 e-tron",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Dual electric motors",
+  "horsepower": 295,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "AWD",
+  "fuel_type": "electric",
+  "base_price": 50000,
+  "trims": [
+   "Premium",
+   "Premium Plus",
+   "Prestige"
+  ],
+  "slug": "audi-q4-e-tron",
+  "range_miles": 258,
+  "years": [
+   2022,
+   2027
+  ],
+  "photo": "assets/cars/audi-q4-e-tron.webp"
+ },
+ {
+  "make": "Lexus",
+  "model": "IS",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 241,
+  "transmission": "8-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 41000,
+  "trims": [
+   "IS 300",
+   "IS 350 F Sport",
+   "IS 500 F Sport Performance"
+  ],
+  "slug": "lexus-is",
+  "mpg_city": 21,
+  "mpg_highway": 31,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/lexus-is.webp"
+ },
+ {
+  "make": "Lexus",
+  "model": "ES",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl hybrid",
+  "horsepower": 215,
+  "transmission": "eCVT",
+  "drivetrain": "FWD",
+  "fuel_type": "hybrid",
+  "base_price": 43000,
+  "trims": [
+   "ES 250",
+   "ES 350",
+   "ES 300h",
+   "ES 350 F Sport"
+  ],
+  "slug": "lexus-es",
+  "mpg_city": 43,
+  "mpg_highway": 44,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/lexus-es.webp"
+ },
+ {
+  "make": "Lexus",
+  "model": "UX",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L 4-cyl hybrid",
+  "horsepower": 196,
+  "transmission": "eCVT",
+  "drivetrain": "AWD",
+  "fuel_type": "hybrid",
+  "base_price": 37000,
+  "trims": [
+   "UX 250h",
+   "UX 250h Premium",
+   "UX 250h F Sport"
+  ],
+  "slug": "lexus-ux",
+  "mpg_city": 43,
+  "mpg_highway": 41,
+  "years": [
+   2019,
+   2027
+  ],
+  "photo": "assets/cars/lexus-ux.webp"
+ },
+ {
+  "make": "Lexus",
+  "model": "NX",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.5L 4-cyl",
+  "horsepower": 203,
+  "transmission": "8-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 41000,
+  "trims": [
+   "NX 250",
+   "NX 350",
+   "NX 350h",
+   "NX 450h+"
+  ],
+  "slug": "lexus-nx",
+  "mpg_city": 25,
+  "mpg_highway": 33,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/lexus-nx.webp"
+ },
+ {
+  "make": "Lexus",
+  "model": "RX",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.4L turbo 4-cyl",
+  "horsepower": 275,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 50000,
+  "trims": [
+   "RX 350",
+   "RX 350h",
+   "RX 500h F Sport Performance"
+  ],
+  "slug": "lexus-rx",
+  "mpg_city": 22,
+  "mpg_highway": 29,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/lexus-rx.webp"
+ },
+ {
+  "make": "Lexus",
+  "model": "GX",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "3.4L twin-turbo V6",
+  "horsepower": 349,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 65000,
+  "trims": [
+   "Premium",
+   "Overtrail",
+   "Luxury"
+  ],
+  "slug": "lexus-gx",
+  "mpg_city": 15,
+  "mpg_highway": 21,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/lexus-gx.webp"
+ },
+ {
+  "make": "Acura",
+  "model": "Integra",
+  "body_type": "hatchback",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.5L turbo 4-cyl",
+  "horsepower": 200,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 32000,
+  "trims": [
+   "Base",
+   "A-Spec",
+   "A-Spec Technology",
+   "Type S"
+  ],
+  "slug": "acura-integra",
+  "mpg_city": 29,
+  "mpg_highway": 36,
+  "years": [
+   2023,
+   2027
+  ],
+  "photo": "assets/cars/acura-integra.webp"
+ },
+ {
+  "make": "Acura",
+  "model": "TLX",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 272,
+  "transmission": "10-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 45000,
+  "trims": [
+   "Base",
+   "Technology",
+   "A-Spec",
+   "Type S"
+  ],
+  "slug": "acura-tlx",
+  "mpg_city": 22,
+  "mpg_highway": 29,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/acura-tlx.webp"
+ },
+ {
+  "make": "Acura",
+  "model": "RDX",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 272,
+  "transmission": "10-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 44000,
+  "trims": [
+   "Base",
+   "Technology",
+   "A-Spec",
+   "Advance"
+  ],
+  "slug": "acura-rdx",
+  "mpg_city": 21,
+  "mpg_highway": 26,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/acura-rdx.webp"
+ },
+ {
+  "make": "Acura",
+  "model": "MDX",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "3.5L V6",
+  "horsepower": 290,
+  "transmission": "10-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 50000,
+  "trims": [
+   "Base",
+   "Technology",
+   "A-Spec",
+   "Advance",
+   "Type S"
+  ],
+  "slug": "acura-mdx",
+  "mpg_city": 19,
+  "mpg_highway": 25,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/acura-mdx.webp"
+ },
+ {
+  "make": "Acura",
+  "model": "ZDX",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 358,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 65000,
+  "trims": [
+   "A-Spec",
+   "Type S"
+  ],
+  "slug": "acura-zdx",
+  "range_miles": 313,
+  "years": [
+   2024,
+   2027
+  ],
+  "photo": "assets/cars/acura-zdx.webp"
+ },
+ {
+  "make": "Buick",
+  "model": "Envista",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.2L turbo 3-cyl",
+  "horsepower": 137,
+  "transmission": "6-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 23500,
+  "trims": [
+   "Preferred",
+   "Sport Touring",
+   "Avenir"
+  ],
+  "slug": "buick-envista",
+  "mpg_city": 28,
+  "mpg_highway": 32,
+  "years": [
+   2024,
+   2027
+  ],
+  "photo": "assets/cars/buick-envista.webp"
+ },
+ {
+  "make": "Buick",
+  "model": "Encore GX",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "1.3L turbo 3-cyl",
+  "horsepower": 155,
+  "transmission": "CVT",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 26000,
+  "trims": [
+   "Preferred",
+   "Sport Touring",
+   "Avenir"
+  ],
+  "slug": "buick-encore-gx",
+  "mpg_city": 29,
+  "mpg_highway": 32,
+  "years": [
+   2020,
+   2027
+  ],
+  "photo": "assets/cars/buick-encore-gx.webp"
+ },
+ {
+  "make": "Buick",
+  "model": "Envision",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 228,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 36000,
+  "trims": [
+   "Preferred",
+   "Sport Touring",
+   "Avenir"
+  ],
+  "slug": "buick-envision",
+  "mpg_city": 22,
+  "mpg_highway": 29,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/buick-envision.webp"
+ },
+ {
+  "make": "Buick",
+  "model": "Enclave",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.5L turbo 4-cyl",
+  "horsepower": 328,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 45000,
+  "trims": [
+   "Preferred",
+   "Sport Touring",
+   "Avenir"
+  ],
+  "slug": "buick-enclave",
+  "mpg_city": 19,
+  "mpg_highway": 26,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/buick-enclave.webp"
+ },
+ {
+  "make": "Buick",
+  "model": "LaCrosse",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.6L V6",
+  "horsepower": 310,
+  "transmission": "9-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 30000,
+  "trims": [
+   "Preferred",
+   "Essence",
+   "Avenir"
+  ],
+  "slug": "buick-lacrosse",
+  "mpg_city": 21,
+  "mpg_highway": 31,
+  "years": [
+   2015,
+   2019
+  ],
+  "photo": "assets/cars/buick-lacrosse.webp"
+ },
+ {
+  "make": "Cadillac",
+  "model": "CT4",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 237,
+  "transmission": "8-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 36000,
+  "trims": [
+   "Luxury",
+   "Premium Luxury",
+   "Sport",
+   "V-Series"
+  ],
+  "slug": "cadillac-ct4",
+  "mpg_city": 23,
+  "mpg_highway": 34,
+  "years": [
+   2020,
+   2027
+  ],
+  "photo": "assets/cars/cadillac-ct4.webp"
+ },
+ {
+  "make": "Cadillac",
+  "model": "CT5",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 237,
+  "transmission": "10-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 50000,
+  "trims": [
+   "Luxury",
+   "Premium Luxury",
+   "Sport",
+   "V-Series"
+  ],
+  "slug": "cadillac-ct5",
+  "mpg_city": 23,
+  "mpg_highway": 32,
+  "years": [
+   2020,
+   2027
+  ],
+  "photo": "assets/cars/cadillac-ct5.webp"
+ },
+ {
+  "make": "Cadillac",
+  "model": "XT4",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 235,
+  "transmission": "9-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 39000,
+  "trims": [
+   "Luxury",
+   "Premium Luxury",
+   "Sport"
+  ],
+  "slug": "cadillac-xt4",
+  "mpg_city": 24,
+  "mpg_highway": 30,
+  "years": [
+   2019,
+   2025
+  ],
+  "photo": "assets/cars/cadillac-xt4.webp"
+ },
+ {
+  "make": "Cadillac",
+  "model": "XT5",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl",
+  "horsepower": 235,
+  "transmission": "9-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 45000,
+  "trims": [
+   "Luxury",
+   "Premium Luxury",
+   "Sport"
+  ],
+  "slug": "cadillac-xt5",
+  "mpg_city": 21,
+  "mpg_highway": 27,
+  "years": [
+   2017,
+   2025
+  ],
+  "photo": "assets/cars/cadillac-xt5.webp"
+ },
+ {
+  "make": "Cadillac",
+  "model": "Escalade",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "6.2L V8",
+  "horsepower": 420,
+  "transmission": "10-speed automatic",
+  "drivetrain": "4WD",
+  "fuel_type": "gasoline",
+  "base_price": 85000,
+  "trims": [
+   "Luxury",
+   "Premium Luxury",
+   "Sport",
+   "V-Series"
+  ],
+  "slug": "cadillac-escalade",
+  "mpg_city": 14,
+  "mpg_highway": 19,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/cadillac-escalade.webp"
+ },
+ {
+  "make": "Cadillac",
+  "model": "Lyriq",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 340,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 58000,
+  "trims": [
+   "Tech",
+   "Luxury",
+   "Sport"
+  ],
+  "slug": "cadillac-lyriq",
+  "range_miles": 314,
+  "years": [
+   2023,
+   2027
+  ],
+  "photo": "assets/cars/cadillac-lyriq.webp"
+ },
+ {
+  "make": "Volvo",
+  "model": "S60",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 247,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 43000,
+  "trims": [
+   "Core",
+   "Plus",
+   "Ultimate"
+  ],
+  "slug": "volvo-s60",
+  "mpg_city": 23,
+  "mpg_highway": 33,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/volvo-s60.webp"
+ },
+ {
+  "make": "Volvo",
+  "model": "XC40",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 247,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Core",
+   "Plus",
+   "Ultimate"
+  ],
+  "slug": "volvo-xc40",
+  "mpg_city": 23,
+  "mpg_highway": 30,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/volvo-xc40.webp"
+ },
+ {
+  "make": "Volvo",
+  "model": "XC60",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 247,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 47000,
+  "trims": [
+   "Core",
+   "Plus",
+   "Ultimate"
+  ],
+  "slug": "volvo-xc60",
+  "mpg_city": 22,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/volvo-xc60.webp"
+ },
+ {
+  "make": "Volvo",
+  "model": "XC90",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 7,
+  "engine": "2.0L turbo 4-cyl mild hybrid",
+  "horsepower": 247,
+  "transmission": "8-speed automatic",
+  "drivetrain": "AWD",
+  "fuel_type": "gasoline",
+  "base_price": 57000,
+  "trims": [
+   "Core",
+   "Plus",
+   "Ultimate"
+  ],
+  "slug": "volvo-xc90",
+  "mpg_city": 20,
+  "mpg_highway": 26,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/volvo-xc90.webp"
+ },
+ {
+  "make": "Volvo",
+  "model": "EX30",
+  "body_type": "suv",
+  "doors": 4,
+  "seats": 5,
+  "engine": "Single electric motor",
+  "horsepower": 268,
+  "transmission": "1-speed direct drive",
+  "drivetrain": "RWD",
+  "fuel_type": "electric",
+  "base_price": 37000,
+  "trims": [
+   "Core",
+   "Plus",
+   "Ultra"
+  ],
+  "slug": "volvo-ex30",
+  "range_miles": 253,
+  "years": [
+   2025,
+   2027
+  ],
+  "photo": "assets/cars/volvo-ex30.webp"
+ },
+ {
+  "make": "Chrysler",
+  "model": "Pacifica",
+  "body_type": "minivan",
+  "doors": 4,
+  "seats": 7,
+  "engine": "3.6L V6",
+  "horsepower": 287,
+  "transmission": "9-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "Select",
+   "Limited",
+   "Pinnacle"
+  ],
+  "slug": "chrysler-pacifica",
+  "mpg_city": 19,
+  "mpg_highway": 28,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chrysler-pacifica.webp"
+ },
+ {
+  "make": "Chrysler",
+  "model": "Pacifica Hybrid",
+  "body_type": "minivan",
+  "doors": 4,
+  "seats": 7,
+  "engine": "3.6L V6 plug-in hybrid",
+  "horsepower": 260,
+  "transmission": "eCVT",
+  "drivetrain": "FWD",
+  "fuel_type": "plug-in hybrid",
+  "base_price": 51000,
+  "trims": [
+   "Select",
+   "Premium S Appearance",
+   "Pinnacle"
+  ],
+  "slug": "chrysler-pacifica-hybrid",
+  "mpge": 82,
+  "mpg_combined": 30,
+  "years": [
+   2015,
+   2027
+  ],
+  "photo": "assets/cars/chrysler-pacifica-hybrid.webp"
+ },
+ {
+  "make": "Chrysler",
+  "model": "Voyager",
+  "body_type": "minivan",
+  "doors": 4,
+  "seats": 7,
+  "engine": "3.6L V6",
+  "horsepower": 287,
+  "transmission": "9-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 40000,
+  "trims": [
+   "LX"
+  ],
+  "slug": "chrysler-voyager",
+  "mpg_city": 19,
+  "mpg_highway": 28,
+  "years": [
+   2020,
+   2025
+  ],
+  "photo": "assets/cars/chrysler-voyager.webp"
+ },
+ {
+  "make": "Chrysler",
+  "model": "300",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "3.6L V6",
+  "horsepower": 292,
+  "transmission": "8-speed automatic",
+  "drivetrain": "RWD",
+  "fuel_type": "gasoline",
+  "base_price": 35000,
+  "trims": [
+   "Touring",
+   "Touring L",
+   "300S",
+   "300C"
+  ],
+  "slug": "chrysler-300",
+  "mpg_city": 19,
+  "mpg_highway": 30,
+  "years": [
+   2015,
+   2023
+  ],
+  "photo": "assets/cars/chrysler-300.webp"
+ },
+ {
+  "make": "Chrysler",
+  "model": "200",
+  "body_type": "sedan",
+  "doors": 4,
+  "seats": 5,
+  "engine": "2.4L 4-cyl",
+  "horsepower": 184,
+  "transmission": "9-speed automatic",
+  "drivetrain": "FWD",
+  "fuel_type": "gasoline",
+  "base_price": 22000,
+  "trims": [
+   "LX",
+   "Limited",
+   "S",
+   "C"
+  ],
+  "slug": "chrysler-200",
+  "mpg_city": 23,
+  "mpg_highway": 36,
+  "years": [
+   2015,
+   2017
+  ],
+  "photo": "assets/cars/chrysler-200.webp"
+ }
+]
