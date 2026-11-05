@@ -467,7 +467,11 @@
       (ui.msg ? '<div class="ddb-msg" role="status">' + esc(ui.msg) + '</div>' : '') + (saveError ? '<div class="ddb-msg ddb-bad">' + esc(saveError) + '</div>' : '') +
       (ui.tab === 'drives' ? renderDrives() : ui.tab === 'service' ? renderService() : ui.tab === 'reminders' ? renderReminders() : renderSettings()) + '</div>';
   }
-  function refresh() { if (!ui.el) return; ui.el.innerHTML = renderHTML(); var i = ui.el.querySelector('[data-vsearch]'); if (i) bindPicker(i, ui.el.querySelector('[data-vresults]')); }
+  function refresh() {
+    if (!ui.el) return; ui.el.innerHTML = renderHTML(); var i = ui.el.querySelector('[data-vsearch]'); if (i) bindPicker(i, ui.el.querySelector('[data-vresults]'));
+    var cal = ui.el.querySelector('.ddb-cal-week'), day = ui.el.querySelector('.ddb-today');
+    if (cal && day && cal.scrollWidth > cal.clientWidth + 1) { var left = day.getBoundingClientRect().left - cal.getBoundingClientRect().left + cal.scrollLeft - 8; cal.scrollLeft = left > 0 ? left : 0; }
+  }
   function formData(f) { var o = {}; Array.prototype.forEach.call(f.elements, function (e) { if (!e.name) return; o[e.name] = e.type === 'checkbox' ? e.checked : e.value; }); return o; }
   function onSubmit(ev) {
     var f = ev.target, kind = f.getAttribute('data-form'); if (!kind) return; ev.preventDefault(); var d = formData(f);
