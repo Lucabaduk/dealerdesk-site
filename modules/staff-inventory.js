@@ -67,7 +67,7 @@
     $('l-count').textContent = list.length === 1 ? '1 lead' : list.length + ' leads';
     var rest = list.length - leadShow; list.slice(0, leadShow).forEach(function (l) { var b = el('button', 'lcard'); b.type = 'button'; var top = el('div', 'top');
       top.appendChild(el('b', '', l.name)); if (leads.isOverdue(l)) top.appendChild(el('span', 'od', 'Overdue')); top.appendChild(el('span', 'pill ' + l.status, l.status)); b.appendChild(top);
-      var car = inv.get(l.vin); b.appendChild(el('div', '', String(l.interest).replace('_', ' ') + ' \u00b7 ' + (car ? car.year + ' ' + car.make + ' ' + car.model : l.vin)));
+      var car = inv.get(l.vin); b.appendChild(el('div', '', (l.interest||'').replace('_', ' ') + ' \u00b7 ' + (car ? car.year + ' ' + car.make + ' ' + car.model : l.vin)));
       b.appendChild(el('div', 'src', leads.ago(l.createdAt) + ' \u00b7 ' + (SRC[l.channel] || 'Website') + (l.assignee ? ' \u00b7 ' + l.assignee : '')));
       b.addEventListener('click', function () { openLead(l.id); }); box.appendChild(b); });
     if (rest > 0) { var mb = el('button', 'lcard', 'Show ' + Math.min(rest, LEAD_PAGE) + ' more of ' + rest); mb.type = 'button'; mb.id = 'l-more'; mb.addEventListener('click', function () { leadShow += LEAD_PAGE; drawLeads(true); }); box.appendChild(mb); }
@@ -78,7 +78,7 @@
   function fillLead() { var l = leads.get(openId); if (!l) return; $('ld-name').textContent = l.name;
     $('ld-meta').textContent = (SRC[l.channel] || 'Website') + ' \u00b7 ' + leads.ago(l.createdAt) + ' \u00b7 ' + when(l.createdAt);
     var ct = $('ld-contact'); ct.textContent = ''; if (l.phone) { var a = el('a', '', 'Call ' + l.phone); a.href = 'tel:' + l.phone; ct.appendChild(a); } if (l.email) { var m = el('a', '', 'Email ' + l.email); m.href = 'mailto:' + encodeURIComponent(l.email).replace('%40', '@'); ct.appendChild(m); }
-    $('ld-msg').textContent = String(l.interest).replace('_', ' ') + (l.preferredTime ? ' \u00b7 ' + l.preferredTime : '') + (l.notes ? '\n\n' + l.notes : '');
+    $('ld-msg').textContent = (l.interest||'').replace('_', ' ') + (l.preferredTime ? ' \u00b7 ' + l.preferredTime : '') + (l.notes ? '\n\n' + l.notes : '');
     var cb = $('ld-car'); cb.textContent = ''; var car = inv.get(l.vin) || (l.interest_car_id ? inv.get(l.interest_car_id) : null);
     if (car) { var img = el('img'); img.alt = ''; DDStore.setImg(img, car.photos[0]); cb.appendChild(img); var tx = el('div'); tx.appendChild(el('div', '', [car.year, car.make, car.model, car.trim].filter(Boolean).join(' '))); tx.appendChild(el('b', '', money(car.price))); tx.appendChild(el('div', 'muted', 'VIN ' + car.vin + ' \u00b7 ' + car.status)); cb.appendChild(tx); }
     else cb.appendChild(el('p', 'muted', 'VIN ' + (l.vin || 'unknown') + ' (not in inventory)'));
